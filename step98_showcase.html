@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runner — Direction C Nordic Industrial HUD (Authentic Hybrid)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-mono: 'Geist Mono', Consolas, monospace;
+      --font-hud: 'Space Grotesk', sans-serif;
+      --font-sans: 'Inter', sans-serif;
+
+      /* Dynamic Windows Accent Color */
+      --sys-accent: #0078D4; /* Windows Cobalt default */
+      --sys-accent-hover: #1A90F0;
+      --sys-accent-muted: rgba(0, 120, 212, 0.18);
+      --sys-accent-subtle: rgba(0, 120, 212, 0.08);
+      --sys-accent-border: rgba(0, 120, 212, 0.45);
+      --sys-accent-glow: rgba(0, 120, 212, 0.35);
+
+      /* Direction C Authentic Industrial Slate Canvas */
+      --hud-bg-base: #101216;
+      --hud-bg-sub: #16181D;
+      --hud-bg-panel: #13151A;
+      --hud-bg-active: #1D2028;
+      --hud-border-outer: #2B2F3B;
+      --hud-border-grid: #20232B;
+      --hud-border-hairline: #1C1E26;
+
+      --text-main: #EDEDF0;
+      --text-muted: #8E92A0;
+      --text-dim: #555966;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background-color: #0A0B0E;
+      color: var(--text-main);
+    }
+    .font-hud { font-family: var(--font-hud); }
+    .font-mono { font-family: var(--font-mono); }
+    .font-sans { font-family: var(--font-sans); }
+
+    /* Industrial scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #101216; }
+    ::-webkit-scrollbar-thumb { background: #2B2F3B; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sys-accent); }
+
+    /* Direction C Tactile Mechanical Keycaps */
+    .hud-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+      padding: 0 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: #1C1F26;
+      color: #D4D7E2;
+      border: 1px solid #323744;
+      border-bottom: 2px solid #0D0F12;
+      border-radius: 3px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      user-select: none;
+      transition: transform 0.05s ease, border-bottom-width 0.05s ease;
+    }
+    .hud-key:active {
+      transform: translateY(1px);
+      border-bottom-width: 1px;
+      background: #15171D;
+    }
+
+    /* Industrial Segmented Scope Tabs */
+    .seg-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #16181D;
+      color: #8E92A0;
+      border: 1px solid #232732;
+      border-radius: 3px;
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .seg-tab:hover {
+      background: #1C1F26;
+      color: #FFFFFF;
+      border-color: #353B4A;
+    }
+    .seg-tab.active {
+      background: var(--sys-accent);
+      color: #000000;
+      border-color: var(--sys-accent);
+      font-weight: 700;
+      box-shadow: 0 0 12px var(--sys-accent-glow);
+    }
+    .seg-tab.active span.badge {
+      background: rgba(0, 0, 0, 0.25);
+      color: #000000;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 sm:p-6 selection:bg-blue-500/30 selection:text-white">
+
+  <!-- TOP LAB CONTROLS: WINDOWS ACCENT SIMULATOR -->
+  <header class="w-full max-w-5xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg bg-[#121419] border border-[#232732] text-xs font-mono">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded bg-[var(--sys-accent)] flex items-center justify-center font-bold text-black text-sm shadow-sm">
+        R
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-white tracking-wider font-hud">RUNNER // DIRECTION C HYBRID</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-400/10 text-amber-300 border border-amber-400/30 font-mono">AUTHENTIC NORDIC HUD</span>
+        </div>
+        <p class="text-[11px] text-neutral-400">Strict Tabular Rows • Split Inspector • In-Window Tab Matrix • Adaptive Windows Colors</p>
+      </div>
+    </div>
+
+    <!-- Live Windows Accent Color Swatches -->
+    <div class="flex items-center gap-2 bg-[#16181E] p-1.5 rounded border border-[#2B2F3B]">
+      <span class="text-neutral-400 text-[11px] pl-1">Windows Color:</span>
+      <button onclick="setWindowsAccent('#0078D4', 'Cobalt')" title="Windows Cobalt" class="w-4 h-4 rounded-sm bg-[#0078D4] border border-white/40 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#00B7C3', 'Mint')" title="Windows Mint" class="w-4 h-4 rounded-sm bg-[#00B7C3] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#8764B8', 'Iris')" title="Windows Iris" class="w-4 h-4 rounded-sm bg-[#8764B8] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#E74856', 'Crimson')" title="Windows Crimson" class="w-4 h-4 rounded-sm bg-[#E74856] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#FF8C00', 'Amber')" title="Windows Amber" class="w-4 h-4 rounded-sm bg-[#FF8C00] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#107C41', 'Xbox Green')" title="Xbox Green" class="w-4 h-4 rounded-sm bg-[#107C41] border border-white/20 hover:scale-125 transition-transform"></button>
+      <span id="current-accent-name" class="text-white text-[11px] font-semibold pr-1">Cobalt</span>
+    </div>
+
+    <!-- In-Window Tab Action Dispatcher Trigger -->
+    <div class="flex items-center gap-2">
+      <button onclick="toggleInWindowActions()" id="btn-toggle-action-top" class="px-2.5 py-1.5 rounded bg-[#1C1F26] hover:bg-[#252934] border border-[#353B4A] text-neutral-200 text-xs flex items-center gap-2 transition-colors">
+        <span class="hud-key">[TAB]</span>
+        <span id="action-toggle-label">TOGGLE ACTIONS IN-PANE</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- =================================================================== -->
+  <!-- DIRECTION C NORDIC INDUSTRIAL HUD WINDOW (BESPOKE FRAMELESS SHELL)   -->
+  <!-- =================================================================== -->
+  <div class="w-full max-w-5xl mx-auto bg-[#101216] border-2 border-[#2B2F3B] rounded-lg shadow-2xl overflow-hidden flex flex-col font-mono select-none ring-1 ring-[#1C1E26]">
+
+    <!-- 1. INDUSTRIAL TELEMETRY HEADER RIBBON (NO WIN32 TITLEBAR CHROME!) -->
+    <div class="px-4 py-2 bg-[#16181D] border-b border-[#232732] flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 bg-[var(--sys-accent)] rounded-xs inline-block"></span>
+          <span class="text-white font-bold tracking-wider font-hud text-xs">RUNNER // SYS_COMMAND_HUD</span>
+        </div>
+        <span class="text-neutral-600">|</span>
+        <span class="text-neutral-400 text-[11px]">NTFS_POLL: <strong class="text-neutral-200">12ms</strong></span>
+        <span class="text-neutral-600">|</span>
+        <span class="text-neutral-400 text-[11px]">INDEX_COUNT: <strong class="text-neutral-200">842 HITS</strong></span>
+      </div>
+
+      <div class="flex items-center gap-4 text-[11px] text-neutral-400">
+        <span>STATUS: <strong class="text-emerald-400 font-semibold">[READY]</strong></span>
+        <span>ACCENT: <strong class="text-[var(--sys-accent)] font-semibold" id="hud-accent-tag">#0078D4</strong></span>
+        <!-- Custom Minimalist Dismiss / Hide button (bespoke, not standard Windows titlebar) -->
+        <div class="pl-2 border-l border-[#2B2F3B] flex items-center gap-1">
+          <button onclick="simulateToast('RUNNER MINIMIZED TO TRAY')" class="px-1.5 py-0.5 rounded text-neutral-400 hover:text-white hover:bg-[#252934] text-[10px]" title="Hide to Tray (Esc)">[—]</button>
+          <button onclick="simulateToast('RUNNER CLOSED')" class="px-1.5 py-0.5 rounded text-neutral-400 hover:text-red-400 hover:bg-[#252934] text-[10px]" title="Dismiss">[✕]</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DYNAMIC INDUSTRIAL SEGMENTED SCOPE SWITCHER (FROM DIRECTION B, DIRECTION C STYLED) -->
+    <div class="px-3 py-2 bg-[#13151A] border-b border-[#20232B] flex items-center justify-between gap-2 overflow-x-auto">
+      <div class="flex items-center gap-1.5" id="scope-tabs">
+        <button onclick="setScope('all')" id="tab-all" class="seg-tab active">
+          <span>ALL</span>
+          <span class="badge text-[10px] px-1 rounded">15</span>
+        </button>
+        <button onclick="setScope('favorites')" id="tab-favorites" class="seg-tab">
+          <span class="text-amber-400">★</span>
+          <span>FAVORITES</span>
+          <span class="badge text-[10px] px-1 rounded bg-[#20242E] text-neutral-400">4</span>
+        </button>
+        <button onclick="setScope('suggestions')" id="tab-suggestions" class="seg-tab">
+          <span class="text-indigo-400">⚡</span>
+          <span>SUGGESTIONS</span>
+          <span class="badge text-[10px] px-1 rounded bg-[#20242E] text-neutral-400">3</span>
+        </button>
+        <button onclick="setScope('applications')" id="tab-applications" class="seg-tab">
+          <span class="text-blue-400">⎔</span>
+          <span>APPLICATIONS</span>
+          <span class="badge text-[10px] px-1 rounded bg-[#20242E] text-neutral-400">4</span>
+        </button>
+        <button onclick="setScope('games')" id="tab-games" class="seg-tab">
+          <span class="text-emerald-400">🎮</span>
+          <span>GAMES</span>
+          <span class="badge text-[10px] px-1 rounded bg-[#20242E] text-neutral-400">2</span>
+        </button>
+        <button onclick="setScope('commands')" id="tab-commands" class="seg-tab">
+          <span class="text-purple-400">⌘</span>
+          <span>COMMANDS</span>
+          <span class="badge text-[10px] px-1 rounded bg-[#20242E] text-neutral-400">2</span>
+        </button>
+      </div>
+
+      <div class="text-[11px] text-neutral-500 uppercase tracking-wider hidden sm:block shrink-0">
+        SCOPE: <span id="active-scope-label" class="text-neutral-300 font-bold">ALL_ENTITIES</span>
+      </div>
+    </div>
+
+    <!-- 3. STRICT COMMAND PROMPT BAR (DIRECTION C MONOSPACE OMNIBOX) -->
+    <div class="flex items-center h-12 px-4 border-b border-[#20232B] bg-[#0E1014] gap-3">
+      <span class="text-[var(--sys-accent)] font-bold text-base select-none">></span>
+      <input
+        id="hud-input"
+        type="text"
+        placeholder="EXECUTE QUERY, ALIAS (wh, vs, yt, psh), OR TYPE '/' FOR OPERATOR..."
+        oninput="handleInput(this.value)"
+        class="flex-1 bg-transparent font-mono text-xs uppercase text-white placeholder-neutral-600 focus:outline-none tracking-wider font-medium"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#1C1F26] border border-[#2B2F3B] text-neutral-400">ESC: CLEAR</span>
+      </div>
+    </div>
+
+    <!-- 4. MASTER-DETAIL STAGE: 60% TABULAR LIST / 40% CONTEXT INSPECTOR -->
+    <div class="grid grid-cols-12 min-h-[440px] max-h-[500px] divide-x-2 divide-[#20232B] bg-[#101216]">
+
+      <!-- ================================================================= -->
+      <!-- LEFT 60% COLUMN: AUTHENTIC DIRECTION C TABULAR MATRIX             -->
+      <!-- ================================================================= -->
+      <div class="col-span-7 flex flex-col overflow-hidden">
+        <!-- Tabular Column Headings -->
+        <div class="grid grid-cols-12 px-3 py-1.5 bg-[#14161C] border-b border-[#20232B] text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-semibold select-none">
+          <div class="col-span-1">ID</div>
+          <div class="col-span-5">TARGET / ALIAS</div>
+          <div class="col-span-2">TYPE</div>
+          <div class="col-span-2">SOURCE</div>
+          <div class="col-span-2 text-right">ACTION</div>
+        </div>
+
+        <!-- Scrollable Tabular Results -->
+        <div class="flex-1 overflow-y-auto p-1.5 space-y-0.5" id="tabular-list-container">
+          <!-- Dynamically populated with strict single-row tabular records -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- RIGHT 40% COLUMN: LIVE INSPECTOR / IN-WINDOW ACTION MATRIX         -->
+      <!-- ================================================================= -->
+      <div class="col-span-5 flex flex-col bg-[#12141A] p-4 justify-between overflow-y-auto" id="hud-right-pane">
+        <!-- Dynamically renders either:
+             A) Direction C Telemetry Inspector (Default)
+             B) Direction C In-Window Action Matrix (When Tab is pressed) -->
+      </div>
+    </div>
+
+    <!-- 5. TACTILE MECHANICAL DOCK FOOTER -->
+    <div class="px-4 py-2 bg-[#14161C] border-t border-[#20232B] flex items-center justify-between text-xs font-mono text-neutral-400 select-none">
+      <div class="flex items-center gap-3">
+        <span class="text-[var(--sys-accent)] font-bold">[ONLINE]</span>
+        <span id="footer-item-label" class="text-neutral-200 truncate max-w-[220px]">WhatsApp</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="triggerPrimary()">
+          <kbd class="hud-key">[ENTER]</kbd>
+          <span class="text-neutral-300">EXEC</span>
+        </span>
+        <span class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="triggerAdmin()">
+          <kbd class="hud-key">[^ENTER]</kbd>
+          <span>PRIVILEGED</span>
+        </span>
+        <span class="flex items-center gap-1.5 cursor-pointer text-[var(--sys-accent)] font-bold" onclick="toggleInWindowActions()">
+          <kbd class="hud-key bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold">[TAB]</kbd>
+          <span id="footer-tab-status">ACTIONS IN-PANE</span>
+        </span>
+        <span class="flex items-center gap-1">
+          <kbd class="hud-key">[ESC]</kbd>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="hud-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-150 px-4 py-2.5 rounded bg-[#16181E] border border-[var(--sys-accent-border)] text-white text-xs font-mono shadow-2xl flex items-center gap-3">
+    <span class="text-[var(--sys-accent)] font-bold">></span>
+    <span id="hud-toast-text">DISPATCHED</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 1. DATASET WITH RAYCAST CATEGORIES & REAL WINDOWS TARGETS
+    const dataset = [
+      // FAVORITES
+      {
+        id: 'whatsapp',
+        title: 'WhatsApp',
+        category: 'favorites',
+        type: 'APP',
+        source: 'UWP_MSIX',
+        alias: 'wh',
+        param: 'WhatsApp_2.24...\\WhatsApp.exe',
+        icon: '💬',
+        publisher: 'Meta Platforms, Inc.',
+        version: '2.2443.4.0 (x64)',
+        runtime: 'WindowsAppSDK / XAML',
+        actions: ['OPEN APPLICATION', 'RUN PRIVILEGED (ADMIN)', 'REVEAL IN EXPLORER', 'UNPIN FROM FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'vscode',
+        title: 'Visual Studio Code',
+        category: 'favorites',
+        type: 'APP',
+        source: 'LOCAL_EXE',
+        alias: 'vs',
+        param: 'Programs\\VS Code\\Code.exe',
+        icon: '⚡',
+        publisher: 'Microsoft Corporation',
+        version: '1.95.2 (x64)',
+        runtime: 'Electron v32 / V8',
+        actions: ['OPEN APPLICATION', 'RUN AS ADMINISTRATOR', 'OPEN SETTINGS.JSON', 'REVEAL IN EXPLORER', 'UNPIN FROM FAVORITES', 'COPY TARGET PATH']
+      },
+      {
+        id: 'youtube',
+        title: 'YouTube',
+        category: 'favorites',
+        type: 'APP',
+        source: 'PWA_HOST',
+        alias: 'yt',
+        param: 'chrome_proxy.exe --app-id=agim...',
+        icon: '▶',
+        publisher: 'Google LLC',
+        version: 'Progressive Web App',
+        runtime: 'Chromium Evergreen',
+        actions: ['LAUNCH PWA', 'OPEN IN DEFAULT BROWSER', 'UNPIN FROM FAVORITES']
+      },
+      {
+        id: 'terminal',
+        title: 'Windows Terminal',
+        category: 'favorites',
+        type: 'APP',
+        source: 'WIN32_EXE',
+        alias: 'psh',
+        param: 'wt.exe (PowerShell 7.4, WSL2)',
+        icon: '⌨',
+        publisher: 'Microsoft Corporation',
+        version: '1.20.11781.0',
+        runtime: 'ConPTY / Win32 Host',
+        actions: ['LAUNCH TERMINAL', 'OPEN ELEVATED (ADMIN)', 'LAUNCH WSL UBUNTU', 'UNPIN FROM FAVORITES']
+      },
+
+      // SUGGESTIONS
+      {
+        id: 'shutdown',
+        title: 'Shut Down',
+        category: 'suggestions',
+        type: 'COMMAND',
+        source: 'SYS_API',
+        alias: '',
+        param: 'ntdll!NtShutdownSystem',
+        icon: '⏻',
+        publisher: 'Windows NT Kernel',
+        version: 'NTOSKRNL 10.0.26100',
+        runtime: 'Kernel Dispatch',
+        actions: ['EXECUTE SHUT DOWN', 'RESTART WORKSTATION', 'SLEEP SUSPEND', 'LOCK USER SESSION']
+      },
+      {
+        id: 'antigravity',
+        title: 'Antigravity IDE',
+        category: 'suggestions',
+        type: 'APP',
+        source: 'LOCAL_EXE',
+        alias: '',
+        param: 'Antigravity\\Antigravity.exe',
+        icon: '✨',
+        publisher: 'Google DeepMind',
+        version: '2.0.0-PROD',
+        runtime: 'Rust Core + WebView2',
+        actions: ['OPEN APPLICATION', 'RUN PRIVILEGED (ADMIN)', 'PIN TO FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'unigetui',
+        title: 'UniGetUI',
+        category: 'suggestions',
+        type: 'APP',
+        source: 'WINGET',
+        alias: '',
+        param: 'UniGetUI.exe (Winget / Scoop)',
+        icon: '📦',
+        publisher: 'Marti Climent',
+        version: '3.1.2 (WinUI 3)',
+        runtime: '.NET 8 / C# Desktop',
+        actions: ['OPEN UNIGETUI', 'CHECK PACKAGE UPDATES', 'PIN TO FAVORITES']
+      },
+
+      // APPLICATIONS
+      {
+        id: 'matlab',
+        title: 'MATLAB R2026a',
+        category: 'applications',
+        type: 'APP',
+        source: 'MATHWORKS',
+        alias: '',
+        param: 'MATLAB\\R2026a\\bin\\matlab.exe',
+        icon: '📐',
+        publisher: 'The MathWorks, Inc.',
+        version: 'R2026a (64-bit)',
+        runtime: 'Native C++ / JVM 21',
+        actions: ['LAUNCH MATLAB', 'LAUNCH WITHOUT DESKTOP', 'PIN TO FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'teams',
+        title: 'Microsoft Teams',
+        category: 'applications',
+        type: 'APP',
+        source: 'MS_TEAMS',
+        alias: 'te',
+        param: 'ms-teams.exe',
+        icon: '👥',
+        publisher: 'Microsoft Corporation',
+        version: '24295.1000.3200',
+        runtime: 'WebView2 / React 18',
+        actions: ['OPEN TEAMS', 'STATUS: AVAILABLE', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'android_studio',
+        title: 'Android Studio',
+        category: 'applications',
+        type: 'APP',
+        source: 'JETBRAINS',
+        alias: '',
+        param: 'bin\\studio64.exe',
+        icon: '🤖',
+        publisher: 'Google LLC',
+        version: 'Koala 2024.1.1',
+        runtime: 'IntelliJ Platform',
+        actions: ['OPEN IDE', 'LAUNCH AVD EMULATOR', 'PIN TO FAVORITES']
+      },
+
+      // GAMES
+      {
+        id: 'assetto_corsa',
+        title: 'Assetto Corsa',
+        category: 'games',
+        type: 'GAME',
+        source: 'STEAM_244210',
+        alias: '',
+        param: 'Steam.exe -applaunch 244210',
+        icon: '🏎️',
+        publisher: 'Kunos Simulazioni',
+        version: 'CSP v0.2.4 (DirectX 11)',
+        runtime: 'Native Win32 Sim Engine',
+        actions: ['LAUNCH VIA STEAM', 'OPEN CONTENT MANAGER', 'OPEN GAME DIRECTORY', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'detroit',
+        title: 'Detroit: Become Human',
+        category: 'games',
+        type: 'GAME',
+        source: 'EPIC_GAMES',
+        alias: '',
+        param: 'Detroit\\Detroit.exe -Vulkan',
+        icon: '⭕',
+        publisher: 'Quantic Dream',
+        version: 'DirectX 12 / Vulkan 1.3',
+        runtime: 'Native 64-bit Binary',
+        actions: ['LAUNCH GAME', 'VERIFY LOCAL CLOUD SYNC', 'PIN TO FAVORITES']
+      },
+
+      // COMMANDS
+      {
+        id: 'clip_history',
+        title: 'Clipboard History',
+        category: 'commands',
+        type: 'COMMAND',
+        source: 'SUBSYSTEM',
+        alias: 'cli',
+        param: 'ipc:run_subsystem(clipboard)',
+        icon: '📋',
+        publisher: 'Runner Core Subsystem',
+        version: 'SQLite v3.45',
+        runtime: 'Rust In-Memory Cache',
+        actions: ['DISPATCH CLIPBOARD VIEW', 'PURGE CLIPBOARD BUFFER', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'emoji_symbols',
+        title: 'Search Emoji & Symbols',
+        category: 'commands',
+        type: 'COMMAND',
+        source: 'SUBSYSTEM',
+        alias: 'emj',
+        param: 'ipc:run_subsystem(emojis)',
+        icon: '🎨',
+        publisher: 'Unicode 15.1 Store',
+        version: '3,782 Symbols Loaded',
+        runtime: 'Local Trie Index',
+        actions: ['OPEN EMOJI PICKER', 'PIN TO FAVORITES']
+      }
+    ];
+
+    // STATE
+    let currentScope = 'all';
+    let filterQuery = '';
+    let selectedIndex = 0;
+    let isActionMatrixOpen = false;
+    let selectedActionIndex = 0;
+
+    // 2. WINDOWS ACCENT COLOR APPLICATION
+    function setWindowsAccent(hex, name) {
+      document.documentElement.style.setProperty('--sys-accent', hex);
+      document.documentElement.style.setProperty('--sys-accent-hover', lighten(hex, 25));
+      document.documentElement.style.setProperty('--sys-accent-muted', hexToRgba(hex, 0.18));
+      document.documentElement.style.setProperty('--sys-accent-subtle', hexToRgba(hex, 0.08));
+      document.documentElement.style.setProperty('--sys-accent-border', hexToRgba(hex, 0.45));
+      document.documentElement.style.setProperty('--sys-accent-glow', hexToRgba(hex, 0.35));
+
+      document.getElementById('current-accent-name').innerText = name;
+      document.getElementById('hud-accent-tag').innerText = hex;
+      simulateToast(`SYSTEM ACCENT SYNCED: ${name} [${hex}]`);
+      render();
+    }
+
+    function hexToRgba(hex, alpha) {
+      let c = hex.substring(1);
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+
+    function lighten(hex, amt) {
+      const num = parseInt(hex.replace('#',''), 16);
+      const r = Math.min(255, (num >> 16) + amt);
+      const b = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+      const g = Math.min(255, (num & 0x0000FF) + amt);
+      return '#' + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+    }
+
+    // 3. SCOPE SWITCHER
+    function setScope(scope) {
+      currentScope = scope;
+      selectedIndex = 0;
+      isActionMatrixOpen = false;
+
+      document.querySelectorAll('.seg-tab').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`tab-${scope}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('active-scope-label').innerText = scope.toUpperCase();
+      render();
+    }
+
+    function handleInput(val) {
+      filterQuery = val.trim().toLowerCase();
+      selectedIndex = 0;
+      isActionMatrixOpen = false;
+      render();
+    }
+
+    function getItems() {
+      return dataset.filter(item => {
+        let matchesScope = true;
+        if (currentScope === 'favorites') matchesScope = item.category === 'favorites';
+        else if (currentScope === 'suggestions') matchesScope = item.category === 'suggestions';
+        else if (currentScope === 'applications') matchesScope = item.category === 'applications';
+        else if (currentScope === 'games') matchesScope = item.category === 'games';
+        else if (currentScope === 'commands') matchesScope = item.category === 'commands';
+
+        const matchesSearch = !filterQuery ||
+          item.title.toLowerCase().includes(filterQuery) ||
+          (item.alias && item.alias.toLowerCase() === filterQuery) ||
+          item.param.toLowerCase().includes(filterQuery) ||
+          item.source.toLowerCase().includes(filterQuery) ||
+          item.type.toLowerCase().includes(filterQuery);
+
+        return matchesScope && matchesSearch;
+      });
+    }
+
+    // 4. RENDERING IMPLEMENTATION
+    function render() {
+      const items = getItems();
+      if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
+
+      const activeItem = items[selectedIndex];
+      if (activeItem) {
+        document.getElementById('footer-item-label').innerText = activeItem.title.toUpperCase();
+      }
+
+      renderTabularList(items);
+      renderRightPane(activeItem);
+    }
+
+    // RENDER DIRECTION C TABULAR MATRIX LIST
+    function renderTabularList(items) {
+      const container = document.getElementById('tabular-list-container');
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-neutral-500 text-xs font-mono">
+            >> ZERO HITS FOR QUERY: "${filterQuery.toUpperCase()}"
+          </div>
+        `;
+        return;
+      }
+
+      // Group by Section Headings
+      const sections = ['favorites', 'suggestions', 'applications', 'games', 'commands'];
+      const sectionLabels = {
+        favorites: '// FAVORITES [PINNED]',
+        suggestions: '// SUGGESTIONS [HEURISTIC]',
+        applications: '// APPLICATIONS [INSTALLED]',
+        games: '// GAMES [DETECTED_ENGINES]',
+        commands: '// COMMANDS [SUBSYSTEMS]'
+      };
+
+      const grouped = {};
+      items.forEach((item, globalIdx) => {
+        if (!grouped[item.category]) grouped[item.category] = [];
+        grouped[item.category].push({ item, globalIdx });
+      });
+
+      let html = '';
+      sections.forEach(sec => {
+        const groupItems = grouped[sec];
+        if (!groupItems || groupItems.length === 0) return;
+
+        html += `
+          <div class="px-2 pt-2.5 pb-1 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold border-b border-[#1A1D24]">
+            <span class="text-neutral-400">${sectionLabels[sec]}</span>
+            <span class="text-neutral-600">[${groupItems.length}]</span>
+          </div>
+        `;
+
+        groupItems.forEach(({ item, globalIdx }) => {
+          const isSelected = globalIdx === selectedIndex;
+          const idNum = String(globalIdx + 1).padStart(2, '0');
+
+          html += `
+            <div
+              onclick="selectRow(${globalIdx})"
+              ondblclick="triggerPrimary()"
+              class="grid grid-cols-12 items-center px-2.5 py-1.5 cursor-pointer text-xs font-mono transition-colors border border-transparent ${
+                isSelected
+                  ? 'bg-[var(--sys-accent)] text-black font-bold shadow-md'
+                  : 'text-neutral-300 hover:bg-[#1A1D24]'
+              }"
+            >
+              <!-- Col 1: ID -->
+              <div class="col-span-1 text-[11px] ${isSelected ? 'text-black font-black' : 'text-neutral-500'}">
+                ${idNum}
+              </div>
+
+              <!-- Col 2: Target & Alias -->
+              <div class="col-span-5 flex items-center gap-2 truncate pr-2">
+                <span class="${isSelected ? 'text-black' : 'text-[var(--sys-accent)]'} text-xs">${item.icon}</span>
+                <span class="truncate ${isSelected ? 'text-black font-bold' : 'text-white'}">
+                  ${item.title}
+                </span>
+                ${item.alias ? `
+                  <span class="px-1 py-0.2 rounded text-[10px] font-mono font-bold ${
+                    isSelected ? 'bg-black text-[var(--sys-accent)]' : 'bg-[#222631] text-neutral-300 border border-[#2D3342]'
+                  }">
+                    ${item.alias}
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Col 3: Type -->
+              <div class="col-span-2 text-[10px] uppercase tracking-wider ${isSelected ? 'text-neutral-900 font-bold' : 'text-neutral-400'}">
+                [${item.type}]
+              </div>
+
+              <!-- Col 4: Source / Path -->
+              <div class="col-span-2 truncate text-[11px] ${isSelected ? 'text-neutral-900' : 'text-neutral-500'}">
+                ${item.source}
+              </div>
+
+              <!-- Col 5: Action Button -->
+              <div class="col-span-2 text-right">
+                <span class="hud-key ${isSelected ? 'bg-black text-[var(--sys-accent)] border-black' : ''}">
+                  [ENTER]
+                </span>
+              </div>
+            </div>
+          `;
+        });
+      });
+
+      container.innerHTML = html;
+    }
+
+    // RENDER RIGHT PANE: DIRECTION C TELEMETRY INSPECTOR OR IN-WINDOW ACTIONS
+    function renderRightPane(active) {
+      const pane = document.getElementById('hud-right-pane');
+      const actionToggleLabel = document.getElementById('action-toggle-label');
+      const footerTabStatus = document.getElementById('footer-tab-status');
+
+      if (!active) {
+        pane.innerHTML = `
+          <div class="p-8 text-center text-neutral-600 text-xs font-mono">
+            >> SELECT A ROW TO INITIALIZE INSPECTOR
+          </div>
+        `;
+        return;
+      }
+
+      if (isActionMatrixOpen) {
+        // ===============================================================
+        // IN-WINDOW ACTION DISPATCH MATRIX (DIRECTION C ARCHITECTURAL STYLE)
+        // ===============================================================
+        actionToggleLabel.innerText = "RETURN TO INSPECTOR [TAB]";
+        footerTabStatus.innerText = "RETURN [TAB]";
+
+        pane.innerHTML = `
+          <div class="flex flex-col h-full justify-between">
+            <div>
+              <!-- Action Matrix Header -->
+              <div class="flex items-center justify-between pb-2 mb-3 border-b-2 border-[#20232B] text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 bg-[var(--sys-accent)] inline-block"></span>
+                  <span class="font-bold text-white tracking-wider">ACTION MATRIX: ${active.title.toUpperCase()}</span>
+                </div>
+                <button onclick="toggleInWindowActions()" class="text-neutral-500 hover:text-white font-mono text-[10px]">[ESC: CLOSE]</button>
+              </div>
+
+              <!-- List of Actions directly in pane -->
+              <div class="space-y-1">
+                ${active.actions.map((act, aIdx) => {
+                  const isActSel = aIdx === selectedActionIndex;
+                  const keyNum = `0${aIdx + 1}`;
+                  return `
+                    <div
+                      onclick="dispatchAction('${active.id}', '${act}')"
+                      class="flex items-center justify-between px-3 py-2 rounded-xs cursor-pointer text-xs transition-colors border ${
+                        isActSel
+                          ? 'bg-[var(--sys-accent)] text-black font-bold border-[var(--sys-accent)]'
+                          : 'bg-[#16181E] text-neutral-200 border-[#232732] hover:bg-[#1D2028]'
+                      }"
+                    >
+                      <div class="flex items-center gap-2">
+                        <span class="${isActSel ? 'text-black' : 'text-neutral-500'} font-mono text-[10px]">[${keyNum}]</span>
+                        <span class="truncate">${act}</span>
+                      </div>
+                      <span class="hud-key ${isActSel ? 'bg-black text-[var(--sys-accent)] border-black' : ''}">
+                        [↵ EXEC]
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- In-Window Footer Note -->
+            <div class="pt-3 border-t border-[#20232B] text-[10px] font-mono text-neutral-500 flex items-center justify-between">
+              <span>USE <kbd class="hud-key text-[9px]">[↑]</kbd> <kbd class="hud-key text-[9px]">[↓]</kbd> + <kbd class="hud-key text-[9px]">[ENTER]</kbd></span>
+              <span class="text-[var(--sys-accent)] font-bold">IN-WINDOW DISPATCH</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // ===============================================================
+        // DIRECTION C TELEMETRY CONTEXT INSPECTOR (DIRECTION A SPLIT PANE)
+        // ===============================================================
+        actionToggleLabel.innerText = "ACTIONS IN-PANE [TAB]";
+        footerTabStatus.innerText = "ACTIONS [TAB]";
+
+        pane.innerHTML = `
+          <div class="flex flex-col h-full justify-between">
+            <div class="space-y-3">
+              <!-- Top Header -->
+              <div class="flex items-center justify-between pb-1.5 border-b border-[#20232B] text-[10px] text-neutral-500 uppercase tracking-wider font-semibold">
+                <span class="text-[var(--sys-accent)]">// CONTEXT TELEMETRY</span>
+                <span>STATUS: ACTIVE</span>
+              </div>
+
+              <!-- Item Ident Banner -->
+              <div class="p-2.5 rounded bg-[#16181E] border border-[#232732] space-y-1">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">${active.icon}</span>
+                    <span class="font-bold text-white text-sm tracking-wide font-hud">${active.title.toUpperCase()}</span>
+                  </div>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#20242E] text-[var(--sys-accent)] border border-[#2A303E]">
+                    [${active.type}]
+                  </span>
+                </div>
+                ${active.alias ? `
+                  <div class="text-[11px] text-neutral-400">
+                    SPEED ALIAS: <strong class="text-white font-mono font-bold bg-black/40 px-1 py-0.5 rounded border border-[#2B2F3B]">${active.alias}</strong> (Type alias + Space)
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Technical Metric Grid -->
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <div class="p-2 bg-[#14161C] border border-[#20232B] rounded">
+                  <span class="text-neutral-500 block text-[10px]">PUBLISHER:</span>
+                  <span class="text-neutral-200 font-semibold truncate block">${active.publisher}</span>
+                </div>
+                <div class="p-2 bg-[#14161C] border border-[#20232B] rounded">
+                  <span class="text-neutral-500 block text-[10px]">BUILD_VERSION:</span>
+                  <span class="text-neutral-200 font-semibold truncate block">${active.version}</span>
+                </div>
+              </div>
+
+              <!-- Parameter / File / Target Path Spec -->
+              <div class="space-y-1">
+                <span class="text-[10px] uppercase text-neutral-500 font-bold block">// TARGET_LOCATION:</span>
+                <div class="p-2 bg-[#0C0E12] border border-[#20232B] rounded text-[11px] text-neutral-300 break-all leading-tight font-mono">
+                  ${active.param}
+                </div>
+              </div>
+
+              <!-- Runtime Platform -->
+              <div class="text-[11px] text-neutral-400 font-mono">
+                RUNTIME_ENV: <span class="text-neutral-200 font-semibold">${active.runtime}</span>
+              </div>
+            </div>
+
+            <!-- In-Pane Quick Actions -->
+            <div class="pt-3 border-t border-[#20232B] mt-2">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase tracking-wider text-neutral-500 font-bold">// QUICK_ACTIONS:</span>
+                <button onclick="toggleInWindowActions()" class="text-[10px] text-[var(--sys-accent)] hover:underline font-bold">[VIEW ALL (TAB)]</button>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                ${active.actions.slice(0, 3).map(act => `
+                  <button onclick="dispatchAction('${active.id}', '${act}')" class="px-2 py-1 rounded bg-[#181B22] hover:bg-[var(--sys-accent)] hover:text-black border border-[#282C38] text-[10px] font-bold text-neutral-300 transition-colors">
+                    ${act}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 5. ACTION DISPATCH & INTERACTION
+    function toggleInWindowActions() {
+      isActionMatrixOpen = !isActionMatrixOpen;
+      selectedActionIndex = 0;
+      render();
+    }
+
+    function selectRow(idx) {
+      selectedIndex = idx;
+      isActionMatrixOpen = false;
+      render();
+    }
+
+    function triggerPrimary() {
+      const items = getItems();
+      const current = items[selectedIndex];
+      if (current) dispatchAction(current.id, current.actions[0]);
+    }
+
+    function triggerAdmin() {
+      const items = getItems();
+      const current = items[selectedIndex];
+      if (current) dispatchAction(current.id, 'RUN PRIVILEGED (ADMIN)');
+    }
+
+    function dispatchAction(id, actionName) {
+      const item = dataset.find(i => i.id === id);
+      if (!item) return;
+
+      simulateToast(`EXEC >> ${actionName} ON [${item.title.toUpperCase()}]`);
+      isActionMatrixOpen = false;
+      render();
+    }
+
+    function simulateToast(msg) {
+      const toast = document.getElementById('hud-toast');
+      document.getElementById('hud-toast-text').innerText = msg;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2200);
+    }
+
+    // 6. KEYBOARD EVENT ROUTER
+    window.addEventListener('keydown', (e) => {
+      // TAB: Toggles in-window action matrix
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        toggleInWindowActions();
+        return;
+      }
+
+      // ESC: Close action matrix or clear query
+      if (e.key === 'Escape') {
+        if (isActionMatrixOpen) {
+          e.preventDefault();
+          isActionMatrixOpen = false;
+          render();
+          return;
+        }
+        if (filterQuery) {
+          e.preventDefault();
+          document.getElementById('hud-input').value = '';
+          handleInput('');
+          return;
+        }
+      }
+
+      if (isActionMatrixOpen) {
+        // Navigating inside In-Window Action Matrix
+        const items = getItems();
+        const active = items[selectedIndex];
+        if (!active) return;
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedActionIndex = (selectedActionIndex + 1) % active.actions.length;
+          render();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedActionIndex = (selectedActionIndex - 1 + active.actions.length) % active.actions.length;
+          render();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          dispatchAction(active.id, active.actions[selectedActionIndex]);
+        }
+        return;
+      }
+
+      // Navigating Master Tabular List
+      const items = getItems();
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        render();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        render();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.ctrlKey) {
+          triggerAdmin();
+        } else {
+          triggerPrimary();
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('hud-input')?.focus();
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

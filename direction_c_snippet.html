@@ -1,0 +1,69 @@
+ <span>INDEX: <strong class="text-white">ONLINE</strong></span>
+            <span>NTFS_POLL: <strong class="text-amber-400">12ms</strong></span>
+            <span>BUILD: <strong class="text-neutral-300">2026.10</strong></span>
+          </div>
+        </div>
+
+        <div class="flex items-center h-12 px-4 border-b border-[#252830] bg-[#111316] gap-3">
+          <span class="font-mono text-amber-400 font-bold text-sm">></span>
+          <input
+            id="search-input-C"
+            type="text"
+            placeholder="EXECUTE QUERY OR OPERATOR..."
+            oninput="handleSearch(this.value)"
+            class="flex-1 bg-transparent font-mono text-sm uppercase text-amber-200 placeholder-neutral-600 focus:outline-none tracking-wider"
+          />
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-400/10 text-amber-300 border border-amber-400/30">FUZZY_MATCH</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 px-4 py-1.5 bg-[#16181D] border-b border-[#252830] text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+          <div class="col-span-1">ID</div>
+          <div class="col-span-4">TARGET / COMMAND</div>
+          <div class="col-span-2">TYPE</div>
+          <div class="col-span-3">LOCATION / PARAM</div>
+          <div class="col-span-2 text-right">EXEC KEY</div>
+        </div>
+
+        <div class="p-2 max-h-[380px] overflow-y-auto space-y-1 font-mono" id="list-container-C"></div>
+
+        <div class="px-4 py-2.5 bg-[#16181D] border-t border-[#252830] flex items-center justify-between text-xs font-mono text-neutral-400">
+          <div class="flex items-center gap-3">
+            <span class="text-amber-400 font-semibold">[READY]</span>
+            <span id="footer-count-C">10 RECORDS LOADED</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[ENTER]</kbd> RUN</span>
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[^ENTER]</kbd> PRIVILEGED</span>
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[TAB]</kbd> ACTIONS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOATING ACTION MENU OVERLAY -->
+    <div id="action-menu-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="w-full max-w-sm bg-[#16181E] border border-white/[0.12] rounded-2xl shadow-2xl p-2.5 animate-in fade-in zoom-in-95">
+        <div class="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 font-mono">Available Actions</span>
+          <button onclick="toggleActionMenu()" class="text-neutral-400 hover:text-white text-xs">✕</button>
+        </div>
+        <div class="space-y-1" id="action-menu-items"></div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="demo-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 px-4 py-3 rounded-xl bg-neutral-900 border border-white/[0.15] text-white text-xs font-medium shadow-2xl flex items-center gap-3">
+      <span id="toast-icon" class="text-base">🚀</span>
+      <div>
+        <p id="toast-title" class="font-bold">Action Executed</p>
+        <p id="toast-desc" class="text-neutral-400 text-[11px]">Command dispatched to system</p>
+      </div>
+    </div>
+
+    <!-- COMPARISON SECTION -->
+    <section id="comparison" class="w-full mt-16 pt-8 border-t border-white/[0.08]">
+      <div class="mb-8">
+        <span class="text-xs font-mono font-medium text-blue-400 tracking-wider uppercase">ARCHITECTURAL DESIGN MATRIX</span>
+        <h3 class="text-xl font-bold text-wh

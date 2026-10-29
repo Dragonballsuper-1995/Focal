@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runner — Design System Exploration & Interactive Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', Consolas, monospace;
+      --font-display: 'Space Grotesk', sans-serif;
+    }
+    body {
+      font-family: var(--font-sans);
+    }
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+    .font-display {
+      font-family: var(--font-display);
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    .kbd-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-radius: 4px;
+      line-height: 1.3;
+    }
+  </style>
+</head>
+<body class="bg-[#090A0C] text-[#E4E4E7] min-h-screen flex flex-col selection:bg-blue-500/30 selection:text-white transition-colors duration-200">
+
+  <!-- TOP APP SWITCHER & CONTROL BAR -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#090A0C]/80 border-b border-white/[0.08] px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-amber-500 flex items-center justify-center font-black text-white text-base shadow-lg shadow-blue-500/20">
+        R
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">RUNNER DESIGN LAB</h1>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 font-medium">INTERACTIVE PROTOTYPE</span>
+        </div>
+        <p class="text-xs text-neutral-400">Comparing 3 inspired alternatives to transcend the Raycast clone look</p>
+      </div>
+    </div>
+
+    <!-- Direction Switcher Tabs -->
+    <div class="flex items-center gap-1.5 bg-[#14161B] p-1 rounded-xl border border-white/[0.08]">
+      <button onclick="switchDirection('A')" id="btn-tab-A" class="direction-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 bg-blue-600 text-white shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-blue-200"></span>
+        <span>A: Swiss Precision</span>
+        <span class="kbd-chip bg-white/20 text-white text-[10px]">1</span>
+      </button>
+      <button onclick="switchDirection('B')" id="btn-tab-B" class="direction-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 text-neutral-400 hover:text-white hover:bg-white/[0.05]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>B: Fluid Ambient Glass</span>
+        <span class="kbd-chip bg-white/10 text-neutral-400 text-[10px]">2</span>
+      </button>
+      <button onclick="switchDirection('C')" id="btn-tab-C" class="direction-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 text-neutral-400 hover:text-white hover:bg-white/[0.05]">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span>C: Nordic Industrial HUD</span>
+        <span class="kbd-chip bg-white/10 text-neutral-400 text-[10px]">3</span>
+      </button>
+    </div>
+
+    <!-- Utility Controls -->
+    <div class="flex items-center gap-3">
+      <button onclick="toggleTheme()" id="theme-toggle-btn" class="px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#14161B] hover:bg-white/[0.06] text-xs font-medium text-neutral-300 transition-colors flex items-center gap-1.5">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Dark Glass</span>
+      </button>
+      <a href="#comparison" class="px-2.5 py-1.5 rounded-lg border border-white/[0.08] bg-[#14161B] hover:bg-white/[0.06] text-xs font-medium text-neutral-300 transition-colors flex items-center gap-1">
+        <span>Spec Sheet</span>
+        <span>↓</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN STAGE / INTERACTIVE WORKSPACE -->
+  <main class="flex-1 flex flex-col items-center justify-start p-6 max-w-6xl w-full mx-auto">
+
+    <!-- Direction Header Badge & Explanation -->
+    <div class="w-full mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div id="dir-badge" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-2">
+          <span>DIRECTION A: SWISS PRECISION STAGE</span>
+        </div>
+        <h2 id="dir-title" class="text-2xl font-bold tracking-tight text-white">Linear & Zed Inspired Master-Detail Architecture</h2>
+        <p id="dir-desc" class="text-sm text-neutral-400 max-w-2xl mt-1">
+          Features a high-speed split-pane with live file and app preview, keyboard command rails, and zero redundant decor. Click items or use <kbd class="kbd-chip bg-white/10">↑</kbd><kbd class="kbd-chip bg-white/10">↓</kbd> arrows and <kbd class="kbd-chip bg-white/10">↵</kbd> Enter!
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 bg-[#121418] border border-white/[0.08] px-3 py-2 rounded-xl">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Keyboard Active: Try <kbd class="kbd-chip bg-white/10 text-white">↑</kbd> <kbd class="kbd-chip bg-white/10 text-white">↓</kbd> <kbd class="kbd-chip bg-white/10 text-white">↵</kbd> <kbd class="kbd-chip bg-white/10 text-white">Tab</kbd></span>
+      </div>
+    </div>
+
+    <!-- THE LIVE SIMULATED RUNNER PALETTE CONTAINER -->
+    <div class="w-full flex justify-center py-4 relative">
+
+      <!-- VARIANT A -->
+      <div id="palette-variant-A" class="w-full max-w-4xl bg-[#0E1013] border border-white/[0.09] rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ring-1 ring-white/[0.05]">
+        <div class="flex items-center h-14 px-4 border-b border-white/[0.08] gap-3 bg-[#111317]/50">
+          <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            id="search-input-A"
+            type="text"
+            placeholder="Type a command, search apps, files or type '>' for system..."
+            oninput="handleSearch(this.value)"
+            class="flex-1 bg-transparent text-sm font-medium text-white placeholder-neutral-500 focus:outline-none tracking-tight"
+          />
+          <div class="flex items-center gap-1.5 text-xs font-mono text-neutral-400">
+            <span class="kbd-chip bg-white/[0.06] border border-white/[0.08] text-neutral-300">esc</span>
+            <span>clear</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 min-h-[400px] max-h-[460px] divide-x divide-white/[0.08]">
+          <div class="col-span-7 flex flex-col overflow-y-auto p-2 space-y-1" id="list-container-A"></div>
+          <div class="col-span-5 flex flex-col bg-[#0B0C0E]/70 p-4 justify-between overflow-y-auto" id="preview-container-A"></div>
+        </div>
+
+        <div class="h-10 px-4 border-t border-white/[0.08] bg-[#0A0B0D] flex items-center justify-between text-xs text-neutral-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span class="font-mono text-[11px] text-neutral-300">SWISS PRECISION RAIL</span>
+            <span class="text-neutral-600">•</span>
+            <span id="footer-count-A" class="text-[11px]">8 items ready</span>
+          </div>
+          <div class="flex items-center gap-3 font-mono text-[11px]">
+            <span class="flex items-center gap-1"><kbd class="kbd-chip bg-white/[0.08] text-white">↵</kbd> Execute</span>
+            <span class="flex items-center gap-1"><kbd class="kbd-chip bg-white/[0.08] text-white">^↵</kbd> Admin</span>
+            <span class="flex items-center gap-1"><kbd class="kbd-chip bg-white/[0.08] text-white">Tab</kbd> Actions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VARIANT B -->
+      <div id="palette-variant-B" class="w-full max-w-3xl bg-[#0F1219]/80 backdrop-blur-3xl border border-white/[0.12] rounded-3xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ring-1 ring-emerald-500/20 shadow-emerald-500/5 hidden">
+        <div class="px-5 pt-3.5 pb-2 flex items-center justify-between border-b border-white/[0.06]">
+          <div class="flex items-center gap-1.5 p-1 bg-black/40 rounded-xl border border-white/[0.06]">
+            <button onclick="setCategoryFilter('all')" id="pill-all" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all bg-emerald-500 text-black font-semibold shadow-sm">All</button>
+            <button onclick="setCategoryFilter('app')" id="pill-app" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">Apps</button>
+            <button onclick="setCategoryFilter('file')" id="pill-file" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">Files</button>
+            <button onclick="setCategoryFilter('clipboard')" id="pill-clipboard" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">Clipboard</button>
+            <button onclick="setCategoryFilter('snippet')" id="pill-snippet" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white">Snippets</button>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-emerald-400 font-mono">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>Runner OS</span>
+          </div>
+        </div>
+
+        <div class="flex items-center h-14 px-5 gap-3">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <input
+            id="search-input-B"
+            type="text"
+            placeholder="Search anything or ask Runner..."
+            oninput="handleSearch(this.value)"
+            class="flex-1 bg-transparent text-base font-medium text-white placeholder-neutral-500 focus:outline-none"
+          />
+          <div class="flex items-center gap-1">
+            <span class="text-xs px-2 py-0.5 rounded-md bg-white/[0.06] text-neutral-300 font-mono">⌘K</span>
+          </div>
+        </div>
+
+        <div class="px-5 py-2.5 bg-black/20 border-y border-white/[0.05] flex items-center gap-2 overflow-x-auto">
+          <span class="text-[10px] uppercase font-mono tracking-wider text-neutral-400 shrink-0">Favorites:</span>
+          <div class="flex items-center gap-2">
+            <button onclick="simulateExecute('vscode')" class="px-2.5 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-emerald-500/40 text-xs font-medium text-white flex items-center gap-2 transition-all">
+              <span class="text-blue-400">⚡</span> VS Code
+            </button>
+            <button onclick="simulateExecute('terminal')" class="px-2.5 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-emerald-500/40 text-xs font-medium text-white flex items-center gap-2 transition-all">
+              <span class="text-neutral-400">⌨</span> Terminal
+            </button>
+            <button onclick="simulateExecute('figma')" class="px-2.5 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-emerald-500/40 text-xs font-medium text-white flex items-center gap-2 transition-all">
+              <span class="text-purple-400">🎨</span> Figma
+            </button>
+            <button onclick="simulateExecute('package_json')" class="px-2.5 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-emerald-500/40 text-xs font-medium text-white flex items-center gap-2 transition-all">
+              <span class="text-amber-400">📄</span> package.json
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3 max-h-[380px] overflow-y-auto space-y-1.5" id="list-container-B"></div>
+
+        <div class="p-3 bg-black/40 border-t border-white/[0.06] flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-neutral-400" id="selection-label-B">Ready</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="triggerSelectedPrimary()" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-500/20">
+              <span>Open</span>
+              <kbd class="kbd-chip bg-black/20 text-black text-[10px]">↵</kbd>
+            </button>
+            <button onclick="toggleActionMenu()" class="px-3 py-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white font-medium text-xs transition-colors flex items-center gap-1.5 border border-white/[0.08]">
+              <span>Actions</span>
+              <kbd class="kbd-chip bg-white/20 text-white text-[10px]">Tab</kbd>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VARIANT C -->
+      <div id="palette-variant-C" class="w-full max-w-4xl bg-[#131518] border-2 border-[#252830] rounded-xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 font-sans hidden">
+        <div class="px-4 py-2.5 bg-[#181B20] border-b border-[#252830] flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-bold">RUNNER //</span>
+            <span class="text-neutral-400">SYS_COMMAND_SHELL</span>
+          </div>
+          <div class="flex items-center gap-4 text-neutral-400">
+            <span>INDEX: <strong class="text-white">ONLINE</strong></span>
+            <span>NTFS_POLL: <strong class="text-amber-400">12ms</strong></span>
+            <span>BUILD: <strong class="text-neutral-300">2026.10</strong></span>
+          </div>
+        </div>
+
+        <div class="flex items-center h-12 px-4 border-b border-[#252830] bg-[#111316] gap-3">
+          <span class="font-mono text-amber-400 font-bold text-sm">></span>
+          <input
+            id="search-input-C"
+            type="text"
+            placeholder="EXECUTE QUERY OR OPERATOR..."
+            oninput="handleSearch(this.value)"
+            class="flex-1 bg-transparent font-mono text-sm uppercase text-amber-200 placeholder-neutral-600 focus:outline-none tracking-wider"
+          />
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-400/10 text-amber-300 border border-amber-400/30">FUZZY_MATCH</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 px-4 py-1.5 bg-[#16181D] border-b border-[#252830] text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+          <div class="col-span-1">ID</div>
+          <div class="col-span-4">TARGET / COMMAND</div>
+          <div class="col-span-2">TYPE</div>
+          <div class="col-span-3">LOCATION / PARAM</div>
+          <div class="col-span-2 text-right">EXEC KEY</div>
+        </div>
+
+        <div class="p-2 max-h-[380px] overflow-y-auto space-y-1 font-mono" id="list-container-C"></div>
+
+        <div class="px-4 py-2.5 bg-[#16181D] border-t border-[#252830] flex items-center justify-between text-xs font-mono text-neutral-400">
+          <div class="flex items-center gap-3">
+            <span class="text-amber-400 font-semibold">[READY]</span>
+            <span id="footer-count-C">10 RECORDS LOADED</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[ENTER]</kbd> RUN</span>
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[^ENTER]</kbd> PRIVILEGED</span>
+            <span class="text-neutral-300"><kbd class="kbd-chip bg-[#22262E] border border-[#303642] text-amber-300">[TAB]</kbd> ACTIONS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOATING ACTION MENU OVERLAY -->
+    <div id="action-menu-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="w-full max-w-sm bg-[#16181E] border border-white/[0.12] rounded-2xl shadow-2xl p-2.5 animate-in fade-in zoom-in-95">
+        <div class="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 font-mono">Available Actions</span>
+          <button onclick="toggleActionMenu()" class="text-neutral-400 hover:text-white text-xs">✕</button>
+        </div>
+        <div class="space-y-1" id="action-menu-items"></div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="demo-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 px-4 py-3 rounded-xl bg-neutral-900 border border-white/[0.15] text-white text-xs font-medium shadow-2xl flex items-center gap-3">
+      <span id="toast-icon" class="text-base">🚀</span>
+      <div>
+        <p id="toast-title" class="font-bold">Action Executed</p>
+        <p id="toast-desc" class="text-neutral-400 text-[11px]">Command dispatched to system</p>
+      </div>
+    </div>
+
+    <!-- COMPARISON SECTION -->
+    <section id="comparison" class="w-full mt-16 pt-8 border-t border-white/[0.08]">
+      <div class="mb-8">
+        <span class="text-xs font-mono font-medium text-blue-400 tracking-wider uppercase">ARCHITECTURAL DESIGN MATRIX</span>
+        <h3 class="text-xl font-bold text-white mt-1">Comparing the 3 Design Archetypes</h3>
+        <p class="text-sm text-neutral-400 mt-1">Review the UX principles, visual identity tokens, and ergonomics of each direction before deciding.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-5 rounded-2xl bg-[#0E1013] border border-blue-500/30 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">DIRECTION A</span>
+              <span class="text-xs font-semibold text-white">Linear & Zed Inspired</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Swiss Precision Stage</h4>
+            <p class="text-xs text-neutral-400 mt-2 leading-relaxed">
+              Eliminates the "black box" launcher pattern. The 60/40 split preview immediately reassures power users by displaying file paths, syntax, timestamps, and quick action chips without entering a submenu.
+            </p>
+          </div>
+          <button onclick="switchDirection('A')" class="mt-6 w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition-colors">
+            Test Direction A Above ↑
+          </button>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#0F1219] border border-emerald-500/30 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">DIRECTION B</span>
+              <span class="text-xs font-semibold text-white">Arc & Spotlight Inspired</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Fluid Ambient Glass</h4>
+            <p class="text-xs text-neutral-400 mt-2 leading-relaxed">
+              Organic, floating translucent island with dynamic category pill switches and a top speed-dial capsule bar. Focuses on effortless elegance, spatial continuity, and smooth micro-animations.
+            </p>
+          </div>
+          <button onclick="switchDirection('B')" class="mt-6 w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors">
+            Test Direction B Above ↑
+          </button>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#131518] border border-amber-500/30 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20">DIRECTION C</span>
+              <span class="text-xs font-semibold text-white">Dieter Rams Inspired</span>
+            </div>
+            <h4 class="text-base font-bold text-white">Nordic Industrial HUD</h4>
+            <p class="text-xs text-neutral-400 mt-2 leading-relaxed">
+              Replaces amorphous soft lists with crisp tabular columns and physical-feeling mechanical keycaps. High contrast, immediate data scanning, and distinct monospace identity.
+            </p>
+          </div>
+          <button onclick="switchDirection('C')" class="mt-6 w-full py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-black font-semibold text-xs transition-colors">
+            Test Direction C Above ↑
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const mockData = [
+      {
+        id: 'vscode',
+        title: 'Visual Studio Code',
+        category: 'app',
+        subtitle: 'C:\\Users\\sujal\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe',
+        icon: '⚡',
+        iconBg: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        version: '1.95.2 (x64)',
+        publisher: 'Microsoft Corporation',
+        lastUsed: '2 minutes ago',
+        actions: ['Open Workspace', 'Run as Administrator', 'Open settings.json', 'Reveal in File Explorer'],
+        meta: 'Editor'
+      },
+      {
+        id: 'terminal',
+        title: 'Windows Terminal',
+        category: 'app',
+        subtitle: 'wt.exe (PowerShell 7, WSL2 Ubuntu)',
+        icon: '⌨',
+        iconBg: 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30',
+        version: '1.20.11781.0',
+        publisher: 'Microsoft Corporation',
+        lastUsed: '10 minutes ago',
+        actions: ['Open Elevated Session', 'Launch WSL Ubuntu', 'Open Settings'],
+        meta: 'Console'
+      },
+      {
+        id: 'figma',
+        title: 'Figma Desktop',
+        category: 'app',
+        subtitle: 'C:\\Users\\sujal\\AppData\\Local\\Figma\\Figma.exe',
+        icon: '🎨',
+        iconBg: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+        version: '124.7.1',
+        publisher: 'Figma Inc.',
+        lastUsed: '1 hour ago',
+        actions: ['Open Workspace', 'New Draft File', 'Clear Local Cache'],
+        meta: 'Design'
+      },
+      {
+        id: 'package_json',
+        title: 'package.json',
+        category: 'file',
+        subtitle: 'c:\\Users\\sujal\\Documents\\Projects\\Runner\\package.json',
+        icon: '📄',
+        iconBg: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+        size: '966 Bytes',
+        modified: 'Today, 1:02 PM',
+        codeSnippet: '{\n  "name": "runner",\n  "version": "0.1.0",\n  "dependencies": {\n    "@tauri-apps/api": "^2.2.0"\n  }\n}',
+        actions: ['Open with VS Code', 'Copy Path', 'Reveal in Explorer'],
+        meta: 'JSON'
+      },
+      {
+        id: 'vite_config',
+        title: 'vite.config.ts',
+        category: 'file',
+        subtitle: 'c:\\Users\\sujal\\Documents\\Projects\\Runner\\vite.config.ts',
+        icon: '⚡',
+        iconBg: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+        size: '1.09 KB',
+        modified: 'Today, 11:42 AM',
+        codeSnippet: 'import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nexport default defineConfig({\n  plugins: [react()]\n});',
+        actions: ['Open in Editor', 'Copy Full Path', 'Git Diff'],
+        meta: 'TypeScript'
+      },
+      {
+        id: 'clip_curl',
+        title: 'curl -X POST https://api.runner.local/v1/search',
+        category: 'clipboard',
+        subtitle: 'Terminal request payload with headers',
+        icon: '📋',
+        iconBg: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+        chars: '68 characters',
+        copied: '14 mins ago',
+        preview: 'curl -X POST https://api.runner.local/v1/search \\\n  -H "Content-Type: application/json" \\\n  -d \'{"query": "calculator"}\'',
+        actions: ['Paste to Frontmost Window', 'Copy to Clipboard', 'Pin Snippet'],
+        meta: 'Clip Text'
+      },
+      {
+        id: 'snip_react',
+        title: 'rfc -> React Functional Component',
+        category: 'snippet',
+        subtitle: 'Keyword: :rfc • Expands to typed boilerplate',
+        icon: '🧩',
+        iconBg: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+        keyword: ':rfc',
+        preview: 'export const Component: React.FC<Props> = ({ children }) => {\n  return (\n    <div className="flex flex-col">\n      {children}\n    </div>\n  );\n};',
+        actions: ['Insert Snippet', 'Edit Template', 'Duplicate'],
+        meta: 'Snippet'
+      },
+      {
+        id: 'sys_settings',
+        title: 'System Preferences & Hotkeys',
+        category: 'app',
+        subtitle: 'Global hotkey: Shift+Alt+Space',
+        icon: '⚙',
+        iconBg: 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30',
+        actions: ['Open Settings', 'Rebind Global Shortcut', 'Rescan Index'],
+        meta: 'System'
+      }
+    ];
+
+    let currentDirection = 'A';
+    let searchQuery = '';
+    let categoryFilter = 'all';
+    let selectedIndex = 0;
+    let isActionMenuOpen = false;
+    let isLightMode = false;
+
+    function switchDirection(dir) {
+      currentDirection = dir;
+      selectedIndex = 0;
+
+      ['A', 'B', 'C'].forEach(d => {
+        const btn = document.getElementById(`btn-tab-${d}`);
+        const palette = document.getElementById(`palette-variant-${d}`);
+        if (d === dir) {
+          btn.className = 'direction-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 bg-blue-600 text-white shadow-sm';
+          palette.classList.remove('hidden');
+        } else {
+          btn.className = 'direction-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 text-neutral-400 hover:text-white hover:bg-white/[0.05]';
+          palette.classList.add('hidden');
+        }
+      });
+
+      const badge = document.getElementById('dir-badge');
+      const title = document.getElementById('dir-title');
+      const desc = document.getElementById('dir-desc');
+
+      if (dir === 'A') {
+        badge.className = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-2';
+        badge.innerHTML = '<span>DIRECTION A: SWISS PRECISION STAGE</span>';
+        title.innerText = 'Linear & Zed Inspired Master-Detail Architecture';
+        desc.innerText = 'Features a high-speed 60/40 split-pane with live file and app preview, keyboard command rails, and zero redundant decor. Click items or use ↑ ↓ arrows!';
+        setTimeout(() => document.getElementById('search-input-A')?.focus(), 50);
+      } else if (dir === 'B') {
+        badge.className = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2';
+        badge.innerHTML = '<span>DIRECTION B: FLUID AMBIENT GLASS</span>';
+        title.innerText = 'Arc & Modern Spotlight Inspired Floating Island';
+        desc.innerText = 'Translucent frosted glass with dynamic category filter pills, quick speed-dial favorites, and soft glowing elevation.';
+        setTimeout(() => document.getElementById('search-input-B')?.focus(), 50);
+      } else if (dir === 'C') {
+        badge.className = 'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-400/10 text-amber-300 border border-amber-400/20 mb-2';
+        badge.innerHTML = '<span>DIRECTION C: NORDIC INDUSTRIAL HUD</span>';
+        title.innerText = 'Dieter Rams & Mechanical Terminal Inspired Tabular HUD';
+        desc.innerText = 'Rigorous tabular grid columns, tactile physical keycaps with pressed depth, industrial warm ochre accents, and telemetry stats.';
+        setTimeout(() => document.getElementById('search-input-C')?.focus(), 50);
+      }
+
+      renderCurrent();
+    }
+
+    function getFilteredItems() {
+      return mockData.filter(item => {
+        const matchesQuery = searchQuery === '' ||
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesCat = categoryFilter === 'all' || item.category === categoryFilter;
+
+        return matchesQuery && matchesCat;
+      });
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      selectedIndex = 0;
+      renderCurrent();
+    }
+
+    function setCategoryFilter(cat) {
+      categoryFilter = cat;
+      selectedIndex = 0;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.className = 'cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all text-neutral-400 hover:text-white';
+      });
+      const activeBtn = document.getElementById(`pill-${cat}`);
+      if (activeBtn) {
+        activeBtn.className = 'cat-pill px-3 py-1 rounded-lg text-xs font-medium transition-all bg-emerald-500 text-black font-semibold shadow-sm';
+      }
+      renderCurrent();
+    }
+
+    function renderCurrent() {
+      const items = getFilteredItems();
+      if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
+
+      if (currentDirection === 'A') renderDirectionA(items);
+      else if (currentDirection === 'B') renderDirectionB(items);
+      else if (currentDirection === 'C') renderDirectionC(items);
+    }
+
+    function renderDirectionA(items) {
+      const listContainer = document.getElementById('list-container-A');
+      const previewContainer = document.getElementById('preview-container-A');
+      const footerCount = document.getElementById('footer-count-A');
+      footerCount.innerText = `${items.length} items found`;
+
+      if (items.length === 0) {
+        listContainer.innerHTML = `<div class="p-8 text-center text-neutral-500 text-xs">No matching results for "${searchQuery}"</div>`;
+        previewContainer.innerHTML = `<div class="p-8 text-center text-neutral-600 text-xs">Select an item to view preview</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = items.map((item, idx) => {
+        const isSelected = idx === selectedIndex;
+        return `
+          <div
+            onclick="selectItem(${idx})"
+            ondblclick="simulateExecute('${item.id}')"
+            class="group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+              isSelected
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'text-neutral-300 hover:bg-white/[0.04]'
+            }"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border text-xs font-medium ${
+                isSelected ? 'bg-white/20 border-white/30 text-white' : item.iconBg
+              }">
+                ${item.icon}
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs font-semibold truncate ${isSelected ? 'text-white' : 'text-neutral-200'}">
+                  ${item.title}
+                </span>
+                <span class="text-[11px] truncate ${isSelected ? 'text-blue-100' : 'text-neutral-400'}">
+                  ${item.subtitle}
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded uppercase ${
+                isSelected ? 'bg-white/20 text-white' : 'bg-white/[0.05] text-neutral-400'
+              }">${item.category}</span>
+              ${isSelected ? '<span class="kbd-chip bg-white/25 text-white text-[10px]">↵</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const active = items[selectedIndex];
+      if (active) {
+        let previewHtml = '';
+        if (active.category === 'file') {
+          previewHtml = `
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-xs font-mono text-neutral-400">
+                <span class="text-amber-400">${active.icon}</span>
+                <span>FILE INSPECTOR</span>
+              </div>
+              <h3 class="text-base font-bold text-white">${active.title}</h3>
+              <p class="text-xs text-neutral-400 font-mono break-all">${active.subtitle}</p>
+              <div class="grid grid-cols-2 gap-2 text-xs py-2 border-y border-white/[0.08] font-mono">
+                <div><span class="text-neutral-500">Size:</span> ${active.size}</div>
+                <div><span class="text-neutral-500">Modified:</span> ${active.modified}</div>
+              </div>
+              <div>
+                <span class="text-[10px] font-mono uppercase text-neutral-400">Preview:</span>
+                <pre class="mt-1 p-2.5 rounded-lg bg-black/60 border border-white/[0.08] text-[11px] font-mono text-blue-200 overflow-x-auto leading-relaxed">${active.codeSnippet}</pre>
+              </div>
+            </div>
+          `;
+        } else if (active.category === 'clipboard') {
+          previewHtml = `
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-xs font-mono text-emerald-400">
+                <span>📋</span>
+                <span>CLIPBOARD ENTRY</span>
+              </div>
+              <h3 class="text-base font-bold text-white truncate">${active.title}</h3>
+              <div class="flex items-center gap-3 text-xs font-mono text-neutral-400 border-b border-white/[0.08] pb-2">
+                <span>${active.chars}</span> • <span>${active.copied}</span>
+              </div>
+              <div>
+                <span class="text-[10px] font-mono uppercase text-neutral-400">Full String Content:</span>
+                <pre class="mt-1 p-2.5 rounded-lg bg-black/60 border border-white/[0.08] text-[11px] font-mono text-emerald-200 overflow-x-auto leading-relaxed whitespace-pre-wrap">${active.preview}</pre>
+              </div>
+            </div>
+          `;
+        } else if (active.category === 'snippet') {
+          previewHtml = `
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-xs font-mono text-cyan-400">
+                <span>🧩</span>
+                <span>CODE EXPANSION SNIPPET</span>
+              </div>
+              <h3 class="text-base font-bold text-white">${active.title}</h3>
+              <div class="text-xs font-mono bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 p-2 rounded-lg">
+                TRIGGER: <strong class="text-white">${active.keyword}</strong>
+              </div>
+              <div>
+                <span class="text-[10px] font-mono uppercase text-neutral-400">Template Body:</span>
+                <pre class="mt-1 p-2.5 rounded-lg bg-black/60 border border-white/[0.08] text-[11px] font-mono text-cyan-100 overflow-x-auto leading-relaxed">${active.preview}</pre>
+              </div>
+            </div>
+          `;
+        } else {
+          previewHtml = `
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-xs font-mono text-blue-400">
+                <span>${active.icon}</span>
+                <span>APPLICATION PROFILE</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-2xl">
+                  ${active.icon}
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-white">${active.title}</h3>
+                  <span class="text-xs text-neutral-400 font-mono">${active.version || 'Version 1.0'}</span>
+                </div>
+              </div>
+              <p class="text-xs text-neutral-400 font-mono break-all bg-black/30 p-2 rounded-lg border border-white/[0.05]">${active.subtitle}</p>
+              <div class="text-xs space-y-1 font-mono text-neutral-400">
+                <div>Publisher: <span class="text-neutral-200">${active.publisher || 'System'}</span></div>
+                <div>Last Run: <span class="text-neutral-200">${active.lastUsed || 'Recent'}</span></div>
+              </div>
+            </div>
+          `;
+        }
+
+        previewContainer.innerHTML = `
+          <div>${previewHtml}</div>
+          <div class="pt-4 border-t border-white/[0.08] mt-4 space-y-1.5">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-neutral-500 block">Actions on this item:</span>
+            <div class="flex flex-wrap gap-1.5">
+              ${active.actions.map(act => `
+                <button onclick="simulateExecute('${active.id}', '${act}')" class="px-2 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-[11px] font-medium text-neutral-200 hover:text-white transition-colors">
+                  ${act}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderDirectionB(items) {
+      const container = document.getElementById('list-container-B');
+      const selectionLabel = document.getElementById('selection-label-B');
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-neutral-400 text-xs">Nothing matches your search</div>`;
+        selectionLabel.innerText = '0 results';
+        return;
+      }
+
+      const active = items[selectedIndex];
+      selectionLabel.innerHTML = `Selected: <strong class="text-white">${active.title}</strong> (${active.category})`;
+
+      container.innerHTML = items.map((item, idx) => {
+        const isSelected = idx === selectedIndex;
+        return `
+          <div
+            onclick="selectItem(${idx})"
+            ondblclick="simulateExecute('${item.id}')"
+            class="flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
+              isSelected
+                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-500/40 text-white shadow-lg shadow-emerald-500/10 scale-[1.01]'
+                : 'text-neutral-300 hover:bg-white/[0.05] border border-transparent'
+            }"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border text-sm ${
+                isSelected ? 'bg-emerald-500 text-black border-emerald-400 font-bold' : item.iconBg
+              }">
+                ${item.icon}
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-semibold truncate ${isSelected ? 'text-white' : 'text-neutral-100'}">
+                  ${item.title}
+                </span>
+                <span class="text-xs truncate text-neutral-400">
+                  ${item.subtitle}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/[0.06] text-neutral-300 capitalize">
+                ${item.category}
+              </span>
+              ${isSelected ? `
+                <span class="kbd-chip bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-[10px]">↵ Open</span>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDirectionC(items) {
+      const container = document.getElementById('list-container-C');
+      const footerCount = document.getElementById('footer-count-C');
+      footerCount.innerText = `${items.length} RECORDS INDEXED`;
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-amber-500/70 font-mono text-xs">QUERY YIELDED 0 HITS</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map((item, idx) => {
+        const isSelected = idx === selectedIndex;
+        const idStr = String(idx + 1).padStart(2, '0');
+        return `
+          <div
+            onclick="selectItem(${idx})"
+            ondblclick="simulateExecute('${item.id}')"
+            class="grid grid-cols-12 items-center px-3 py-2 rounded cursor-pointer transition-colors ${
+              isSelected
+                ? 'bg-amber-400 text-black font-semibold shadow-md'
+                : 'text-neutral-300 hover:bg-[#1D2026]'
+            }"
+          >
+            <div class="col-span-1 font-mono text-xs ${isSelected ? 'text-black' : 'text-neutral-500'}">
+              ${idStr}
+            </div>
+            <div class="col-span-4 flex items-center gap-2 truncate">
+              <span class="${isSelected ? 'text-black' : 'text-amber-400'}">${item.icon}</span>
+              <span class="truncate text-xs ${isSelected ? 'text-black font-bold' : 'text-white'}">
+                ${item.title}
+              </span>
+            </div>
+            <div class="col-span-2 text-[10px] uppercase tracking-wider ${isSelected ? 'text-neutral-900' : 'text-neutral-400'}">
+              [${item.category}]
+            </div>
+            <div class="col-span-3 truncate text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-400'}">
+              ${item.subtitle}
+            </div>
+            <div class="col-span-2 text-right">
+              <span class="kbd-chip ${
+                isSelected
+                  ? 'bg-black text-amber-400 border border-black'
+                  : 'bg-[#22262E] text-neutral-300 border border-[#303642]'
+              }">↵ EXEC</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectItem(idx) {
+      selectedIndex = idx;
+      renderCurrent();
+    }
+
+    function simulateExecute(itemId, actionLabel = 'Launch') {
+      const item = mockData.find(i => i.id === itemId);
+      if (!item) return;
+      showToast(`⚡ ${actionLabel}: ${item.title}`, `Dispatched successfully to Windows Shell.`);
+    }
+
+    function triggerSelectedPrimary() {
+      const items = getFilteredItems();
+      const current = items[selectedIndex];
+      if (current) simulateExecute(current.id, 'Open');
+    }
+
+    function toggleActionMenu() {
+      isActionMenuOpen = !isActionMenuOpen;
+      const modal = document.getElementById('action-menu-modal');
+      const menuContainer = document.getElementById('action-menu-items');
+
+      if (isActionMenuOpen) {
+        const items = getFilteredItems();
+        const active = items[selectedIndex] || mockData[0];
+        menuContainer.innerHTML = active.actions.map(act => `
+          <button onclick="simulateExecute('${active.id}', '${act}'); toggleActionMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs font-medium text-neutral-200 hover:bg-blue-600 hover:text-white flex items-center justify-between transition-colors">
+            <span>${act}</span>
+            <span class="kbd-chip bg-white/10 text-neutral-300 text-[10px]">↵</span>
+          </button>
+        `).join('');
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function showToast(title, desc) {
+      const toast = document.getElementById('demo-toast');
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-desc').innerText = desc;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function toggleTheme() {
+      isLightMode = !isLightMode;
+      const body = document.body;
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+
+      if (isLightMode) {
+        body.classList.remove('bg-[#090A0C]', 'text-[#E4E4E7]');
+        body.classList.add('bg-[#F4F5F7]', 'text-[#18181B]', 'light');
+        icon.innerText = '☀️';
+        label.innerText = 'Light Clean';
+      } else {
+        body.classList.add('bg-[#090A0C]', 'text-[#E4E4E7]');
+        body.classList.remove('bg-[#F4F5F7]', 'text-[#18181B]', 'light');
+        icon.innerText = '🌙';
+        label.innerText = 'Dark Glass';
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (isActionMenuOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          toggleActionMenu();
+        }
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        toggleActionMenu();
+        return;
+      }
+
+      if (['1', '2', '3'].includes(e.key) && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        if (e.key === '1') switchDirection('A');
+        if (e.key === '2') switchDirection('B');
+        if (e.key === '3') switchDirection('C');
+        return;
+      }
+
+      const items = getFilteredItems();
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        renderCurrent();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        renderCurrent();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        triggerSelectedPrimary();
+      }
+    });
+
+    switchDirection('A');
+  </script>
+</body>
+</html>

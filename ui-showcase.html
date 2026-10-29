@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runner — Direction C: Nordic Minimal HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-mono: 'Geist Mono', Consolas, monospace;
+      --font-hud: 'Space Grotesk', sans-serif;
+
+      /* Dynamic Windows Accent Color */
+      --sys-accent: #0078D4; /* Windows Cobalt Default */
+      --sys-accent-hover: #1A90F0;
+      --sys-accent-muted: rgba(0, 120, 212, 0.18);
+      --sys-accent-subtle: rgba(0, 120, 212, 0.08);
+      --sys-accent-border: rgba(0, 120, 212, 0.45);
+      --sys-accent-glow: rgba(0, 120, 212, 0.35);
+
+      /* Authentic Direction C Industrial Slate Canvas */
+      --hud-bg-base: #0E1015;
+      --hud-bg-sub: #14161C;
+      --hud-bg-panel: #111318;
+      --hud-bg-card: #161820;
+      --hud-border-outer: #262A36;
+      --hud-border-grid: #1D202A;
+      --hud-border-hairline: #161822;
+
+      --text-main: #EAEAEF;
+      --text-muted: #868A98;
+      --text-dim: #505462;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background-color: #07080A;
+      color: var(--text-main);
+    }
+    .font-hud { font-family: var(--font-hud); }
+    .font-mono { font-family: var(--font-mono); }
+
+    /* Industrial scrollbar */
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #262A36; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sys-accent); }
+
+    /* Direction C Tactile Mechanical Keycaps */
+    .hud-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 18px;
+      padding: 0 5px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: #1A1D24;
+      color: #C8CBD6;
+      border: 1px solid #2F3442;
+      border-bottom: 2px solid #0B0D10;
+      border-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      user-select: none;
+      transition: transform 0.05s ease, border-bottom-width 0.05s ease;
+    }
+    .hud-key:active {
+      transform: translateY(1px);
+      border-bottom-width: 1px;
+      background: #14161B;
+    }
+
+    /* Industrial Control Button */
+    .hud-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #14161C;
+      color: #868A98;
+      border: 1px solid #262A36;
+      border-radius: 2px;
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .hud-btn:hover {
+      background: #1C1F28;
+      color: #FFFFFF;
+      border-color: #353B4A;
+    }
+    .hud-btn.active {
+      background: var(--sys-accent);
+      color: #000000;
+      border-color: var(--sys-accent);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 selection:bg-blue-500/30 selection:text-white">
+
+  <!-- TOP PROTOTYPE CONTROL BAR -->
+  <header class="w-full max-w-[760px] mb-3 flex flex-wrap items-center justify-between gap-2 p-2 rounded bg-[#111317] border border-[#222530] text-xs font-mono">
+    <div class="flex items-center gap-2">
+      <div class="w-5 h-5 rounded-xs bg-[var(--sys-accent)] flex items-center justify-center font-black text-black text-[10px]">
+        R
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-white tracking-wider font-hud text-xs">RUNNER // NORDIC MINIMAL HUD</span>
+        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-400/10 text-amber-300 border border-amber-400/30">COMPACT 760PX</span>
+      </div>
+    </div>
+
+    <!-- Live Windows Accent Color Swatches -->
+    <div class="flex items-center gap-1.5 bg-[#15171D] px-2 py-1 rounded border border-[#242732]">
+      <span class="text-neutral-400 text-[10px]">ACCENT:</span>
+      <button onclick="setWindowsAccent('#0078D4', 'Cobalt')" title="Windows Cobalt" class="w-3 h-3 rounded-xs bg-[#0078D4] border border-white/40 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#FF8C00', 'Amber')" title="Windows Amber" class="w-3 h-3 rounded-xs bg-[#FF8C00] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#00B7C3', 'Mint')" title="Windows Mint" class="w-3 h-3 rounded-xs bg-[#00B7C3] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#E74856', 'Crimson')" title="Windows Crimson" class="w-3 h-3 rounded-xs bg-[#E74856] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#8764B8', 'Iris')" title="Windows Iris" class="w-3 h-3 rounded-xs bg-[#8764B8] border border-white/20 hover:scale-125 transition-transform"></button>
+      <button onclick="setWindowsAccent('#107C41', 'Xbox Green')" title="Xbox Green" class="w-3 h-3 rounded-xs bg-[#107C41] border border-white/20 hover:scale-125 transition-transform"></button>
+      <span id="current-accent-name" class="text-white text-[10px] font-bold pl-1">Cobalt</span>
+    </div>
+
+    <!-- Preview Toggle -->
+    <button onclick="togglePreviewPane()" id="btn-toggle-preview" class="hud-btn" title="Toggle 60/40 Split Preview Pane">
+      <span>PREVIEW:</span>
+      <span id="preview-state-label" class="text-[var(--sys-accent)] font-bold">ON</span>
+    </button>
+  </header>
+
+  <!-- =================================================================== -->
+  <!-- DIRECTION C NORDIC MINIMAL HUD WINDOW (PROPORTIONAL 760PX SHELL)    -->
+  <!-- =================================================================== -->
+  <div class="w-full max-w-[760px] bg-[#0E1015] border-2 border-[#262A36] rounded-md shadow-2xl overflow-hidden flex flex-col font-mono select-none ring-1 ring-[#161822] relative">
+
+    <!-- 1. STREAMLINED MINIMAL TELEMETRY HEADER -->
+    <div class="px-3.5 py-1.5 bg-[#14161C] border-b border-[#1E212A] flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2 h-2 bg-[var(--sys-accent)] rounded-xs inline-block"></span>
+        <span class="text-white font-bold tracking-wider font-hud text-xs">RUNNER // SYS_COMMAND_HUD</span>
+        <span class="text-neutral-600">•</span>
+        <span class="text-neutral-400 text-[10.5px]">842 TARGETS</span>
+      </div>
+
+      <div class="flex items-center gap-3 text-[10.5px] text-neutral-400">
+        <span>STATUS: <strong class="text-emerald-400 font-semibold">[READY]</strong></span>
+        <span>ACCENT: <strong class="text-[var(--sys-accent)] font-semibold" id="hud-accent-tag">#0078D4</strong></span>
+        <!-- Minimal Dismiss Buttons -->
+        <div class="pl-2 border-l border-[#262A36] flex items-center gap-1">
+          <button onclick="simulateToast('RUNNER MINIMIZED')" class="px-1 py-0.2 rounded-xs text-neutral-500 hover:text-white hover:bg-[#20232D] text-[9.5px]" title="Hide to Tray (Esc)">[—]</button>
+          <button onclick="simulateToast('RUNNER CLOSED')" class="px-1 py-0.2 rounded-xs text-neutral-500 hover:text-red-400 hover:bg-[#20232D] text-[9.5px]" title="Dismiss">[✕]</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MINIMAL COMMAND PROMPT BAR WITH 4-MODE SWITCHER (LIST, HYBRID, GRID, CATEGORY) -->
+    <div class="flex items-center h-11 px-3.5 border-b border-[#1E212A] bg-[#0E1015] gap-2.5">
+      <span class="text-[var(--sys-accent)] font-bold text-sm select-none">></span>
+      <input
+        id="hud-input"
+        type="text"
+        placeholder="EXECUTE QUERY, ALIAS (wh, vs, yt, psh), OR TYPE '/'..."
+        oninput="handleInput(this.value)"
+        class="flex-1 bg-transparent font-mono text-xs uppercase text-white placeholder-neutral-600 focus:outline-none tracking-wider font-medium"
+        spellcheck="false"
+        autocomplete="off"
+      />
+
+      <!-- Ergonomic 4-Mode Layout Switcher -->
+      <div class="flex items-center gap-0.5 bg-[#14161C] p-0.5 rounded-xs border border-[#222530]">
+        <button onclick="setLayout('list')" id="layout-btn-list" class="px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all text-neutral-400 hover:text-white">
+          LIST
+        </button>
+        <button onclick="setLayout('hybrid')" id="layout-btn-hybrid" class="px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all bg-[var(--sys-accent)] text-black">
+          HYBRID
+        </button>
+        <button onclick="setLayout('grid')" id="layout-btn-grid" class="px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all text-neutral-400 hover:text-white">
+          GRID
+        </button>
+        <button onclick="setLayout('category')" id="layout-btn-category" class="px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all text-neutral-400 hover:text-white">
+          CATEGORY
+        </button>
+      </div>
+
+      <span class="text-[9.5px] px-1 py-0.5 rounded bg-[#161820] border border-[#262A36] text-neutral-500">ESC</span>
+    </div>
+
+    <!-- 3. MAIN HUD STAGE (COMPACT HEIGHT ~380PX) -->
+    <div id="hud-main-stage" class="grid grid-cols-12 h-[380px] divide-x border-[#1E212A] bg-[#0E1015] relative">
+
+      <!-- ================================================================= -->
+      <!-- LEFT STAGE (LIST / HYBRID / GRID / CATEGORY)                      -->
+      <!-- ================================================================= -->
+      <div id="hud-left-stage" class="col-span-7 flex flex-col overflow-hidden transition-all duration-150">
+        <!-- Scrollable Stage Results -->
+        <div class="flex-1 overflow-y-auto p-2" id="stage-content-container">
+          <!-- Dynamically populated according to active layout mode -->
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- RIGHT STAGE: CONTEXT TELEMETRY INSPECTOR                          -->
+      <!-- ================================================================= -->
+      <div id="hud-right-pane" class="col-span-5 flex flex-col bg-[#111318] p-3.5 justify-between overflow-y-auto">
+        <!-- Live item telemetry -->
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- FLOATING BOTTOM-RIGHT ACTION MENU POP-UP (ANCHORED ABOVE TAB PILL) -->
+      <!-- ================================================================= -->
+      <div id="bottom-right-action-popup" class="hidden absolute bottom-1 right-2 w-64 bg-[#14161C] border-2 border-[#2F3442] rounded shadow-2xl z-50 flex flex-col font-mono text-xs overflow-hidden ring-1 ring-black">
+        <div class="px-3 py-1.5 bg-[#101217] border-b border-[#222530] flex items-center justify-between text-[10px]">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="w-1.5 h-1.5 bg-[var(--sys-accent)] inline-block"></span>
+            <span class="font-bold text-white tracking-wider truncate" id="popup-action-title">// ACTIONS</span>
+          </div>
+          <button onclick="closeActionPopup()" class="text-neutral-500 hover:text-white font-mono text-[9px]">[ESC]</button>
+        </div>
+
+        <div class="p-1 space-y-0.5 max-h-56 overflow-y-auto" id="popup-action-items">
+          <!-- Populated dynamically with actions -->
+        </div>
+
+        <div class="px-3 py-1 bg-[#101217] border-t border-[#1E212A] text-[9px] text-neutral-500 flex items-center justify-between">
+          <span>NAV: <kbd class="hud-key text-[8px]">[↑]</kbd> <kbd class="hud-key text-[8px]">[↓]</kbd></span>
+          <span class="text-[var(--sys-accent)] font-bold">↵ EXECUTE</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4. MECHANICAL DOCK FOOTER -->
+    <div class="px-3.5 py-2 bg-[#121419] border-t border-[#1E212A] flex items-center justify-between text-xs font-mono text-neutral-400 select-none relative z-10">
+      <div class="flex items-center gap-2 truncate">
+        <span class="text-[var(--sys-accent)] font-bold text-[11px]">[ONLINE]</span>
+        <span id="footer-item-label" class="text-neutral-200 truncate max-w-[240px] text-xs font-medium">WhatsApp</span>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <span class="flex items-center gap-1 cursor-pointer hover:text-white text-[11px]" onclick="triggerPrimary()">
+          <kbd class="hud-key">[ENTER]</kbd>
+          <span class="text-neutral-300">EXEC</span>
+        </span>
+        <span class="flex items-center gap-1 cursor-pointer hover:text-white text-[11px]" onclick="triggerAdmin()">
+          <kbd class="hud-key">[^ENTER]</kbd>
+          <span>ADMIN</span>
+        </span>
+        <span class="flex items-center gap-1 cursor-pointer text-[var(--sys-accent)] font-bold text-[11px]" onclick="toggleActionPopup()">
+          <kbd class="hud-key bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold">[TAB]</kbd>
+          <span id="footer-tab-status">ACTIONS</span>
+        </span>
+        <span class="flex items-center">
+          <kbd class="hud-key">[ESC]</kbd>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="hud-toast" class="fixed bottom-5 right-5 z-50 transform translate-y-16 opacity-0 transition-all duration-150 px-3.5 py-2 rounded-xs bg-[#161820] border border-[var(--sys-accent-border)] text-white text-xs font-mono shadow-2xl flex items-center gap-2.5">
+    <span class="text-[var(--sys-accent)] font-bold">></span>
+    <span id="hud-toast-text">DISPATCHED</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // AUTHENTIC VECTOR SVG APP ICONS (NO EMOJIS!)
+    const icons = {
+      whatsapp: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#25D366"/><path d="M17.5 14.4c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1-.2.2-.6.7-.8.9-.1.1-.3.2-.5.1-.2-.1-.9-.3-1.8-1.1-.7-.6-1.1-1.3-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.2.3-.4.1-.1.1-.2.2-.3 0-.1 0-.2 0-.3s-.5-1.2-.7-1.6c-.2-.4-.4-.3-.5-.3h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.7.1.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.2.1-1.3-.1-.1-.3-.2-.5-.3z" fill="white"/></svg>`,
+      vscode: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><path d="M17.5 2.5L7.8 11.2l-4-3.1L2 9.2l3.4 2.8L2 14.8l1.8 1.1 4-3.1 9.7 8.7 4.5-2.2V4.7l-4.5-2.2zm0 4.6v9.8L10.3 12 17.5 7.1z" fill="#007ACC"/></svg>`,
+      terminal: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#1E1E1E"/><path d="M5 7l5 5-5 5M12 17h7" stroke="#4EC9B0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      youtube: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><path d="M23.5 6.2c-.3-1-.9-1.8-1.9-2-1.7-.5-8.6-.5-8.6-.5s-6.9 0-8.6.5c-1 .2-1.6 1-1.9 2C2 7.9 2 12 2 12s0 4.1.5 5.8c.3 1 .9 1.8 1.9 2 1.7.5 8.6.5 8.6.5s6.9 0 8.6-.5c1-.2 1.6-1 1.9-2 .5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8z" fill="#FF0000"/><polygon points="9.5,8.5 15.5,12 9.5,15.5" fill="white"/></svg>`,
+      shutdown: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><path d="M12 3v9M18.4 6.6a9 9 0 1 1-12.8 0" stroke="#EF4444" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      antigravity: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1E293B"/><path d="M12 4l3 7h-6l3-7zm0 16l-3-7h6l-3 7z" fill="#38BDF8"/><circle cx="12" cy="12" r="2.5" fill="#F59E0B"/></svg>`,
+      unigetui: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#3B82F6"/><path d="M7 8l5-3 5 3v8l-5 3-5-3V8z" stroke="white" stroke-width="1.8" fill="none"/><path d="M12 5v14M7 8l10 6M17 8L7 14" stroke="white" stroke-width="1.5"/></svg>`,
+      matlab: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 5-9 8-9s3 12 6 12 4-5 4-5" stroke="#ED5C2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      teams: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#5059C9"/><circle cx="15.5" cy="8.5" r="2.5" fill="white"/><path d="M13 13h5a3 3 0 0 1 3 3v2h-8v-5z" fill="white"/><rect x="3" y="7" width="9" height="11" rx="2" fill="#7B83EB"/><text x="5.5" y="15.5" fill="white" font-weight="bold" font-size="9" font-family="sans-serif">T</text></svg>`,
+      android_studio: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#3DDC84"/><circle cx="8.5" cy="9.5" r="1.5" fill="#073042"/><circle cx="15.5" cy="9.5" r="1.5" fill="#073042"/><path d="M6 14h12M9 5l-2-2M15 5l2-2" stroke="#073042" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+      steam: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#171A21"/><path d="M12 3a9 9 0 0 0-8.9 7.7l4.7 1.9a3.2 3.2 0 0 1 3.5-.6l3.2-4.6A4.5 4.5 0 0 1 12 3zm4.5 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="#66C0F4"/></svg>`,
+      detroit: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#00B4D8" stroke-width="2.5" fill="#0B132B"/><path d="M8 8l8 8M16 8l-8 8" stroke="#00B4D8" stroke-width="2" stroke-linecap="round"/></svg>`,
+      clip_history: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#A78BFA" stroke-width="2"/><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z" fill="#A78BFA"/><path d="M8 10h8M8 14h5" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+      emoji_symbols: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#FBBF24" stroke-width="2"/><circle cx="9" cy="10" r="1.2" fill="#FBBF24"/><circle cx="15" cy="10" r="1.2" fill="#FBBF24"/><path d="M8 14.5s1.5 2.5 4 2.5 4-2.5 4-2.5" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/></svg>`,
+      calculator: `<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#60A5FA" stroke-width="2"/><rect x="7" y="6" width="10" height="3" fill="#60A5FA" fill-opacity="0.3"/><circle cx="8" cy="13" r="1" fill="#60A5FA"/><circle cx="12" cy="13" r="1" fill="#60A5FA"/><circle cx="16" cy="13" r="1" fill="#60A5FA"/><circle cx="8" cy="17" r="1" fill="#60A5FA"/><circle cx="12" cy="17" r="1" fill="#60A5FA"/><circle cx="16" cy="17" r="1" fill="#60A5FA"/></svg>`
+    };
+
+    // DATASET
+    const dataset = [
+      // FAVORITES (PINNED)
+      {
+        id: 'whatsapp',
+        title: 'WhatsApp',
+        category: 'favorites',
+        cluster: 'comms',
+        type: 'APP',
+        source: 'UWP_MSIX',
+        alias: 'wh',
+        param: 'WhatsApp_2.24...\\WhatsApp.exe',
+        iconKey: 'whatsapp',
+        publisher: 'Meta Platforms, Inc.',
+        version: '2.2443.4.0 (x64)',
+        runtime: 'WindowsAppSDK / XAML',
+        actions: ['OPEN APPLICATION', 'RUN PRIVILEGED (ADMIN)', 'REVEAL IN EXPLORER', 'UNPIN FROM FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'vscode',
+        title: 'Visual Studio Code',
+        category: 'favorites',
+        cluster: 'dev',
+        type: 'APP',
+        source: 'LOCAL_EXE',
+        alias: 'vs',
+        param: 'Programs\\VS Code\\Code.exe',
+        iconKey: 'vscode',
+        publisher: 'Microsoft Corporation',
+        version: '1.95.2 (x64)',
+        runtime: 'Electron v32 / V8',
+        actions: ['OPEN APPLICATION', 'RUN AS ADMINISTRATOR', 'OPEN SETTINGS.JSON', 'REVEAL IN EXPLORER', 'UNPIN FROM FAVORITES', 'COPY TARGET PATH']
+      },
+      {
+        id: 'youtube',
+        title: 'YouTube',
+        category: 'favorites',
+        cluster: 'media',
+        type: 'APP',
+        source: 'PWA_HOST',
+        alias: 'yt',
+        param: 'chrome_proxy.exe --app-id=agim...',
+        iconKey: 'youtube',
+        publisher: 'Google LLC',
+        version: 'Progressive Web App',
+        runtime: 'Chromium Evergreen',
+        actions: ['LAUNCH PWA', 'OPEN IN DEFAULT BROWSER', 'UNPIN FROM FAVORITES']
+      },
+      {
+        id: 'terminal',
+        title: 'Windows Terminal',
+        category: 'favorites',
+        cluster: 'dev',
+        type: 'APP',
+        source: 'WIN32_EXE',
+        alias: 'psh',
+        param: 'wt.exe (PowerShell 7.4, WSL2)',
+        iconKey: 'terminal',
+        publisher: 'Microsoft Corporation',
+        version: '1.20.11781.0',
+        runtime: 'ConPTY / Win32 Host',
+        actions: ['LAUNCH TERMINAL', 'OPEN ELEVATED (ADMIN)', 'LAUNCH WSL UBUNTU', 'UNPIN FROM FAVORITES']
+      },
+
+      // SUGGESTIONS
+      {
+        id: 'shutdown',
+        title: 'Shut Down',
+        category: 'suggestions',
+        cluster: 'core',
+        type: 'COMMAND',
+        source: 'SYS_API',
+        alias: '',
+        param: 'ntdll!NtShutdownSystem',
+        iconKey: 'shutdown',
+        publisher: 'Windows NT Kernel',
+        version: 'NTOSKRNL 10.0.26100',
+        runtime: 'Kernel Dispatch',
+        actions: ['EXECUTE SHUT DOWN', 'RESTART WORKSTATION', 'SLEEP SUSPEND', 'LOCK USER SESSION']
+      },
+      {
+        id: 'antigravity',
+        title: 'Antigravity IDE',
+        category: 'suggestions',
+        cluster: 'dev',
+        type: 'APP',
+        source: 'LOCAL_EXE',
+        alias: '',
+        param: 'Antigravity\\Antigravity.exe',
+        iconKey: 'antigravity',
+        publisher: 'Google DeepMind',
+        version: '2.0.0-PROD',
+        runtime: 'Rust Core + WebView2',
+        actions: ['OPEN APPLICATION', 'RUN PRIVILEGED (ADMIN)', 'PIN TO FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'unigetui',
+        title: 'UniGetUI',
+        category: 'suggestions',
+        cluster: 'core',
+        type: 'APP',
+        source: 'WINGET',
+        alias: '',
+        param: 'UniGetUI.exe (Winget / Scoop)',
+        iconKey: 'unigetui',
+        publisher: 'Marti Climent',
+        version: '3.1.2 (WinUI 3)',
+        runtime: '.NET 8 / C# Desktop',
+        actions: ['OPEN UNIGETUI', 'CHECK PACKAGE UPDATES', 'PIN TO FAVORITES']
+      },
+
+      // APPLICATIONS
+      {
+        id: 'matlab',
+        title: 'MATLAB R2026a',
+        category: 'applications',
+        cluster: 'dev',
+        type: 'APP',
+        source: 'MATHWORKS',
+        alias: '',
+        param: 'MATLAB\\R2026a\\bin\\matlab.exe',
+        iconKey: 'matlab',
+        publisher: 'The MathWorks, Inc.',
+        version: 'R2026a (64-bit)',
+        runtime: 'Native C++ / JVM 21',
+        actions: ['LAUNCH MATLAB', 'LAUNCH WITHOUT DESKTOP', 'PIN TO FAVORITES', 'COPY FULL PATH']
+      },
+      {
+        id: 'teams',
+        title: 'Microsoft Teams',
+        category: 'applications',
+        cluster: 'comms',
+        type: 'APP',
+        source: 'MS_TEAMS',
+        alias: 'te',
+        param: 'ms-teams.exe',
+        iconKey: 'teams',
+        publisher: 'Microsoft Corporation',
+        version: '24295.1000.3200',
+        runtime: 'WebView2 / React 18',
+        actions: ['OPEN TEAMS', 'STATUS: AVAILABLE', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'android_studio',
+        title: 'Android Studio',
+        category: 'applications',
+        cluster: 'dev',
+        type: 'APP',
+        source: 'JETBRAINS',
+        alias: '',
+        param: 'bin\\studio64.exe',
+        iconKey: 'android_studio',
+        publisher: 'Google LLC',
+        version: 'Koala 2024.1.1',
+        runtime: 'IntelliJ Platform',
+        actions: ['OPEN IDE', 'LAUNCH AVD EMULATOR', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'calculator',
+        title: 'Calculator',
+        category: 'applications',
+        cluster: 'core',
+        type: 'APP',
+        source: 'WIN32_UWP',
+        alias: 'calc',
+        param: 'calc.exe',
+        iconKey: 'calculator',
+        publisher: 'Microsoft Corporation',
+        version: '11.2405.8.0',
+        runtime: 'WinUI 3 Native',
+        actions: ['OPEN CALCULATOR', 'PIN TO FAVORITES']
+      },
+
+      // GAMES
+      {
+        id: 'steam',
+        title: 'Steam Client',
+        category: 'games',
+        cluster: 'games',
+        type: 'APP',
+        source: 'VALVE',
+        alias: 'stm',
+        param: 'Steam\\steam.exe',
+        iconKey: 'steam',
+        publisher: 'Valve Corporation',
+        version: 'Steam Client v1715',
+        runtime: 'Chromium Embedded Framework',
+        actions: ['LAUNCH STEAM', 'CHECK DOWNLOADS', 'GO OFFLINE', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'detroit',
+        title: 'Detroit: Become Human',
+        category: 'games',
+        cluster: 'games',
+        type: 'GAME',
+        source: 'EPIC_GAMES',
+        alias: '',
+        param: 'Detroit\\Detroit.exe -Vulkan',
+        iconKey: 'detroit',
+        publisher: 'Quantic Dream',
+        version: 'DirectX 12 / Vulkan 1.3',
+        runtime: 'Native 64-bit Binary',
+        actions: ['LAUNCH GAME', 'VERIFY LOCAL CLOUD SYNC', 'PIN TO FAVORITES']
+      },
+
+      // COMMANDS
+      {
+        id: 'clip_history',
+        title: 'Clipboard History',
+        category: 'commands',
+        cluster: 'core',
+        type: 'COMMAND',
+        source: 'SUBSYSTEM',
+        alias: 'cli',
+        param: 'ipc:run_subsystem(clipboard)',
+        iconKey: 'clip_history',
+        publisher: 'Runner Core Subsystem',
+        version: 'SQLite v3.45',
+        runtime: 'Rust In-Memory Cache',
+        actions: ['DISPATCH CLIPBOARD VIEW', 'PURGE CLIPBOARD BUFFER', 'PIN TO FAVORITES']
+      },
+      {
+        id: 'emoji_symbols',
+        title: 'Search Emoji & Symbols',
+        category: 'commands',
+        cluster: 'core',
+        type: 'COMMAND',
+        source: 'SUBSYSTEM',
+        alias: 'emj',
+        param: 'ipc:run_subsystem(emojis)',
+        iconKey: 'emoji_symbols',
+        publisher: 'Unicode 15.1 Store',
+        version: '3,782 Symbols Loaded',
+        runtime: 'Local Trie Index',
+        actions: ['OPEN EMOJI PICKER', 'PIN TO FAVORITES']
+      }
+    ];
+
+    // CATEGORY CLUSTERS
+    const categoryClusters = [
+      { id: 'dev', name: 'DEV SYSTEMS', code: '01', desc: 'IDEs, Consoles & Compilers' },
+      { id: 'comms', name: 'COMMUNICATION', code: '02', desc: 'Messaging & Enterprise Chat' },
+      { id: 'media', name: 'MEDIA STREAM', code: '03', desc: 'Progressive Web Apps & Audio' },
+      { id: 'core', name: 'CORE OS & TOOLS', code: '04', desc: 'Kernel, Clipboard & Utilities' },
+      { id: 'games', name: 'SIMULATION & GAMES', code: '05', desc: 'Native Binaries & Steam Engine' }
+    ];
+
+    // APPLICATION STATE
+    let currentLayout = 'hybrid';    // 'list' | 'hybrid' | 'grid' | 'category'
+    let isPreviewOn = true;          // true = 60/40 Split; false = 100% full width
+    let isActionPopupOpen = false;   // Floating bottom-right action popup
+    let filterQuery = '';
+    let selectedIndex = 0;
+    let selectedActionIndex = 0;
+    let categoryFilter = null;
+
+    // 1. WINDOWS ACCENT COLOR BINDING
+    function setWindowsAccent(hex, name) {
+      document.documentElement.style.setProperty('--sys-accent', hex);
+      document.documentElement.style.setProperty('--sys-accent-hover', lighten(hex, 25));
+      document.documentElement.style.setProperty('--sys-accent-muted', hexToRgba(hex, 0.18));
+      document.documentElement.style.setProperty('--sys-accent-subtle', hexToRgba(hex, 0.08));
+      document.documentElement.style.setProperty('--sys-accent-border', hexToRgba(hex, 0.45));
+      document.documentElement.style.setProperty('--sys-accent-glow', hexToRgba(hex, 0.35));
+
+      document.getElementById('current-accent-name').innerText = name;
+      document.getElementById('hud-accent-tag').innerText = hex;
+      simulateToast(`ACCENT: ${name.toUpperCase()} [${hex}]`);
+      render();
+    }
+
+    function hexToRgba(hex, alpha) {
+      let c = hex.substring(1);
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+
+    function lighten(hex, amt) {
+      const num = parseInt(hex.replace('#',''), 16);
+      const r = Math.min(255, (num >> 16) + amt);
+      const b = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+      const g = Math.min(255, (num & 0x0000FF) + amt);
+      return '#' + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+    }
+
+    // 2. LAYOUT SWITCHER
+    function setLayout(mode) {
+      currentLayout = mode;
+      selectedIndex = 0;
+      categoryFilter = null;
+      isActionPopupOpen = false;
+      closeActionPopup();
+
+      ['list', 'hybrid', 'grid', 'category'].forEach(m => {
+        const btn = document.getElementById(`layout-btn-${m}`);
+        if (m === mode) {
+          btn.className = "px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all bg-[var(--sys-accent)] text-black";
+        } else {
+          btn.className = "px-1.5 py-0.5 rounded-xs text-[9.5px] font-bold transition-all text-neutral-400 hover:text-white";
+        }
+      });
+
+      simulateToast(`VIEW: ${mode.toUpperCase()}`);
+      render();
+    }
+
+    // 3. PREVIEW PANE TOGGLE
+    function togglePreviewPane() {
+      isPreviewOn = !isPreviewOn;
+      isActionPopupOpen = false;
+      closeActionPopup();
+
+      const leftStage = document.getElementById('hud-left-stage');
+      const rightPane = document.getElementById('hud-right-pane');
+      const stateLabel = document.getElementById('preview-state-label');
+      const mainStage = document.getElementById('hud-main-stage');
+
+      if (isPreviewOn) {
+        stateLabel.innerText = "ON";
+        stateLabel.className = "text-[var(--sys-accent)] font-bold";
+        leftStage.className = "col-span-7 flex flex-col overflow-hidden transition-all duration-150";
+        rightPane.classList.remove('hidden');
+        mainStage.className = "grid grid-cols-12 h-[380px] divide-x border-[#1E212A] bg-[#0E1015] relative";
+      } else {
+        stateLabel.innerText = "OFF";
+        stateLabel.className = "text-neutral-500 font-bold";
+        leftStage.className = "col-span-12 flex flex-col overflow-hidden transition-all duration-150";
+        rightPane.classList.add('hidden');
+        mainStage.className = "grid grid-cols-12 h-[380px] border-[#1E212A] bg-[#0E1015] relative";
+      }
+
+      simulateToast(`PREVIEW: ${isPreviewOn ? 'ON (60/40)' : 'OFF (FULL)'}`);
+      render();
+    }
+
+    // 4. FLOATING BOTTOM-RIGHT ACTION MENU POP-UP
+    function toggleActionPopup() {
+      isActionPopupOpen = !isActionPopupOpen;
+      const popup = document.getElementById('bottom-right-action-popup');
+      if (isActionPopupOpen) {
+        selectedActionIndex = 0;
+        updateActionPopup();
+        popup.classList.remove('hidden');
+      } else {
+        popup.classList.add('hidden');
+      }
+    }
+
+    function closeActionPopup() {
+      isActionPopupOpen = false;
+      const popup = document.getElementById('bottom-right-action-popup');
+      if (popup) popup.classList.add('hidden');
+    }
+
+    function updateActionPopup() {
+      const active = getActiveItem();
+      if (!active) return;
+
+      document.getElementById('popup-action-title').innerText = `// ACTIONS: ${active.title.toUpperCase()}`;
+      const container = document.getElementById('popup-action-items');
+
+      container.innerHTML = active.actions.map((act, idx) => {
+        const isActSel = idx === selectedActionIndex;
+        const keyNum = `0${idx + 1}`;
+        return `
+          <div
+            onclick="dispatchAction('${active.id}', '${act}')"
+            class="flex items-center justify-between px-2.5 py-1.5 rounded-xs cursor-pointer text-[11px] font-mono transition-colors border ${
+              isActSel
+                ? 'bg-[var(--sys-accent)] text-black font-bold border-[var(--sys-accent)] shadow-sm'
+                : 'bg-[#181A22] text-neutral-300 border-[#252834] hover:bg-[#1E212B]'
+            }"
+          >
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="${isActSel ? 'text-black' : 'text-neutral-500'} text-[9.5px]">[${keyNum}]</span>
+              <span class="truncate">${act}</span>
+            </div>
+            <span class="hud-key ${isActSel ? 'bg-black text-[var(--sys-accent)] border-black' : ''}">↵</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 5. INPUT & DATA FILTERING
+    function handleInput(val) {
+      filterQuery = val.trim().toLowerCase();
+      selectedIndex = 0;
+      closeActionPopup();
+      render();
+    }
+
+    function getItems() {
+      return dataset.filter(item => {
+        let matchesCategory = true;
+        if (categoryFilter) {
+          matchesCategory = item.cluster === categoryFilter;
+        }
+
+        const matchesSearch = !filterQuery ||
+          item.title.toLowerCase().includes(filterQuery) ||
+          (item.alias && item.alias.toLowerCase() === filterQuery) ||
+          item.param.toLowerCase().includes(filterQuery) ||
+          item.source.toLowerCase().includes(filterQuery) ||
+          item.type.toLowerCase().includes(filterQuery);
+
+        return matchesCategory && matchesSearch;
+      });
+    }
+
+    function getActiveItem() {
+      const items = getItems();
+      return items[selectedIndex] || items[0] || null;
+    }
+
+    // 6. MAIN RENDER DISPATCHER
+    function render() {
+      const items = getItems();
+      if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
+      const active = items[selectedIndex];
+
+      if (active) {
+        document.getElementById('footer-item-label').innerText = active.title.toUpperCase();
+      } else {
+        document.getElementById('footer-item-label').innerText = "ZERO MATCHES";
+      }
+
+      const container = document.getElementById('stage-content-container');
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center text-neutral-500 text-xs font-mono">
+            >> ZERO TARGETS MATCHING: "${filterQuery.toUpperCase()}"
+          </div>
+        `;
+        renderRightPane(null);
+        return;
+      }
+
+      if (currentLayout === 'list') {
+        renderListLayout(container, items);
+      } else if (currentLayout === 'hybrid') {
+        renderHybridLayout(container, items);
+      } else if (currentLayout === 'grid') {
+        renderGridLayout(container, items);
+      } else if (currentLayout === 'category') {
+        renderCategoryLayout(container, items);
+      }
+
+      if (isPreviewOn) {
+        renderRightPane(active);
+      }
+
+      if (isActionPopupOpen) {
+        updateActionPopup();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // LAYOUT 1: AUTHENTIC NORDIC LIST (CLEAN SINGLE-ROW MATRIX)
+    // -------------------------------------------------------------
+    function renderListLayout(container, items) {
+      const sections = ['favorites', 'suggestions', 'applications', 'games', 'commands'];
+      const sectionLabels = {
+        favorites: '// FAVORITES [PINNED]',
+        suggestions: '// SUGGESTIONS',
+        applications: '// APPLICATIONS',
+        games: '// GAMES',
+        commands: '// COMMANDS'
+      };
+
+      const grouped = {};
+      items.forEach((item, globalIdx) => {
+        if (!grouped[item.category]) grouped[item.category] = [];
+        grouped[item.category].push({ item, globalIdx });
+      });
+
+      let html = '';
+      sections.forEach(sec => {
+        const groupItems = grouped[sec];
+        if (!groupItems || groupItems.length === 0) return;
+
+        html += `
+          <div class="px-2 pt-2 pb-0.5 flex items-center justify-between text-[9.5px] font-mono uppercase tracking-wider text-neutral-500 font-bold border-b border-[#1A1C24] mb-1">
+            <span class="text-neutral-400">${sectionLabels[sec]}</span>
+            <span class="text-neutral-600">[${groupItems.length}]</span>
+          </div>
+        `;
+
+        groupItems.forEach(({ item, globalIdx }) => {
+          const isSelected = globalIdx === selectedIndex;
+          const idNum = String(globalIdx + 1).padStart(2, '0');
+          const iconSvg = icons[item.iconKey] || '';
+
+          html += `
+            <div
+              onclick="selectRow(${globalIdx})"
+              ondblclick="triggerPrimary()"
+              class="flex items-center justify-between px-2.5 py-1.5 cursor-pointer text-xs font-mono transition-colors rounded-xs ${
+                isSelected
+                  ? 'bg-[var(--sys-accent)] text-black font-bold shadow-sm'
+                  : 'text-neutral-300 hover:bg-[#14161E]'
+              }"
+            >
+              <!-- Left: ID + Brand Icon + Title + Alias -->
+              <div class="flex items-center gap-2 truncate pr-2">
+                <span class="text-[10px] w-4 text-center shrink-0 ${isSelected ? 'text-black font-bold' : 'text-neutral-500'}">${idNum}</span>
+                <span class="w-4 h-4 flex items-center justify-center shrink-0">${iconSvg}</span>
+                <span class="truncate ${isSelected ? 'text-black font-bold' : 'text-white'}">
+                  ${item.title}
+                </span>
+                ${item.alias ? `
+                  <span class="px-1 py-0.2 rounded-xs text-[9px] font-mono font-bold ${
+                    isSelected ? 'bg-black text-[var(--sys-accent)]' : 'bg-[#1C1F28] text-neutral-400 border border-[#272B38]'
+                  }">
+                    ${item.alias}
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Right: Type Tag + Exec Keycap -->
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[9.5px] uppercase tracking-wider ${isSelected ? 'text-neutral-900 font-bold' : 'text-neutral-500'}">
+                  [${item.type}]
+                </span>
+                <span class="hud-key ${isSelected ? 'bg-black text-[var(--sys-accent)] border-black' : ''}">
+                  [ENTER]
+                </span>
+              </div>
+            </div>
+          `;
+        });
+      });
+
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // LAYOUT 2: HYBRID (GRID FOR PINNED/FAVORITES + LIST FOR NORMAL)
+    // -------------------------------------------------------------
+    function renderHybridLayout(container, items) {
+      let html = '';
+
+      // 1. PINNED / FAVORITES (COMPACT SMALLER GRID BLOCKS)
+      const pinnedItems = items.map((item, globalIdx) => ({ item, globalIdx })).filter(x => x.item.category === 'favorites');
+      const otherItems = items.map((item, globalIdx) => ({ item, globalIdx })).filter(x => x.item.category !== 'favorites');
+
+      if (pinnedItems.length > 0) {
+        html += `
+          <div class="px-2 pt-1 pb-1 flex items-center justify-between text-[9.5px] font-mono uppercase tracking-wider text-neutral-500 font-bold border-b border-[#1A1C24] mb-1.5">
+            <span class="text-neutral-400">// FAVORITES [PINNED]</span>
+            <span class="text-neutral-600">[${pinnedItems.length}]</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mb-2.5">
+        `;
+
+        pinnedItems.forEach(({ item, globalIdx }) => {
+          const isSelected = globalIdx === selectedIndex;
+          const iconSvg = icons[item.iconKey] || '';
+
+          html += `
+            <div
+              onclick="selectRow(${globalIdx})"
+              ondblclick="triggerPrimary()"
+              class="flex items-center gap-2 p-1.5 rounded-xs border cursor-pointer transition-all ${
+                isSelected
+                  ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold shadow-sm'
+                  : 'bg-[#12141A] text-neutral-200 border-[#1F222C] hover:bg-[#171A22] hover:border-[#2C303E]'
+              }"
+            >
+              <div class="w-5 h-5 flex items-center justify-center shrink-0">${iconSvg}</div>
+              <div class="truncate flex-1">
+                <div class="text-[11px] truncate font-mono ${isSelected ? 'text-black font-bold' : 'text-white'}">${item.title}</div>
+                <div class="text-[9px] ${isSelected ? 'text-neutral-900' : 'text-neutral-500'} flex items-center gap-1">
+                  <span>[${item.alias || item.type}]</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+      }
+
+      // 2. NORMAL ITEMS (LIST LAYOUT)
+      if (otherItems.length > 0) {
+        const sections = ['suggestions', 'applications', 'games', 'commands'];
+        const sectionLabels = {
+          suggestions: '// SUGGESTIONS',
+          applications: '// APPLICATIONS',
+          games: '// GAMES',
+          commands: '// COMMANDS'
+        };
+
+        const grouped = {};
+        otherItems.forEach(({ item, globalIdx }) => {
+          if (!grouped[item.category]) grouped[item.category] = [];
+          grouped[item.category].push({ item, globalIdx });
+        });
+
+        sections.forEach(sec => {
+          const groupItems = grouped[sec];
+          if (!groupItems || groupItems.length === 0) return;
+
+          html += `
+            <div class="px-2 pt-2 pb-0.5 flex items-center justify-between text-[9.5px] font-mono uppercase tracking-wider text-neutral-500 font-bold border-b border-[#1A1C24] mb-1">
+              <span class="text-neutral-400">${sectionLabels[sec]}</span>
+              <span class="text-neutral-600">[${groupItems.length}]</span>
+            </div>
+          `;
+
+          groupItems.forEach(({ item, globalIdx }) => {
+            const isSelected = globalIdx === selectedIndex;
+            const idNum = String(globalIdx + 1).padStart(2, '0');
+            const iconSvg = icons[item.iconKey] || '';
+
+            html += `
+              <div
+                onclick="selectRow(${globalIdx})"
+                ondblclick="triggerPrimary()"
+                class="flex items-center justify-between px-2.5 py-1.5 cursor-pointer text-xs font-mono transition-colors rounded-xs ${
+                  isSelected
+                    ? 'bg-[var(--sys-accent)] text-black font-bold shadow-sm'
+                    : 'text-neutral-300 hover:bg-[#14161E]'
+                }"
+              >
+                <div class="flex items-center gap-2 truncate pr-2">
+                  <span class="text-[10px] w-4 text-center shrink-0 ${isSelected ? 'text-black font-bold' : 'text-neutral-500'}">${idNum}</span>
+                  <span class="w-4 h-4 flex items-center justify-center shrink-0">${iconSvg}</span>
+                  <span class="truncate ${isSelected ? 'text-black font-bold' : 'text-white'}">
+                    ${item.title}
+                  </span>
+                  ${item.alias ? `
+                    <span class="px-1 py-0.2 rounded-xs text-[9px] font-mono font-bold ${
+                      isSelected ? 'bg-black text-[var(--sys-accent)]' : 'bg-[#1C1F28] text-neutral-400 border border-[#272B38]'
+                    }">
+                      ${item.alias}
+                    </span>
+                  ` : ''}
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[9.5px] uppercase tracking-wider ${isSelected ? 'text-neutral-900 font-bold' : 'text-neutral-500'}">
+                    [${item.type}]
+                  </span>
+                  <span class="hud-key ${isSelected ? 'bg-black text-[var(--sys-accent)] border-black' : ''}">
+                    [ENTER]
+                  </span>
+                </div>
+              </div>
+            `;
+          });
+        });
+      }
+
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // LAYOUT 3: TACTICAL GRID (COMPACT CARDS)
+    // -------------------------------------------------------------
+    function renderGridLayout(container, items) {
+      const colClass = isPreviewOn ? 'grid-cols-3' : 'grid-cols-4';
+      let html = `<div class="grid ${colClass} gap-1.5 p-1">`;
+
+      items.forEach((item, globalIdx) => {
+        const isSelected = globalIdx === selectedIndex;
+        const iconSvg = icons[item.iconKey] || '';
+
+        html += `
+          <div
+            onclick="selectRow(${globalIdx})"
+            ondblclick="triggerPrimary()"
+            class="flex flex-col items-center justify-center p-2 rounded-xs border cursor-pointer transition-all text-center ${
+              isSelected
+                ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold shadow-md'
+                : 'bg-[#12141A] text-neutral-200 border-[#1E212A] hover:bg-[#161922] hover:border-[#2A2E3B]'
+            }"
+          >
+            <div class="w-6 h-6 flex items-center justify-center mb-1">${iconSvg}</div>
+            <span class="text-[11px] truncate w-full font-mono ${isSelected ? 'text-black font-bold' : 'text-white'}">
+              ${item.title}
+            </span>
+            <div class="flex items-center gap-1 mt-0.5 text-[9px]">
+              <span class="${isSelected ? 'text-neutral-900 font-bold' : 'text-neutral-500'}">[${item.type}]</span>
+              ${item.alias ? `<span class="px-1 rounded-xs ${isSelected ? 'bg-black text-[var(--sys-accent)]' : 'bg-[#1A1D24] text-neutral-400'}">${item.alias}</span>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // LAYOUT 4: SYSTEM CLUSTERS (CATEGORY)
+    // -------------------------------------------------------------
+    function renderCategoryLayout(container, items) {
+      if (categoryFilter) {
+        const currentCluster = categoryClusters.find(c => c.id === categoryFilter);
+        let html = `
+          <div class="p-1">
+            <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-[#1E212A]">
+              <div class="flex items-center gap-2">
+                <button onclick="categoryFilter = null; render();" class="hud-key text-[9.5px]">← ALL</button>
+                <span class="text-xs font-bold text-white tracking-wider">// CLUSTER: ${currentCluster.name}</span>
+              </div>
+              <span class="text-[9.5px] text-neutral-500">[${items.length}]</span>
+            </div>
+        `;
+        container.innerHTML = html;
+        renderListLayout(container, items);
+        return;
+      }
+
+      let html = `<div class="grid grid-cols-2 gap-2 p-1">`;
+      categoryClusters.forEach(cluster => {
+        const clusterItems = dataset.filter(i => i.cluster === cluster.id);
+        const previewIcons = clusterItems.slice(0, 4);
+
+        html += `
+          <div
+            onclick="categoryFilter = '${cluster.id}'; selectedIndex = 0; render();"
+            class="p-2.5 bg-[#12141A] border border-[#1E212A] hover:border-[var(--sys-accent)] rounded-xs cursor-pointer transition-all flex flex-col justify-between group"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[9.5px] font-mono text-[var(--sys-accent)] font-bold">[${cluster.code} // CLUSTER]</span>
+                <span class="text-[9.5px] text-neutral-500 group-hover:text-white font-mono">${clusterItems.length}</span>
+              </div>
+              <h4 class="text-[11.5px] font-bold text-white font-hud tracking-wide">${cluster.name}</h4>
+              <p class="text-[9.5px] text-neutral-400 font-mono truncate">${cluster.desc}</p>
+            </div>
+
+            <div class="mt-2 pt-1.5 border-t border-[#181A22] flex items-center justify-between">
+              <div class="flex items-center gap-1.5 bg-[#161820] px-1.5 py-0.5 rounded-xs border border-[#222530]">
+                ${previewIcons.map(pi => `<span class="w-3.5 h-3.5 flex items-center justify-center">${icons[pi.iconKey] || ''}</span>`).join('')}
+              </div>
+              <span class="hud-key text-[8.5px] group-hover:bg-[var(--sys-accent)] group-hover:text-black">DRILL IN →</span>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // RENDER RIGHT PANE: CONTEXT TELEMETRY INSPECTOR
+    // -------------------------------------------------------------
+    function renderRightPane(active) {
+      const pane = document.getElementById('hud-right-pane');
+      if (!active) {
+        pane.innerHTML = `
+          <div class="p-8 text-center text-neutral-600 text-xs font-mono">
+            >> SELECT RECORD
+          </div>
+        `;
+        return;
+      }
+
+      const iconSvg = icons[active.iconKey] || '';
+
+      pane.innerHTML = `
+        <div class="flex flex-col h-full justify-between">
+          <div class="space-y-2.5">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-1 border-b border-[#1E212A] text-[9.5px] text-neutral-500 uppercase tracking-wider font-semibold">
+              <span class="text-[var(--sys-accent)]">// TELEMETRY_INSPECT</span>
+              <span>[READY]</span>
+            </div>
+
+            <!-- Item Identity -->
+            <div class="p-2 rounded-xs bg-[#14161C] border border-[#20232C] space-y-1">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 flex items-center justify-center">${iconSvg}</span>
+                  <span class="font-bold text-white text-xs tracking-wide font-hud">${active.title.toUpperCase()}</span>
+                </div>
+                <span class="px-1 py-0.2 rounded-xs text-[9px] font-bold bg-[#1C1F28] text-[var(--sys-accent)] border border-[#282C38]">
+                  [${active.type}]
+                </span>
+              </div>
+              <div class="text-[10px] text-neutral-400 font-mono truncate">
+                ${active.param}
+              </div>
+            </div>
+
+            <!-- Clean Spec Box -->
+            <div class="space-y-1 text-xs font-mono">
+              <div class="flex items-center justify-between py-1 border-b border-[#171922]">
+                <span class="text-neutral-500 text-[9.5px]">PUBLISHER</span>
+                <span class="text-neutral-300 font-medium text-[10.5px] truncate max-w-[140px]">${active.publisher}</span>
+              </div>
+              <div class="flex items-center justify-between py-1 border-b border-[#171922]">
+                <span class="text-neutral-500 text-[9.5px]">VERSION</span>
+                <span class="text-neutral-300 font-medium text-[10.5px]">${active.version}</span>
+              </div>
+              <div class="flex items-center justify-between py-1 border-b border-[#171922]">
+                <span class="text-neutral-500 text-[9.5px]">SUBSYSTEM</span>
+                <span class="text-[var(--sys-accent)] font-semibold text-[10.5px]">${active.source}</span>
+              </div>
+              <div class="flex items-center justify-between py-1 border-b border-[#171922]">
+                <span class="text-neutral-500 text-[9.5px]">STATUS</span>
+                <span class="text-emerald-400 font-medium text-[10.5px]">VERIFIED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Prompt in Right Pane -->
+          <div class="pt-2 border-t border-[#1E212A] flex items-center justify-between text-[9.5px] font-mono">
+            <span class="text-neutral-400 cursor-pointer hover:text-white" onclick="toggleActionPopup()">
+              PRESS <kbd class="hud-key bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold text-[8.5px]">[TAB]</kbd> ACTIONS
+            </span>
+            <span class="text-neutral-500">${active.id}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------
+    // INTERACTION HANDLERS
+    // -------------------------------------------------------------
+    function selectRow(idx) {
+      selectedIndex = idx;
+      if (isActionPopupOpen) updateActionPopup();
+      render();
+    }
+
+    function triggerPrimary() {
+      const active = getActiveItem();
+      if (!active) return;
+
+      if (isActionPopupOpen) {
+        const act = active.actions[selectedActionIndex] || active.actions[0];
+        dispatchAction(active.id, act);
+      } else {
+        simulateToast(`DISPATCHED [ENTER]: ${active.title.toUpperCase()}`);
+      }
+    }
+
+    function triggerAdmin() {
+      const active = getActiveItem();
+      if (!active) return;
+      simulateToast(`ADMIN [^ENTER]: ${active.title.toUpperCase()}`);
+    }
+
+    function dispatchAction(itemId, actionName) {
+      const item = dataset.find(i => i.id === itemId);
+      closeActionPopup();
+      simulateToast(`EXECUTED: ${actionName} (${item ? item.title.toUpperCase() : ''})`);
+      render();
+    }
+
+    function simulateToast(msg) {
+      const toast = document.getElementById('hud-toast');
+      const text = document.getElementById('hud-toast-text');
+      text.innerText = msg;
+
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-16', 'opacity-0');
+      }, 2200);
+    }
+
+    // KEYBOARD NAVIGATION
+    window.addEventListener('keydown', (e) => {
+      // ESC
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (isActionPopupOpen) {
+          closeActionPopup();
+          return;
+        }
+        if (categoryFilter) {
+          categoryFilter = null;
+          render();
+          return;
+        }
+        const input = document.getElementById('hud-input');
+        if (input.value) {
+          input.value = '';
+          handleInput('');
+        } else {
+          simulateToast('RUNNER DISMISSED TO TRAY');
+        }
+        return;
+      }
+
+      // TAB
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        toggleActionPopup();
+        return;
+      }
+
+      // ENTER & CTRL+ENTER
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.ctrlKey) {
+          triggerAdmin();
+        } else {
+          triggerPrimary();
+        }
+        return;
+      }
+
+      // ARROW KEYS NAVIGATION
+      if (isActionPopupOpen) {
+        const active = getActiveItem();
+        if (!active) return;
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedActionIndex = (selectedActionIndex + 1) % active.actions.length;
+          updateActionPopup();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedActionIndex = (selectedActionIndex - 1 + active.actions.length) % active.actions.length;
+          updateActionPopup();
+        }
+      } else {
+        const items = getItems();
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % items.length;
+          render();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+          render();
+        }
+      }
+    });
+
+    // INITIAL BOOT
+    setWindowsAccent('#0078D4', 'Cobalt');
+  </script>
+</body>
+</html>
