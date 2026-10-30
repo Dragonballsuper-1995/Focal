@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" fill="none">
+  
+    <defs>
+      <linearGradient id="focal-grad1" x1="22" y1="26" x2="86" y2="26" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FFA07A"/>
+        <stop offset="100%" stop-color="#FB923C"/>
+      </linearGradient>
+
+      <linearGradient id="focal-grad2" x1="22" y1="54" x2="70" y2="54" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#FB7185"/>
+        <stop offset="100%" stop-color="#F43F5E"/>
+      </linearGradient>
+
+      <linearGradient id="focal-grad3" x1="22" y1="82" x2="42" y2="82" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#F43F5E"/>
+        <stop offset="100%" stop-color="#E11D48"/>
+      </linearGradient>
+    </defs>
+    
+  <!-- Mark Container -->
+  <g transform="translate(10, 0)">
+    
+    <g id="focal-mark">
+      <!-- Top Pill Bar (Long) -->
+      <rect x="22" y="16" width="64" height="20" rx="10" fill="url(#focal-grad1)"/>
+
+      <!-- Middle Pill Bar (Medium) -->
+      <rect x="22" y="44" width="48" height="20" rx="10" fill="url(#focal-grad2)"/>
+
+      <!-- Bottom Standalone Dot / Pill (Base of F) -->
+      <circle cx="32" cy="82" r="10" fill="url(#focal-grad3)"/>
+    </g>
+    
+  </g>
+  <!-- Wordmark Text -->
+  <text x="125" y="65" font-family="Inter, -apple-system, sans-serif" font-size="46" font-weight="700" fill="#FFFFFF" letter-spacing="-0.03em">Focal</text>
+</svg>

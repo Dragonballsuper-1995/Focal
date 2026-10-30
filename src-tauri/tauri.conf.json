@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Runner",
+  "productName": "Focal",
   "version": "0.1.0",
-  "identifier": "com.runner.launcher",
+  "identifier": "com.focal.launcher",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Runner",
+        "title": "Focal",
         "width": 760,
         "height": 480,
         "resizable": false,

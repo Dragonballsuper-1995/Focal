@@ -211,12 +211,7 @@ describe('useKeyboardNav Hook', () => {
     );
     const container = screen.getByTestId('nav-container');
 
-    // Initially at results[0]
-    expect(screen.getByTestId('active-section')).toHaveTextContent('results');
-    expect(screen.getByTestId('selected-index')).toHaveTextContent('0');
-
-    // ArrowUp moves into pinned section
-    fireEvent.keyDown(container, { key: 'ArrowUp' });
+    // Initially at pinned[0] (first pinned item)
     expect(screen.getByTestId('active-section')).toHaveTextContent('pinned');
     expect(screen.getByTestId('selected-pinned-index')).toHaveTextContent('0');
 
@@ -236,7 +231,7 @@ describe('useKeyboardNav Hook', () => {
     expect(handleExecutePinned).toHaveBeenCalledWith(1);
     expect(handleExecutePrimary).not.toHaveBeenCalled();
 
-    // ArrowDown drops down back to results[0]
+    // ArrowDown drops down to results[0]
     fireEvent.keyDown(container, { key: 'ArrowDown' });
     expect(screen.getByTestId('active-section')).toHaveTextContent('results');
     expect(screen.getByTestId('selected-index')).toHaveTextContent('0');
@@ -244,19 +239,29 @@ describe('useKeyboardNav Hook', () => {
     // Pressing Enter executes primary result
     fireEvent.keyDown(container, { key: 'Enter' });
     expect(handleExecutePrimary).toHaveBeenCalledWith(0);
+
+    // Navigate to last result item and press ArrowDown -> wraps back to pinned[0]
+    fireEvent.keyDown(container, { key: 'End' });
+    expect(screen.getByTestId('selected-index')).toHaveTextContent('4');
+
+    fireEvent.keyDown(container, { key: 'ArrowDown' });
+    expect(screen.getByTestId('active-section')).toHaveTextContent('pinned');
+    expect(screen.getByTestId('selected-pinned-index')).toHaveTextContent('0');
   });
 
   it('navigates across 2 rows of pinned grid (up to 10 items)', () => {
     render(<NavHarness totalItems={5} pinnedCount={8} />);
     const container = screen.getByTestId('nav-container');
 
-    // Move up into pinned grid
-    fireEvent.keyDown(container, { key: 'ArrowUp' });
+    // Initially at pinned row 0 (index 0)
     expect(screen.getByTestId('active-section')).toHaveTextContent('pinned');
-    // Lands on bottom row (row 1, index 5)
+    expect(screen.getByTestId('selected-pinned-index')).toHaveTextContent('0');
+
+    // ArrowDown moves to row 1 (index 5)
+    fireEvent.keyDown(container, { key: 'ArrowDown' });
     expect(screen.getByTestId('selected-pinned-index')).toHaveTextContent('5');
 
-    // ArrowUp moves to row 0 (index 0)
+    // ArrowUp moves back to row 0 (index 0)
     fireEvent.keyDown(container, { key: 'ArrowUp' });
     expect(screen.getByTestId('selected-pinned-index')).toHaveTextContent('0');
 
@@ -272,5 +277,36 @@ describe('useKeyboardNav Hook', () => {
     fireEvent.keyDown(container, { key: 'ArrowDown' });
     expect(screen.getByTestId('active-section')).toHaveTextContent('results');
     expect(screen.getByTestId('selected-index')).toHaveTextContent('0');
+  });
+
+  it('executes quick numeric shortcuts with Ctrl+1 through Ctrl+9', () => {
+    const handleExecutePrimary = vi.fn();
+    const handleExecutePinned = vi.fn();
+
+    render(
+      <NavHarness
+        totalItems={5}
+        pinnedCount={4}
+        onExecutePrimary={handleExecutePrimary}
+        onExecutePinned={handleExecutePinned}
+      />
+    );
+    const container = screen.getByTestId('nav-container');
+
+    // Ctrl+1 should execute pinned item 0
+    fireEvent.keyDown(container, { key: '1', ctrlKey: true });
+    expect(handleExecutePinned).toHaveBeenCalledWith(0);
+
+    // Ctrl+4 should execute pinned item 3
+    fireEvent.keyDown(container, { key: '4', ctrlKey: true });
+    expect(handleExecutePinned).toHaveBeenCalledWith(3);
+
+    // Ctrl+5 should execute suggestion result 0
+    fireEvent.keyDown(container, { key: '5', ctrlKey: true });
+    expect(handleExecutePrimary).toHaveBeenCalledWith(0);
+
+    // Ctrl+9 should execute suggestion result 4
+    fireEvent.keyDown(container, { key: '9', ctrlKey: true });
+    expect(handleExecutePrimary).toHaveBeenCalledWith(4);
   });
 });

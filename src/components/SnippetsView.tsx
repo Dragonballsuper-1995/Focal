@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { SnippetItem } from '@/types';
 import { getSnippets, saveSnippet, deleteSnippet, expandSnippet, copyToClipboard } from '@/services/ipc';
 import { FileText, Plus, Trash2, Check, Sparkles, Pin, X } from 'lucide-react';
@@ -13,6 +13,7 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const activeSnippetRef = useRef<HTMLDivElement>(null);
 
   // Edit form state
   const [editTitle, setEditTitle] = useState('');
@@ -126,6 +127,10 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isEditing, filteredSnippets.length, selectedSnippet, handleUseSnippet, onBack]);
 
+  useEffect(() => {
+    activeSnippetRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
+
   return (
     <div className="flex-1 flex flex-col h-full bg-[var(--hud-bg-base)] text-[var(--text-main)] font-mono overflow-hidden select-none">
       {/* Top Search Bar */}
@@ -137,13 +142,13 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
         <span className="text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none">&gt;</span>
 
         {/* Breadcrumb pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
           <FileText className="w-3 h-3" />
           <span>Snippets</span>
           <button
             type="button"
             onClick={onBack}
-            className="hover:opacity-75 rounded p-0.5 transition-opacity"
+            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
             title="Return (Esc)"
           >
             <X className="w-3 h-3" />
@@ -162,12 +167,12 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-bold bg-[var(--sys-accent)] text-black rounded hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-bold bg-[var(--sys-accent)] text-black rounded-none hover:opacity-90 transition-opacity"
           >
             <Plus className="w-3 h-3" />
             New Snippet
           </button>
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
+          <span className="text-[9.5px] px-1.5 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
             ESC
           </span>
         </div>
@@ -175,7 +180,7 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
 
       {/* Main split view or create dialog */}
       {isEditing ? (
-        <form onSubmit={handleSave} className="flex-1 p-6 flex flex-col gap-4 overflow-y-auto bg-[var(--hud-bg-panel)]">
+        <form onSubmit={handleSave} className="flex-1 min-h-0 p-6 flex flex-col gap-4 overflow-y-auto bg-[var(--hud-bg-panel)]">
           <div className="flex items-center justify-between border-b border-[var(--hud-border-grid)] pb-2">
             <h3 className="text-xs font-bold text-[var(--text-main)] uppercase tracking-wider">Create New Text Snippet</h3>
             <span className="text-[10px] text-[var(--text-dim)]">ESC to Cancel</span>
@@ -187,7 +192,7 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               placeholder="e.g. My Phone Number"
-              className="w-full px-3 py-1.5 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded text-xs text-[var(--text-main)] font-mono focus:outline-none focus:border-[var(--sys-accent)]"
+              className="w-full px-3 py-1.5 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded-none text-xs text-[var(--text-main)] font-mono focus:outline-none focus:border-[var(--sys-accent)]"
               required
             />
           </div>
@@ -200,10 +205,10 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
               value={editKeyword}
               onChange={(e) => setEditKeyword(e.target.value)}
               placeholder="e.g. phone"
-              className="w-full px-3 py-1.5 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded text-xs text-[var(--text-main)] font-mono focus:outline-none focus:border-[var(--sys-accent)]"
+              className="w-full px-3 py-1.5 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded-none text-xs text-[var(--text-main)] font-mono focus:outline-none focus:border-[var(--sys-accent)]"
             />
           </div>
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">
               Snippet Content (Placeholders: {'{date}'}, {'{time}'}, {'{uuid}'}, {'{clipboard}'}, {'{cursor}'})
             </label>
@@ -211,7 +216,7 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               placeholder="Hello, today is {date}..."
-              className="flex-1 min-h-[120px] px-3 py-2 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded text-xs font-mono text-[var(--text-main)] focus:outline-none focus:border-[var(--sys-accent)] resize-none"
+              className="flex-1 min-h-[120px] px-3 py-2 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded-none text-xs font-mono text-[var(--text-main)] focus:outline-none focus:border-[var(--sys-accent)] resize-none"
               required
             />
           </div>
@@ -225,16 +230,16 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-xs font-bold bg-[var(--sys-accent)] text-black rounded font-mono hover:opacity-90"
+              className="px-4 py-1.5 text-xs font-bold bg-[var(--sys-accent)] text-black rounded-none font-mono hover:opacity-90"
             >
               Save Snippet
             </button>
           </div>
         </form>
       ) : (
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 min-h-0 flex overflow-hidden">
           {/* Left: Snippet list */}
-          <div className="w-1/2 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
+          <div className="w-1/2 min-h-0 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
             {filteredSnippets.length === 0 ? (
               <div className="p-8 text-center text-[var(--text-muted)] text-xs">
                 No snippets found. Click &ldquo;NEW&rdquo; to create one.
@@ -245,9 +250,10 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
                 return (
                   <div
                     key={snippet.id || idx}
+                    ref={isSel ? activeSnippetRef : undefined}
                     onClick={() => setSelectedIndex(idx)}
                     onDoubleClick={() => handleUseSnippet(snippet)}
-                    className={`p-2.5 rounded-md cursor-pointer transition-all border ${
+                    className={`p-2.5 rounded-none cursor-pointer transition-all border ${
                       isSel
                         ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-semibold shadow-sm'
                         : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
@@ -260,7 +266,7 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
                       </span>
                       {snippet.keyword && (
                         <span
-                          className={`text-[9px] px-1 py-0.2 rounded font-mono ml-auto ${
+                          className={`text-[9px] px-1 py-0.2 rounded-none font-mono ml-auto ${
                             isSel
                               ? 'bg-black text-[var(--sys-accent)] font-bold'
                               : 'bg-[var(--keycap-bg)] text-[var(--text-muted)]'
@@ -280,9 +286,9 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
           </div>
 
           {/* Right: Preview & Actions */}
-          <div className="w-1/2 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
+          <div className="w-1/2 min-h-0 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
             {selectedSnippet ? (
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full min-h-0">
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--hud-border-grid)] mb-3">
                   <div>
                     <h4 className="text-xs font-bold text-[var(--text-main)]">{selectedSnippet.title}</h4>
@@ -294,13 +300,13 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
                     <button
                       onClick={() => handleDelete(selectedSnippet.id)}
                       title="Delete Snippet"
-                      className="p-1 rounded text-neutral-400 hover:text-red-400 hover:bg-[var(--hud-bg-card)] transition-colors"
+                      className="p-1 rounded-none text-neutral-400 hover:text-red-400 hover:bg-[var(--hud-bg-card)] transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleUseSnippet(selectedSnippet)}
-                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-black bg-[var(--sys-accent)] hover:opacity-90 rounded transition-opacity"
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-black bg-[var(--sys-accent)] hover:opacity-90 rounded-none transition-opacity"
                     >
                       {copiedId === selectedSnippet.id ? (
                         <>
@@ -316,9 +322,9 @@ export function SnippetsView({ onBack }: SnippetsViewProps) {
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 min-h-0 flex flex-col">
                   <span className="text-[10px] font-bold text-[var(--text-dim)] mb-1 uppercase tracking-wider">RAW TEMPLATE</span>
-                  <pre className="p-3 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded text-xs font-mono text-[var(--text-main)] whitespace-pre-wrap break-all flex-1 select-text">
+                  <pre className="p-3 bg-[var(--hud-bg-card)] border border-[var(--hud-border-outer)] rounded-none text-xs font-mono text-[var(--text-main)] whitespace-pre-wrap break-all flex-1 select-text overflow-y-auto">
                     {selectedSnippet.text}
                   </pre>
                 </div>

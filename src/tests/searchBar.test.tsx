@@ -40,25 +40,22 @@ describe('SearchBar Component', () => {
     expect(handleChange).toHaveBeenCalledWith('terminal');
   });
 
-  it('displays clear button when query is present and triggers onClear on click', () => {
-    const handleClear = vi.fn();
+  it('does not render theme toggle or ESC badge in root mode', () => {
     const inputRef = React.createRef<HTMLInputElement>();
     render(
       <SearchBar
         query="calc"
         onChange={vi.fn()}
-        onClear={handleClear}
+        onClear={vi.fn()}
         onResetView={vi.fn()}
         inputRef={inputRef}
         viewMode="root"
       />
     );
 
-    const clearBtn = screen.getByTitle('Clear search query');
-    expect(clearBtn).toBeInTheDocument();
-
-    fireEvent.click(clearBtn);
-    expect(handleClear).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('ESC')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Clear search query')).not.toBeInTheDocument();
+    expect(screen.queryByTitle(/theme/i)).not.toBeInTheDocument();
   });
 
   it('renders breadcrumb badge when active in subview mode', () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FileResult } from '@/types';
 import { searchFiles, launchItem } from '@/services/ipc';
 import { FolderSearch, File, ExternalLink, X } from 'lucide-react';
@@ -12,6 +12,7 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
   const [files, setFiles] = useState<FileResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const activeFileRef = useRef<HTMLDivElement>(null);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -82,6 +83,10 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [files.length, selectedFile, handleOpen, onBack]);
 
+  useEffect(() => {
+    activeFileRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -99,13 +104,13 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
         <span className="text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none">&gt;</span>
 
         {/* Breadcrumb pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
           <FolderSearch className="w-3 h-3" />
           <span>File Search</span>
           <button
             type="button"
             onClick={onBack}
-            className="hover:opacity-75 rounded p-0.5 transition-opacity"
+            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
             title="Return (Esc)"
           >
             <X className="w-3 h-3" />
@@ -127,16 +132,16 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
               SEARCHING...
             </span>
           )}
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
+          <span className="text-[9.5px] px-1.5 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
             ESC
           </span>
         </div>
       </div>
 
       {/* Main split view */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left: Files List */}
-        <div className="w-3/5 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
+        <div className="w-3/5 min-h-0 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
           {files.length === 0 ? (
             <div className="p-8 text-center text-[var(--text-muted)] text-xs">
               {query.trim() ? 'No files match your search' : 'Type to search local documents and files'}
@@ -147,9 +152,10 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
               return (
                 <div
                   key={file.path}
+                  ref={isSel ? activeFileRef : undefined}
                   onClick={() => setSelectedIndex(idx)}
                   onDoubleClick={() => handleOpen(file)}
-                  className={`p-2.5 rounded-md cursor-pointer transition-all flex items-center gap-2.5 border ${
+                  className={`p-2.5 rounded-none cursor-pointer transition-all flex items-center gap-2.5 border ${
                     isSel
                       ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-semibold shadow-sm'
                       : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
@@ -174,19 +180,19 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
         </div>
 
         {/* Right: File details & actions */}
-        <div className="w-2/5 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
+        <div className="w-2/5 min-h-0 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
           {selectedFile ? (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full min-h-0">
               <div className="flex items-center gap-2 pb-2 border-b border-[var(--hud-border-grid)] mb-3">
                 <File className="w-4 h-4 text-[var(--sys-accent)]" />
                 <span className="text-xs font-bold text-[var(--text-main)] truncate">
                   {selectedFile.file_name}
                 </span>
               </div>
-              <div className="space-y-3 flex-1 text-xs">
+              <div className="space-y-3 flex-1 min-h-0 text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase block mb-1">Target Path</span>
-                  <p className="font-mono text-[11px] bg-[var(--hud-bg-card)] p-2 rounded border border-[var(--hud-border-outer)] text-[var(--text-main)] break-all select-text">
+                  <p className="font-mono text-[11px] bg-[var(--hud-bg-card)] p-2 rounded-none border border-[var(--hud-border-outer)] text-[var(--text-main)] break-all select-text">
                     {selectedFile.path}
                   </p>
                 </div>
@@ -205,14 +211,14 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
               <div className="pt-3 border-t border-[var(--hud-border-grid)] flex items-center gap-2">
                 <button
                   onClick={() => handleOpen(selectedFile)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[var(--sys-accent)] text-black rounded transition-opacity hover:opacity-90 font-mono"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[var(--sys-accent)] text-black rounded-none transition-opacity hover:opacity-90 font-mono"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   OPEN (ENTER)
                 </button>
                 <button
                   onClick={() => handleReveal(selectedFile)}
-                  className="px-3 py-1.5 text-xs font-mono rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors"
+                  className="px-3 py-1.5 text-xs font-mono rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors"
                 >
                   REVEAL
                 </button>

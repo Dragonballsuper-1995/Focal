@@ -1,6 +1,6 @@
-use runner_lib::config::{write_config_atomic, ConfigError, ConfigManager};
-use runner_lib::db::Database;
-use runner_lib::models::{RunnerConfig, ThemeMode};
+use focal_lib::config::{write_config_atomic, ConfigError, ConfigManager};
+use focal_lib::db::Database;
+use focal_lib::models::{RunnerConfig, ThemeMode};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;

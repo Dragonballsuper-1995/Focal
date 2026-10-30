@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  
+  <!-- Squircle Base Tile -->
+  <rect width="100" height="100" rx="22" fill="#FFFFFF"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="21.25" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- Centered Scaled Logo Mark -->
+  <g transform="translate(10, 10) scale(0.8)">
+    
+    <g id="focal-mark">
+      <!-- Top Pill Bar (Long) -->
+      <rect x="22" y="16" width="64" height="20" rx="10" fill="#11141B"/>
+
+      <!-- Middle Pill Bar (Medium) -->
+      <rect x="22" y="44" width="48" height="20" rx="10" fill="#11141B"/>
+
+      <!-- Bottom Standalone Dot / Pill (Base of F) -->
+      <circle cx="32" cy="82" r="10" fill="#11141B"/>
+    </g>
+    
+  </g>
+</svg>

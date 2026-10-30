@@ -1,6 +1,7 @@
 import React from 'react';
 import type { SearchResult } from '@/types';
 import { ActionMenu, type ActionOption } from './ActionMenu';
+import { FocalLogo } from './FocalLogo';
 
 export interface ActionBarProps {
   selectedItem?: SearchResult;
@@ -56,7 +57,6 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   isPinned = false,
 }) => {
   const actions = getActionOptions(selectedItem, isPinned);
-  const activeTitle = selectedItem?.title || 'READY';
 
   const handleStartDrag = async (e: React.MouseEvent) => {
     if (e.button === 0 && !(e.target as HTMLElement).closest('button, [role="button"], a, kbd, .cursor-pointer')) {
@@ -76,17 +76,10 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       onMouseDown={handleStartDrag}
       className="relative flex items-center justify-between h-9 px-4 bg-[var(--hud-bg-base)] border-t border-[var(--hud-border-grid)] text-xs font-mono text-[var(--text-muted)] select-none shrink-0 z-10 backdrop-blur-xl cursor-default"
     >
-      {/* Brand & Active Item */}
+      {/* Brand & Focal Logo */}
       <div className="flex items-center gap-2 truncate">
-        <span className="text-[var(--sys-accent)] font-bold text-[11px]">[ONLINE]</span>
-        <span className="font-semibold text-[var(--text-main)] tracking-wider text-[11px]">RUNNER</span>
-        <span className="text-[var(--text-dim)]">•</span>
-        <span
-          id="footer-item-label"
-          className="text-[var(--text-main)] truncate max-w-[260px] text-xs font-medium"
-        >
-          {activeTitle}
-        </span>
+        <FocalLogo className="w-3.5 h-3.5 shrink-0" />
+        <span className="font-semibold text-[var(--text-main)] tracking-wider text-[11px]">FOCAL</span>
       </div>
 
       {/* Right: Keycap Actions */}

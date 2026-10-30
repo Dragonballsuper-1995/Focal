@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript Data Transfer Objects (DTOs) for Runner
+ * Shared TypeScript Data Transfer Objects (DTOs) for Focal
  * Grounded in Section 6.3.B of RAYCAST_WINDOWS_ARCHITECTURE_REPORT.md
  */
 
@@ -81,6 +81,8 @@ export interface RunnerConfig {
   preview_pane_enabled?: boolean;
   accent_color?: string;
 }
+
+export type FocalConfig = RunnerConfig;
 
 export type ViewMode = 'root' | 'clipboard' | 'snippets' | 'files' | 'settings';
 

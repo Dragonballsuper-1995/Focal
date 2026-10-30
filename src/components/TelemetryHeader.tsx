@@ -20,9 +20,27 @@ export const TelemetryHeader: React.FC<TelemetryHeaderProps> = ({
     >
       {/* Left telemetry info */}
       <div className="flex items-center gap-2.5 pointer-events-none">
-        <span className="w-2 h-2 bg-[var(--sys-accent)] rounded-xs inline-block shrink-0" />
+        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 100 100" fill="none" aria-label="Focal Logo">
+          <defs>
+            <linearGradient id="hdr-focal-1" x1="22" y1="26" x2="86" y2="26" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFA07A"/>
+              <stop offset="100%" stop-color="#FB923C"/>
+            </linearGradient>
+            <linearGradient id="hdr-focal-2" x1="22" y1="54" x2="70" y2="54" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FB7185"/>
+              <stop offset="100%" stop-color="#F43F5E"/>
+            </linearGradient>
+            <linearGradient id="hdr-focal-3" x1="22" y1="82" x2="42" y2="82" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#F43F5E"/>
+              <stop offset="100%" stop-color="#E11D48"/>
+            </linearGradient>
+          </defs>
+          <rect x="22" y="16" width="64" height="20" rx="10" fill="url(#hdr-focal-1)"/>
+          <rect x="22" y="44" width="48" height="20" rx="10" fill="url(#hdr-focal-2)"/>
+          <circle cx="32" cy="82" r="10" fill="url(#hdr-focal-3)"/>
+        </svg>
         <span className="text-white font-bold tracking-wider font-hud text-xs">
-          RUNNER // SYS_COMMAND_HUD
+          FOCAL // SYS_COMMAND_HUD
         </span>
         <span className="text-neutral-600">•</span>
         <span className="text-neutral-400 text-[10.5px]">
@@ -44,7 +62,7 @@ export const TelemetryHeader: React.FC<TelemetryHeaderProps> = ({
           <button
             type="button"
             onClick={onMinimize}
-            className="px-1 py-0.5 rounded-xs text-neutral-500 hover:text-white hover:bg-[#20232D] text-[9.5px] transition-colors"
+            className="px-1 py-0.5 rounded-none text-neutral-500 hover:text-white hover:bg-[#20232D] text-[9.5px] transition-colors"
             title="Hide to Tray (Esc)"
           >
             [—]
@@ -52,7 +70,7 @@ export const TelemetryHeader: React.FC<TelemetryHeaderProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-1 py-0.5 rounded-xs text-neutral-500 hover:text-red-400 hover:bg-[#20232D] text-[9.5px] transition-colors"
+            className="px-1 py-0.5 rounded-none text-neutral-500 hover:text-red-400 hover:bg-[#20232D] text-[9.5px] transition-colors"
             title="Dismiss"
           >
             [✕]

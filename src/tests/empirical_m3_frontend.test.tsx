@@ -281,25 +281,37 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
 
       const input = screen.getByPlaceholderText("EXECUTE QUERY, ALIAS (wh, vs, yt, psh), OR TYPE '/'...");
 
-      // Fire 100 rapid ArrowDown events on input
+      // Starts at pinned[0]. Navigation loop has 6 states (Pinned 0 + 5 Result items)
+      // Fire 100 rapid ArrowDown events on input -> 100 % 6 = 4 (Result item 3)
       for (let i = 0; i < 100; i++) {
         fireEvent.keyDown(input, { key: 'ArrowDown' });
       }
 
-      // 100 % 5 = 0 -> item 0 remains selected
-      await waitFor(() => {
-        const options = screen.getAllByRole('option');
-        expect(options[0]).toHaveAttribute('aria-selected', 'true');
-      });
-
-      // Fire 3 ArrowDown events -> item 3 selected (Windows Terminal)
-      fireEvent.keyDown(input, { key: 'ArrowDown' });
-      fireEvent.keyDown(input, { key: 'ArrowDown' });
-      fireEvent.keyDown(input, { key: 'ArrowDown' });
-
       await waitFor(() => {
         const options = screen.getAllByRole('option');
         expect(options[3]).toHaveAttribute('aria-selected', 'true');
+      });
+
+      // 1 more ArrowDown -> Result item 4 (the last item)
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      await waitFor(() => {
+        const options = screen.getAllByRole('option');
+        expect(options[4]).toHaveAttribute('aria-selected', 'true');
+      });
+
+      // 1 more ArrowDown on the last item -> wraps directly back to Pinned 0!
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      await waitFor(() => {
+        const pinnedButtons = screen.getAllByRole('button');
+        const firstPinned = pinnedButtons.find((btn) => btn.getAttribute('data-selected') === 'true');
+        expect(firstPinned).toBeDefined();
+      });
+
+      // 1 more ArrowDown -> moves from pinned into Result item 0
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      await waitFor(() => {
+        const options = screen.getAllByRole('option');
+        expect(options[0]).toHaveAttribute('aria-selected', 'true');
       });
     });
   });
@@ -500,7 +512,7 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
       fireEvent.change(input, { target: { value: longStr } });
       expect(handleChange).toHaveBeenCalledWith(longStr);
 
-      // 4. Clear button appears and works
+      // 4. ESC / Clear button does not appear in SearchBar (per requirement 7)
       rerender(
         <SearchBar
           query="non-empty"
@@ -511,9 +523,8 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
           viewMode="root"
         />
       );
-      const clearBtn = screen.getByTitle('Clear search query');
-      fireEvent.click(clearBtn);
-      expect(handleClear).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTitle('Clear search query')).not.toBeInTheDocument();
+      expect(screen.queryByText('ESC')).not.toBeInTheDocument();
     });
   });
 
@@ -727,7 +738,13 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
       expect(options[0]).toHaveAttribute('aria-selected', 'true');
       expect(screen.getByText('Result Title 0')).toBeInTheDocument();
 
+      // Single click selects only
       fireEvent.click(options[0]);
+      expect(handleSelect).toHaveBeenCalledWith(0);
+      expect(handleExecute).not.toHaveBeenCalled();
+
+      // Double click executes
+      fireEvent.doubleClick(options[0]);
       expect(handleExecute).toHaveBeenCalledWith(items[0]);
     });
 
@@ -776,8 +793,12 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
       expect(updatedOptions[99]).toHaveAttribute('aria-selected', 'true');
       expect(updatedOptions[0]).toHaveAttribute('aria-selected', 'false');
 
-      // Execute last item
+      // Single click selects
       fireEvent.click(updatedOptions[99]);
+      expect(handleSelect).toHaveBeenCalledWith(99);
+
+      // Execute last item via double-click
+      fireEvent.doubleClick(updatedOptions[99]);
       expect(handleExecute).toHaveBeenCalledWith(items[99]);
     });
   });
@@ -851,9 +872,10 @@ describe('Empirical M3 Frontend UI & Keyboard Navigation Challenge Suite', () =>
         expect(input).toHaveValue('');
         // ActionMenu closed
         expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-        // Selection reset to first item
-        const options = screen.getAllByRole('option');
-        expect(options[0]).toHaveAttribute('aria-selected', 'true');
+        // Selection reset to first pinned item
+        const pinnedButtons = screen.getAllByRole('button');
+        const firstPinned = pinnedButtons.find((btn) => btn.getAttribute('data-selected') === 'true');
+        expect(firstPinned).toBeDefined();
       });
     });
 

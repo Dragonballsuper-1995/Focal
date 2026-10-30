@@ -1,8 +1,8 @@
 ---
-name: Runner Nordic Minimal HUD
+name: Focal Nordic Minimal HUD
 version: 2.1.0
-description: "The definitive design system and architectural specification for RUNNER — an inspired, compact, and spacious Windows desktop command instrument combining Nordic Industrial HUD DNA, restrained functional minimalism, proportional 760px geometry, 4 layout modes (including Hybrid Pinned Grid + List), adaptive Windows accents, and bottom-right anchored action dispatching."
-author: Runner Architecture & Design Lab
+description: "The definitive design system and architectural specification for FOCAL — an inspired, compact, and spacious Windows desktop command instrument combining Nordic Industrial HUD DNA, restrained functional minimalism, proportional 760px geometry, 4 layout modes (including Hybrid Pinned Grid + List), adaptive Windows accents, and bottom-right anchored action dispatching."
+author: Focal Architecture & Design Lab
 standard: design-md/1.0.0
 
 tokens:
@@ -73,7 +73,7 @@ tokens:
     selection_flood: "0 1px 4px rgba(0, 0, 0, 0.35)"
 ---
 
-# RUNNER DESIGN SYSTEM SPECIFICATION (DESIGN.md)
+# FOCAL DESIGN SYSTEM SPECIFICATION (DESIGN.md)
 **Specification Version:** 2.1.0-PROD  
 **Design Identity:** *Nordic Minimal HUD (Direction C Refined)*  
 **Platform:** Windows 11 / Windows 10 (Tauri v2 + WebView2 + React 18/19 + Tailwind CSS)
@@ -95,7 +95,7 @@ The **Nordic Minimal HUD** redesign recalibrates the aesthetic back to Dieter Ra
    - Physical tactile keycaps (`.hud-key`) with 3D bottom bevels.
    - Authentic vector SVG brand icons (zero cartoon emojis).
 3. **Restrained Signal-to-Noise Ratio:**
-   - Telemetry header streamlined to a single elegant bar (`RUNNER // SYS_COMMAND_HUD • 842 TARGETS [READY]`).
+   - Telemetry header streamlined to a single elegant bar (`FOCAL // SYS_COMMAND_HUD • 842 TARGETS [READY]`).
    - Removed the noisy `ID TARGET / ALIAS TYPE SOURCE ACTION` table header; the columns speak for themselves with natural whitespace alignment.
    - Right-side context inspector simplified to a clean identity card and 4 critical technical specs (`PUBLISHER`, `VERSION`, `SUBSYSTEM`, `STATUS: VERIFIED`).
 4. **Bottom-Right Anchored Action Pop-Up (<kbd>Tab</kbd>):**
@@ -109,7 +109,7 @@ The **Nordic Minimal HUD** redesign recalibrates the aesthetic back to Dieter Ra
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ [●] RUNNER // SYS_COMMAND_HUD • 842 TARGETS        [READY] ACCENT  [✕] │ Header (32px)
+│ [●] FOCAL // SYS_COMMAND_HUD • 842 TARGETS        [READY] ACCENT  [✕] │ Header (32px)
 ├────────────────────────────────────────────────────────────────────────┤
 │ > EXECUTE QUERY, ALIAS (wh, vs), OR '/'...  [LIST|HYBRID|GRID|CAT][ESC]│ Omnibox (44px)
 ├────────────────────────────────────────┬───────────────────────────────┤
@@ -132,7 +132,7 @@ The **Nordic Minimal HUD** redesign recalibrates the aesthetic back to Dieter Ra
 
 ## 3. Four Layout Modes
 
-RUNNER supports 4 layout paradigms selectable via the omnibar buttons or keyboard shortcuts:
+FOCAL supports 4 layout paradigms selectable via the omnibar buttons or keyboard shortcuts:
 
 ### 3.1 Mode 1: HYBRID (Recommended Default)
 * **Rationale:** Merges the high visual recognizability of pinned icon tiles with the dense scanning speed of tabular list rows.

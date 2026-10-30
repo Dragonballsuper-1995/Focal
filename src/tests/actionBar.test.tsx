@@ -22,7 +22,7 @@ const MOCK_CMD_ITEM: SearchResult = {
 };
 
 describe('ActionBar Component', () => {
-  it('renders RUNNER branding and active item title', () => {
+  it('renders FOCAL branding and does not render active item title or online badge', () => {
     render(
       <ActionBar
         selectedItem={MOCK_APP_ITEM}
@@ -33,8 +33,9 @@ describe('ActionBar Component', () => {
       />
     );
 
-    expect(screen.getByText('RUNNER')).toBeInTheDocument();
-    expect(screen.getByText('Windows Terminal')).toBeInTheDocument();
+    expect(screen.getByText('FOCAL')).toBeInTheDocument();
+    expect(screen.queryByText('Windows Terminal')).not.toBeInTheDocument();
+    expect(screen.queryByText('[ONLINE]')).not.toBeInTheDocument();
   });
 
   it('renders Admin shortcut hint only for app category', () => {

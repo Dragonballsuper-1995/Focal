@@ -28,12 +28,12 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   return (
     <div
       role="menu"
-      className="absolute bottom-11 right-3 w-64 bg-[var(--hud-bg-sub)] backdrop-blur-xl border border-[var(--hud-border-outer)] rounded-lg shadow-2xl z-50 flex flex-col font-mono text-xs overflow-hidden ring-1 ring-black/20 animate-in fade-in zoom-in-95 select-none"
+      className="absolute bottom-11 right-3 w-64 bg-[var(--hud-bg-sub)] backdrop-blur-xl border border-[var(--hud-border-outer)] rounded-none shadow-2xl z-50 flex flex-col font-mono text-xs overflow-hidden ring-1 ring-black/20 animate-in fade-in zoom-in-95 select-none"
     >
       {/* Header */}
       <div className="px-3 py-2 bg-[var(--hud-bg-panel)] border-b border-[var(--hud-border-grid)] flex items-center justify-between text-[10px]">
         <div className="flex items-center gap-1.5 truncate">
-          <span className="w-1.5 h-1.5 bg-[var(--sys-accent)] rounded-full inline-block shrink-0" />
+          <span className="w-1.5 h-1.5 bg-[var(--sys-accent)] rounded-none inline-block shrink-0" />
           <span
             className="font-bold text-[var(--text-main)] tracking-wider truncate"
             title="Available Actions"
@@ -63,7 +63,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
               role="menuitem"
               onMouseEnter={() => onSelectIndex(idx)}
               onClick={() => onSelect(act.id)}
-              className={`flex items-center justify-between px-2.5 py-1.5 rounded-md cursor-pointer text-[11px] font-mono transition-colors border ${
+              className={`flex items-center justify-between px-2.5 py-1.5 rounded-none cursor-pointer text-[11px] font-mono transition-colors border ${
                 isActSel
                   ? 'bg-[var(--sys-accent)] text-black font-bold border-[var(--sys-accent)] shadow-sm'
                   : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'

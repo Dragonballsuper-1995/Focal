@@ -1,0 +1,46 @@
+import React from 'react';
+
+interface FocalLogoProps {
+  className?: string;
+}
+
+export const FocalLogo: React.FC<FocalLogoProps> = ({ className = 'w-4 h-4' }) => {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        <linearGradient id="focal-grad1" x1="22" y1="26" x2="86" y2="26" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFA07A" />
+          <stop offset="100%" stopColor="#FB923C" />
+        </linearGradient>
+
+        <linearGradient id="focal-grad2" x1="22" y1="54" x2="70" y2="54" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FB7185" />
+          <stop offset="100%" stopColor="#F43F5E" />
+        </linearGradient>
+
+        <linearGradient id="focal-grad3" x1="22" y1="82" x2="42" y2="82" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#F43F5E" />
+          <stop offset="100%" stopColor="#E11D48" />
+        </linearGradient>
+      </defs>
+
+      <g id="focal-mark">
+        {/* Top Pill Bar (Long) */}
+        <rect x="22" y="16" width="64" height="20" rx="10" fill="url(#focal-grad1)" />
+
+        {/* Middle Pill Bar (Medium) */}
+        <rect x="22" y="44" width="48" height="20" rx="10" fill="url(#focal-grad2)" />
+
+        {/* Bottom Standalone Dot / Pill (Base of F) */}
+        <circle cx="32" cy="82" r="10" fill="url(#focal-grad3)" />
+      </g>
+    </svg>
+  );
+};
+
+export default FocalLogo;

@@ -19,6 +19,7 @@ export interface ResultsListProps {
   onContextMenu?: (item: SearchResult) => void;
   onContextMenuPinned?: (item: PinnedItem, index: number) => void;
   layoutMode?: LayoutMode;
+  isCtrlHeld?: boolean;
 }
 
 export const ResultsList: React.FC<ResultsListProps> = ({
@@ -36,6 +37,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
   onContextMenu,
   onContextMenuPinned,
   layoutMode = 'hybrid',
+  isCtrlHeld = false,
 }) => {
   if (results.length === 0) {
     return (
@@ -54,6 +56,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
             }}
             onUnpin={(id) => onUnpinItem?.(id)}
             onContextMenu={onContextMenuPinned}
+            isCtrlHeld={isCtrlHeld}
           />
         )}
         <div className="flex flex-col items-center justify-center py-16 text-center text-neutral-500 text-xs font-mono">
@@ -82,6 +85,8 @@ export const ResultsList: React.FC<ResultsListProps> = ({
                 aria-selected={isSelected}
                 onClick={() => {
                   onSelectIndex(index);
+                }}
+                onDoubleClick={() => {
                   onExecute(item);
                 }}
                 onContextMenu={(e) => {
@@ -90,7 +95,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
                   onSelectIndex(index);
                   onContextMenu?.(item);
                 }}
-                className={`flex flex-col items-center justify-center p-3 rounded-md border cursor-pointer transition-all text-center ${
+                className={`flex flex-col items-center justify-center p-3 rounded-none border cursor-pointer transition-all text-center ${
                   isSelected
                     ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold shadow-md'
                     : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)] hover:border-[var(--sys-accent)]'
@@ -112,7 +117,7 @@ export const ResultsList: React.FC<ResultsListProps> = ({
                   </span>
                   {item.alias && (
                     <span
-                      className={`px-1 rounded ${
+                      className={`px-1 rounded-none ${
                         isSelected
                           ? 'bg-black text-[var(--sys-accent)] font-bold'
                           : 'bg-[var(--keycap-bg)] text-[var(--text-muted)]'
@@ -130,11 +135,10 @@ export const ResultsList: React.FC<ResultsListProps> = ({
     );
   }
 
-  // 2. HYBRID & LIST MODES: Natural array-order rendering with Raycast-style section dividers
+  // 2. HYBRID & LIST MODES: Natural array-order rendering with unified Suggestions section
   const showPinnedGrid =
     layoutMode === 'hybrid' && query === '' && pinnedItems && pinnedItems.length > 0;
-
-  let lastSection = '';
+  const effectivePinnedCount = showPinnedGrid && pinnedItems ? Math.min(pinnedItems.length, 9) : 0;
 
   return (
     <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1 font-mono select-none" role="listbox">
@@ -153,51 +157,34 @@ export const ResultsList: React.FC<ResultsListProps> = ({
           }}
           onUnpin={(id) => onUnpinItem?.(id)}
           onContextMenu={onContextMenuPinned}
+          isCtrlHeld={isCtrlHeld}
         />
       )}
 
-      {/* Render results in natural index order to preserve keyboard navigation invariants */}
-      {results.map((item, index) => {
-        let section = 'Commands & Settings';
-        const idL = item.id.toLowerCase();
-        const titleL = item.title.toLowerCase();
-        if (
-          idL.includes('clipboard') ||
-          idL.includes('snippets') ||
-          idL.includes('files') ||
-          idL.includes('shutdown') ||
-          idL.includes('restart') ||
-          idL.includes('lock') ||
-          idL.includes('sleep') ||
-          titleL.includes('shut down') ||
-          titleL.includes('restart')
-        ) {
-          section = 'Suggestions';
-        } else if (item.category === 'app') {
-          section = 'Applications';
-        }
+      {/* Unified Suggestions category header when query is empty */}
+      {query === '' && results.length > 0 && (
+        <div className="px-1.5 pt-2 pb-1 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-bold">
+          <span>Suggestions</span>
+        </div>
+      )}
 
-        const showHeader = query === '' && section !== lastSection;
-        if (showHeader) {
-          lastSection = section;
-        }
+      {/* Render results with quick numeric triggers (continuing from pinned items up to 9) */}
+      {results.map((item, index) => {
+        const slot = effectivePinnedCount + index + 1;
+        const quickNumber = slot <= 9 ? slot : undefined;
 
         return (
-          <React.Fragment key={item.id}>
-            {showHeader && (
-              <div className="px-1.5 pt-2 pb-1 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-bold">
-                <span>{section}</span>
-              </div>
-            )}
-            <ResultItem
-              item={item}
-              index={index}
-              isSelected={activeSection === 'results' && index === selectedIndex}
-              onSelect={() => onSelectIndex(index)}
-              onExecute={onExecute}
-              onContextMenu={onContextMenu}
-            />
-          </React.Fragment>
+          <ResultItem
+            key={item.id}
+            item={item}
+            index={index}
+            isSelected={activeSection === 'results' && index === selectedIndex}
+            onSelect={() => onSelectIndex(index)}
+            onExecute={onExecute}
+            onContextMenu={onContextMenu}
+            isCtrlHeld={isCtrlHeld}
+            quickNumber={quickNumber}
+          />
         );
       })}
     </div>

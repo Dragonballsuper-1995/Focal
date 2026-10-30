@@ -109,7 +109,7 @@ pub fn fast_launch_windows(target: &str, run_as_admin: bool) {
     // 3. Native ShellExecuteW for .lnk shortcuts, protocols (ms-settings:), and admin execution
     if let Err(e) = native_launch_target(target, run_as_admin) {
         eprintln!(
-            "[Runner Warning] Native ShellExecute failed for '{}' ({}), falling back to explorer",
+            "[Focal Warning] Native ShellExecute failed for '{}' ({}), falling back to explorer",
             target, e
         );
         let mut cmd = std::process::Command::new("explorer.exe");
@@ -335,7 +335,7 @@ pub fn run() {
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
-                    eprintln!("[Runner Hotkey Triggered] {:?}, state: {:?}", shortcut, event.state());
+                    eprintln!("[Focal Hotkey Triggered] {:?}, state: {:?}", shortcut, event.state());
                     if event.state() == ShortcutState::Pressed {
                         window_manager::toggle_launcher(app);
                     }
@@ -394,15 +394,15 @@ pub fn run() {
                 use tauri::menu::{Menu, MenuItem};
                 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 
-                let show_i = MenuItem::with_id(app, "show", "Open Runner", true, None::<&str>)?;
-                let quit_i = MenuItem::with_id(app, "quit", "Quit Runner", true, None::<&str>)?;
+                let show_i = MenuItem::with_id(app, "show", "Open Focal", true, None::<&str>)?;
+                let quit_i = MenuItem::with_id(app, "quit", "Quit Focal", true, None::<&str>)?;
                 let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
 
                 let _tray = TrayIconBuilder::new()
                     .icon(icon)
                     .menu(&menu)
                     .show_menu_on_left_click(false)
-                    .tooltip("Runner")
+                    .tooltip("Focal")
                     .on_menu_event(|app, event| {
                         match event.id.as_ref() {
                             "quit" => {
@@ -477,14 +477,24 @@ pub fn run() {
                 let _ = window.hide();
             }
             WindowEvent::Focused(focused) => {
-                eprintln!("[Runner WindowEvent] Focused: {}", focused);
-                if !focused && !window_manager::should_ignore_blur() {
-                    let _ = window.hide();
-                    let _ = window.emit("launcher-hidden", ());
+                eprintln!("[Focal WindowEvent] Focused: {}", focused);
+                if !focused {
+                    #[cfg(target_os = "windows")]
+                    let is_external = match window.hwnd() {
+                        Ok(hwnd) => window_manager::is_external_blur(hwnd.0 as isize),
+                        Err(_) => !window_manager::should_ignore_blur(),
+                    };
+                    #[cfg(not(target_os = "windows"))]
+                    let is_external = !window_manager::should_ignore_blur();
+
+                    if is_external {
+                        let _ = window.hide();
+                        let _ = window.emit("launcher-hidden", ());
+                    }
                 }
             }
             _ => {}
         })
         .run(tauri::generate_context!())
-        .expect("error while running runner application");
+        .expect("error while running focal application");
 }

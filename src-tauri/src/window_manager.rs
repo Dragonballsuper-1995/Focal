@@ -16,18 +16,18 @@ pub fn register_launcher_hotkey(
 
     match shortcut_manager.register(primary) {
         Ok(_) => {
-            println!("[Runner] Global hotkey '{}' registered successfully.", primary);
+            println!("[Focal] Global hotkey '{}' registered successfully.", primary);
             Ok(primary.to_string())
         }
         Err(err) => {
             eprintln!(
-                "[Runner Warning] Could not register primary hotkey '{}': {:?}. Trying fallback '{}'...",
+                "[Focal Warning] Could not register primary hotkey '{}': {:?}. Trying fallback '{}'...",
                 primary, err, fallback
             );
             if fallback != primary {
                 match shortcut_manager.register(fallback) {
                     Ok(_) => {
-                        println!("[Runner] Fallback hotkey '{}' registered successfully.", fallback);
+                        println!("[Focal] Fallback hotkey '{}' registered successfully.", fallback);
                         Ok(fallback.to_string())
                     }
                     Err(fallback_err) => Err(format!(
@@ -49,7 +49,7 @@ pub fn apply_window_effects(hwnd_raw: isize) {
     use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::Graphics::Dwm::{
         DwmSetWindowAttribute, DWMWA_USE_IMMERSIVE_DARK_MODE, DWMWA_WINDOW_CORNER_PREFERENCE,
-        DWMWCP_ROUND,
+        DWMWCP_DONOTROUND,
     };
 
     unsafe {
@@ -64,8 +64,8 @@ pub fn apply_window_effects(hwnd_raw: isize) {
             std::mem::size_of::<i32>() as u32,
         );
 
-        // 2. Hardware rounded corners (attribute 33)
-        let corner_pref = DWMWCP_ROUND;
+        // 2. Hardware sharp/boxy corners (attribute 33: DWMWCP_DONOTROUND = 1)
+        let corner_pref = DWMWCP_DONOTROUND;
         let _ = DwmSetWindowAttribute(
             hwnd,
             DWMWA_WINDOW_CORNER_PREFERENCE as u32,
@@ -94,7 +94,60 @@ pub fn should_ignore_blur() -> bool {
     now.saturating_sub(last_shown) < 200
 }
 
-/// Restores focus to the window that owned foreground prior to Runner opening
+/// Determines whether a blur/unfocus event was caused by switching to another window,
+/// or if it was an internal modal move loop artifact (e.g. window dragging).
+#[cfg(target_os = "windows")]
+pub fn is_external_blur(hwnd_raw: isize) -> bool {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON};
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetAncestor, GetForegroundWindow, GetWindowThreadProcessId, GA_ROOT,
+    };
+
+    if should_ignore_blur() {
+        return false;
+    }
+
+    unsafe {
+        let hwnd = hwnd_raw as HWND;
+        let fg_hwnd = GetForegroundWindow();
+
+        // If foreground window is temporarily null during drag/mode transition, ignore blur.
+        if fg_hwnd.is_null() {
+            return false;
+        }
+
+        // If our window (or root ancestor) is still the foreground window, this blur is an internal
+        // Chromium/WebView2 or modal move loop artifact (e.g. data-tauri-drag-region).
+        if fg_hwnd == hwnd || GetAncestor(fg_hwnd, GA_ROOT) == hwnd {
+            return false;
+        }
+
+        // If the foreground window belongs to our own process, ignore blur.
+        let mut fg_pid = 0u32;
+        GetWindowThreadProcessId(fg_hwnd, &mut fg_pid);
+        if fg_pid == std::process::id() {
+            return false;
+        }
+
+        // If the left mouse button is currently held down, the user is likely
+        // performing a window drag or click interaction; do not hide.
+        let lbutton_state = GetAsyncKeyState(VK_LBUTTON as i32);
+        if (lbutton_state as u16 & 0x8000) != 0 {
+            return false;
+        }
+
+        // Otherwise, focus has genuinely shifted to an external application.
+        true
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn is_external_blur(_hwnd_raw: isize) -> bool {
+    !should_ignore_blur()
+}
+
+/// Restores focus to the window that owned foreground prior to Focal opening
 #[cfg(target_os = "windows")]
 pub fn restore_previous_focus() {
     use windows_sys::Win32::Foundation::HWND;

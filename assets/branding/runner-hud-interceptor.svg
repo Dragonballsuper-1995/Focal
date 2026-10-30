@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Runner Variant C: The HUD Interceptor (Nordic Telemetry Reticle) -->
+  <defs>
+    <linearGradient id="hud-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E121A"/>
+      <stop offset="100%" stop-color="#080A0F"/>
+    </linearGradient>
+
+    <linearGradient id="hud-cyan-grad" x1="26" y1="26" x2="74" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <linearGradient id="hud-accent-grad" x1="40" y1="34" x2="78" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Container -->
+  <rect width="100" height="100" rx="24" fill="url(#hud-bg)"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="23.25" stroke="#1F283C" stroke-width="1.5"/>
+
+  <!-- Radar Telemetry Compass Circle -->
+  <circle cx="50" cy="50" r="38" stroke="#1A2234" stroke-width="1.5"/>
+  <circle cx="50" cy="50" r="32" stroke="#151C2A" stroke-width="1" stroke-dasharray="2 4"/>
+
+  <!-- Precision Cardinal Telemetry Crosshairs -->
+  <line x1="50" y1="8" x2="50" y2="15" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="85" x2="50" y2="92" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="8" y1="50" x2="15" y2="50" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="85" y1="50" x2="92" y2="50" stroke="#38BDF8" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Dual-Tier Interceptor Chevrons (Forward Running Vectors) -->
+  <!-- Primary High-Speed Interceptor Chevron (Pointing Right / Forward >>) -->
+  <path d="M 36 28 L 56 50 L 36 72 L 48 72 L 68 50 L 48 28 Z" fill="url(#hud-cyan-grad)"/>
+
+  <!-- Secondary Kinetic Core Vector Blade -->
+  <path d="M 52 36 L 66 50 L 52 64 L 60 64 L 74 50 L 60 36 Z" fill="url(#hud-accent-grad)"/>
+
+  <!-- Focal Aim Singularity Crosshair -->
+  <circle cx="68" cy="50" r="2.5" fill="#FFFFFF"/>
+  <line x1="20" y1="50" x2="30" y2="50" stroke="#38BDF8" stroke-width="1" stroke-dasharray="1 2"/>
+</svg>

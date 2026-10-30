@@ -112,7 +112,7 @@ export function App() {
     const preventBrowserInterferingShortcuts = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         const k = e.key.toLowerCase();
-        if (['p', 'o', 'f', 'r', 'u', 'j'].includes(k)) {
+        if (['p', 'o', 'f', 'r', 'u', 'j'].includes(k) || (k >= '1' && k <= '9')) {
           e.preventDefault();
         }
       }
@@ -231,6 +231,14 @@ export function App() {
   const pinnedCount =
     viewMode === 'root' && query === '' && layoutMode === 'hybrid' ? pinnedItems.length : 0;
 
+  // Capped at max 5 items for suggestions when query is empty
+  const displayedResults = useMemo(() => {
+    if (query === '') {
+      return results.slice(0, 5);
+    }
+    return results;
+  }, [query, results]);
+
   // 6. Keyboard Navigation hook
   const {
     selectedIndex,
@@ -242,13 +250,14 @@ export function App() {
     actionIndex,
     setActionIndex,
     handleKeyDown,
+    isCtrlHeld,
   } = useKeyboardNav({
-    totalItems: results.length,
+    totalItems: displayedResults.length,
     pinnedCount,
     actionItemsCount: 5,
     onExecutePrimary: (idx) => {
-      if (results[idx]) {
-        handleExecuteItem(results[idx]);
+      if (displayedResults[idx]) {
+        handleExecuteItem(displayedResults[idx]);
       }
     },
     onExecutePinned: (pIdx) => {
@@ -270,8 +279,8 @@ export function App() {
       if (activeSection === 'pinned' && pinnedItems[selectedPinnedIndex]) {
         const item = pinnedItems[selectedPinnedIndex];
         launchItem(item.id, 'app_admin', item.action).catch(console.error);
-      } else if (results[idx]) {
-        handleAction('admin', results[idx]);
+      } else if (displayedResults[idx]) {
+        handleAction('admin', displayedResults[idx]);
       }
     },
     onExecuteActionByIndex: (actIdx) => {
@@ -290,9 +299,19 @@ export function App() {
     onResetView: () => {
       setViewMode('root');
       clearQuery();
+      const hasPinned = (config.pinned_items || []).length > 0;
+      setActiveSection(hasPinned ? 'pinned' : 'results');
+      setSelectedPinnedIndex(0);
+      setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 10);
     },
-    onClearQuery: clearQuery,
+    onClearQuery: () => {
+      clearQuery();
+      const hasPinned = (config.pinned_items || []).length > 0;
+      setActiveSection(hasPinned ? 'pinned' : 'results');
+      setSelectedPinnedIndex(0);
+      setSelectedIndex(0);
+    },
     onHideWindow: () => {
       hideWindow().catch(() => {});
     },
@@ -316,8 +335,8 @@ export function App() {
         alias: p.alias,
       };
     }
-    return results[selectedIndex];
-  }, [activeSection, pinnedCount, pinnedItems, selectedPinnedIndex, results, selectedIndex]);
+    return displayedResults[selectedIndex];
+  }, [activeSection, pinnedCount, pinnedItems, selectedPinnedIndex, displayedResults, selectedIndex]);
 
   const isSelectedPinned = useMemo(() => {
     if (!currentSelectedItem) return false;
@@ -339,14 +358,14 @@ export function App() {
 
   const handleItemContextMenu = useCallback(
     (item: SearchResult) => {
-      const idx = results.findIndex((r) => r.id === item.id);
+      const idx = displayedResults.findIndex((r) => r.id === item.id);
       if (idx !== -1) {
         setActiveSection('results');
         setSelectedIndex(idx);
       }
       setIsActionMenuOpen(true);
     },
-    [results, setActiveSection, setSelectedIndex]
+    [displayedResults, setActiveSection, setSelectedIndex]
   );
 
   const handlePinnedContextMenu = useCallback(
@@ -363,7 +382,8 @@ export function App() {
     onShown: () => {
       clearQuery();
       setViewMode('root');
-      setActiveSection('results');
+      const hasPinned = (config.pinned_items || []).length > 0;
+      setActiveSection(hasPinned ? 'pinned' : 'results');
       setSelectedIndex(0);
       setSelectedPinnedIndex(0);
       setIsActionMenuOpen(false);
@@ -381,45 +401,59 @@ export function App() {
   return (
     <div className="flex items-center justify-center w-full h-full bg-transparent p-0 select-none">
       <div
-        className="relative flex flex-col w-full max-w-[760px] h-full max-h-[480px] bg-[var(--hud-bg-base)] border border-[var(--hud-border-outer)] rounded-xl shadow-2xl overflow-hidden font-mono backdrop-blur-xl ring-1 ring-black/10"
+        className="relative flex flex-col w-full max-w-[760px] h-full max-h-[480px] bg-[var(--hud-bg-base)] border border-[var(--hud-border-outer)] rounded-none shadow-2xl overflow-hidden font-mono backdrop-blur-xl ring-1 ring-black/10"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        {/* 1. Command Prompt Omnibar directly at Top (No telemetry header) */}
-        <SearchBar
-          query={query}
-          onChange={(q) => {
-            setQuery(q);
-            setActiveSection('results');
-            setSelectedIndex(0);
-          }}
-          onClear={() => {
-            clearQuery();
-            setActiveSection('results');
-            setSelectedIndex(0);
-            setSelectedPinnedIndex(0);
-          }}
-          onResetView={() => {
-            setViewMode('root');
-            clearQuery();
-            setTimeout(() => inputRef.current?.focus(), 10);
-          }}
-          inputRef={inputRef}
-          viewMode={viewMode}
-          isLoading={isLoading}
-          theme={config.theme}
-          onToggleTheme={handleToggleTheme}
-          onOpenSettings={() => {
-            setViewMode('settings');
-            clearQuery();
-          }}
-        />
+        {/* 1. Command Prompt Omnibar directly at Top (Root only) */}
+        {viewMode === 'root' && (
+          <SearchBar
+            query={query}
+            onChange={(q) => {
+              setQuery(q);
+              if (q === '') {
+                const hasPinned = (config.pinned_items || []).length > 0;
+                setActiveSection(hasPinned ? 'pinned' : 'results');
+                setSelectedPinnedIndex(0);
+                setSelectedIndex(0);
+              } else {
+                setActiveSection('results');
+                setSelectedIndex(0);
+              }
+            }}
+            onClear={() => {
+              clearQuery();
+              const hasPinned = (config.pinned_items || []).length > 0;
+              setActiveSection(hasPinned ? 'pinned' : 'results');
+              setSelectedIndex(0);
+              setSelectedPinnedIndex(0);
+            }}
+            onResetView={() => {
+              setViewMode('root');
+              clearQuery();
+              const hasPinned = (config.pinned_items || []).length > 0;
+              setActiveSection(hasPinned ? 'pinned' : 'results');
+              setSelectedPinnedIndex(0);
+              setSelectedIndex(0);
+              setTimeout(() => inputRef.current?.focus(), 10);
+            }}
+            inputRef={inputRef}
+            viewMode={viewMode}
+            isLoading={isLoading}
+            theme={config.theme}
+            onToggleTheme={handleToggleTheme}
+            onOpenSettings={() => {
+              setViewMode('settings');
+              clearQuery();
+            }}
+          />
+        )}
 
         {/* 2. Main Stage (Full 100% width, no preview pane) */}
         {viewMode === 'root' ? (
           <div className="flex-1 w-full overflow-hidden flex flex-col bg-transparent relative">
             <ResultsList
-              results={results}
+              results={displayedResults}
               selectedIndex={selectedIndex}
               onSelectIndex={(idx) => {
                 setActiveSection('results');
@@ -434,6 +468,7 @@ export function App() {
               onExecute={handleExecuteItem}
               query={query}
               pinnedItems={pinnedItems}
+              isCtrlHeld={isCtrlHeld}
               onExecutePinned={(pinned) => {
                 handleExecuteItem({
                   id: pinned.id,
@@ -510,7 +545,7 @@ export function App() {
                   clearQuery();
                   inputRef.current?.focus();
                 }}
-                className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--sys-accent)] hover:opacity-90 rounded transition-opacity shadow-sm"
+                className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--sys-accent)] hover:opacity-90 rounded-none transition-opacity shadow-sm"
               >
                 Return to Search (Esc)
               </button>
@@ -518,17 +553,19 @@ export function App() {
           </div>
         )}
 
-        {/* 3. Raycast-Inspired Bottom Dock Footer */}
-        <ActionBar
-          selectedItem={currentSelectedItem}
-          isActionMenuOpen={isActionMenuOpen}
-          actionIndex={actionIndex}
-          onSelectActionIndex={setActionIndex}
-          onToggleActionMenu={() => setIsActionMenuOpen((prev) => !prev)}
-          onCloseActionMenu={() => setIsActionMenuOpen(false)}
-          onSelectAction={(actionId) => handleAction(actionId, currentSelectedItem)}
-          isPinned={isSelectedPinned}
-        />
+        {/* 3. Raycast-Inspired Bottom Dock Footer (Root only) */}
+        {viewMode === 'root' && (
+          <ActionBar
+            selectedItem={currentSelectedItem}
+            isActionMenuOpen={isActionMenuOpen}
+            actionIndex={actionIndex}
+            onSelectActionIndex={setActionIndex}
+            onToggleActionMenu={() => setIsActionMenuOpen((prev) => !prev)}
+            onCloseActionMenu={() => setIsActionMenuOpen(false)}
+            onSelectAction={(actionId) => handleAction(actionId, currentSelectedItem)}
+            isPinned={isSelectedPinned}
+          />
+        )}
       </div>
     </div>
   );

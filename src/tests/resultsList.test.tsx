@@ -81,21 +81,27 @@ describe('ResultsList Component', () => {
     expect(badges[0].closest('[role="option"]')).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('triggers onExecute when clicking an item row', () => {
+  it('selects item row on click without executing; executes on double click', () => {
+    const handleSelectIndex = vi.fn();
     const handleExecute = vi.fn();
     render(
       <ResultsList
         results={MOCK_ITEMS}
         selectedIndex={0}
-        onSelectIndex={vi.fn()}
+        onSelectIndex={handleSelectIndex}
         onExecute={handleExecute}
         query=""
       />
     );
 
     const secondItem = screen.getByText('Windows Terminal');
+    // Single click selects only
     fireEvent.click(secondItem);
+    expect(handleSelectIndex).toHaveBeenCalledWith(1);
+    expect(handleExecute).not.toHaveBeenCalled();
 
+    // Double click executes
+    fireEvent.doubleClick(secondItem);
     expect(handleExecute).toHaveBeenCalledTimes(1);
     expect(handleExecute).toHaveBeenCalledWith(MOCK_ITEMS[1]);
   });
@@ -127,9 +133,13 @@ describe('ResultsList Component', () => {
     expect(handleSelectIndex).toHaveBeenCalledWith(2);
     expect(handleContextMenu).toHaveBeenCalledWith(MOCK_ITEMS[2]);
 
-    // 3. Left click selects item and triggers execution
+    // 3. Left click selects item and does NOT trigger execution
     fireEvent.click(thirdItem);
     expect(handleSelectIndex).toHaveBeenCalledWith(2);
+    expect(handleExecute).not.toHaveBeenCalled();
+
+    // 4. Double click triggers execution
+    fireEvent.doubleClick(thirdItem);
     expect(handleExecute).toHaveBeenCalledWith(MOCK_ITEMS[2]);
   });
 
@@ -148,5 +158,106 @@ describe('ResultsList Component', () => {
     expect(
       screen.getByText('Try searching for installed apps or system settings')
     ).toBeInTheDocument();
+  });
+
+  it('renders a single unified Suggestions category header with no separate Applications or Commands & Settings headers', () => {
+    render(
+      <ResultsList
+        results={MOCK_ITEMS}
+        selectedIndex={0}
+        onSelectIndex={vi.fn()}
+        onExecute={vi.fn()}
+        query=""
+      />
+    );
+
+    // Single Suggestions header should be visible
+    expect(screen.getByText('Suggestions')).toBeInTheDocument();
+
+    // Distinct fragmented category headers should not exist
+    expect(screen.queryByText('Applications')).not.toBeInTheDocument();
+    expect(screen.queryByText('Commands & Settings')).not.toBeInTheDocument();
+  });
+
+  it('displays quick number badges on pinned items and results when isCtrlHeld is true and hides them when false', () => {
+    const mockPinned = [
+      {
+        id: 'pin-1',
+        title: 'Pinned App 1',
+        subtitle: 'Sub 1',
+        category: 'app',
+        action: 'launch:app1',
+      },
+      {
+        id: 'pin-2',
+        title: 'Pinned App 2',
+        subtitle: 'Sub 2',
+        category: 'app',
+        action: 'launch:app2',
+      },
+    ];
+
+    const { rerender } = render(
+      <ResultsList
+        results={MOCK_ITEMS}
+        selectedIndex={0}
+        onSelectIndex={vi.fn()}
+        onExecute={vi.fn()}
+        query=""
+        pinnedItems={mockPinned}
+        isCtrlHeld={false}
+      />
+    );
+
+    // When isCtrlHeld is false, badges should not be displayed
+    expect(screen.queryByTestId('pinned-quick-number-1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pinned-quick-number-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('quick-number-3')).not.toBeInTheDocument();
+
+    // When isCtrlHeld is true, badges 1 and 2 appear on pinned, and 3, 4, 5 appear on results
+    rerender(
+      <ResultsList
+        results={MOCK_ITEMS}
+        selectedIndex={0}
+        onSelectIndex={vi.fn()}
+        onExecute={vi.fn()}
+        query=""
+        pinnedItems={mockPinned}
+        isCtrlHeld={true}
+      />
+    );
+
+    expect(screen.getByTestId('pinned-quick-number-1')).toHaveTextContent('1');
+    expect(screen.getByTestId('pinned-quick-number-2')).toHaveTextContent('2');
+    expect(screen.getByTestId('quick-number-3')).toHaveTextContent('3');
+    expect(screen.getByTestId('quick-number-4')).toHaveTextContent('4');
+    expect(screen.getByTestId('quick-number-5')).toHaveTextContent('5');
+  });
+
+  it('selects item on single click and executes on double click in grid layout mode', () => {
+    const handleSelectIndex = vi.fn();
+    const handleExecute = vi.fn();
+
+    render(
+      <ResultsList
+        results={MOCK_ITEMS}
+        selectedIndex={0}
+        onSelectIndex={handleSelectIndex}
+        onExecute={handleExecute}
+        query="test"
+        layoutMode="grid"
+      />
+    );
+
+    const secondItem = screen.getByText('Windows Terminal');
+    // Single click selects only
+    fireEvent.click(secondItem);
+    expect(handleSelectIndex).toHaveBeenCalledWith(1);
+    expect(handleExecute).not.toHaveBeenCalled();
+
+    // Double click executes
+    fireEvent.doubleClick(secondItem);
+    expect(handleExecute).toHaveBeenCalledTimes(1);
+    expect(handleExecute).toHaveBeenCalledWith(MOCK_ITEMS[1]);
   });
 });

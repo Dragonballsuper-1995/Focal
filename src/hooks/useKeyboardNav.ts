@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 export interface UseKeyboardNavOptions {
   totalItems: number;
@@ -37,16 +37,51 @@ export function useKeyboardNav({
   viewMode = 'root',
   hasQuery = false,
 }: UseKeyboardNavOptions) {
-  const [activeSection, setActiveSection] = useState<'pinned' | 'results'>('results');
+  const [activeSection, setActiveSection] = useState<'pinned' | 'results'>(
+    pinnedCount > 0 && !hasQuery ? 'pinned' : 'results'
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedPinnedIndex, setSelectedPinnedIndex] = useState(0);
   const [actionIndex, setActionIndex] = useState(0);
+  const [isCtrlHeld, setIsCtrlHeld] = useState(false);
 
-  // If query is present or no pinned items exist, force results section
+  // Track global Ctrl key press & hold state
+  useEffect(() => {
+    const handleKeyDownGlobal = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlHeld(true);
+      }
+    };
+    const handleKeyUpGlobal = (e: KeyboardEvent) => {
+      if (e.key === 'Control') {
+        setIsCtrlHeld(false);
+      }
+    };
+    const handleBlur = () => {
+      setIsCtrlHeld(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDownGlobal);
+    window.addEventListener('keyup', handleKeyUpGlobal);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDownGlobal);
+      window.removeEventListener('keyup', handleKeyUpGlobal);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
+  // If query is present or no pinned items exist, force results section.
+  // When pinned items become available with no query, switch to pinned if at initial state.
+  const prevPinnedCount = useRef(pinnedCount);
   useEffect(() => {
     if (hasQuery || pinnedCount === 0) {
       setActiveSection('results');
+    } else if (prevPinnedCount.current === 0 && pinnedCount > 0 && !hasQuery) {
+      setActiveSection('pinned');
+      setSelectedPinnedIndex(0);
     }
+    prevPinnedCount.current = pinnedCount;
   }, [hasQuery, pinnedCount]);
 
   // Keep selected index bounded within range whenever totalItems changes
@@ -172,6 +207,22 @@ export function useKeyboardNav({
       }
 
       // 4. Action Shortcuts (executable when browsing search results or pinned items)
+      // Quick numeric execution: Ctrl+1 through Ctrl+9 (from pinned to results)
+      if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        const slot = parseInt(e.key, 10);
+        const effectivePinnedCount = !hasQuery ? pinnedCount : 0;
+        if (slot <= effectivePinnedCount) {
+          onExecutePinned?.(slot - 1);
+        } else {
+          const resultIndex = slot - effectivePinnedCount - 1;
+          if (resultIndex < totalItems) {
+            onExecutePrimary?.(resultIndex);
+          }
+        }
+        return;
+      }
+
       // Run as Administrator: Ctrl+Enter
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
@@ -261,9 +312,14 @@ export function useKeyboardNav({
           return;
         }
 
-        // In results list: cycle through results with exact modulo wrapping
+        // In results list: advance or wrap around to pinned
         if (totalItems > 0) {
-          setSelectedIndex((prev) => (prev + 1) % totalItems);
+          if (selectedIndex === totalItems - 1 && pinnedCount > 0 && !hasQuery) {
+            setActiveSection('pinned');
+            setSelectedPinnedIndex(0);
+          } else {
+            setSelectedIndex((prev) => (prev + 1) % totalItems);
+          }
         }
         return;
       }
@@ -409,5 +465,6 @@ export function useKeyboardNav({
     actionIndex,
     setActionIndex,
     handleKeyDown,
+    isCtrlHeld,
   };
 }

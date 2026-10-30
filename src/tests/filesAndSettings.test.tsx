@@ -21,7 +21,7 @@ describe('Milestone 5: File Search & Settings UI', () => {
     render(<SettingsModal onBack={mockBack} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Runner Preferences')).toBeInTheDocument();
+      expect(screen.getByText('Focal Preferences')).toBeInTheDocument();
       expect(screen.getByText('General & Appearance')).toBeInTheDocument();
       expect(screen.getByText('Hotkeys & Activation')).toBeInTheDocument();
       expect(screen.getByText('Search Directories')).toBeInTheDocument();

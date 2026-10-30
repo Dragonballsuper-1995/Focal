@@ -100,7 +100,7 @@ pub struct PinnedItem {
     pub action: String,
 }
 
-/// Persistent configuration store (%APPDATA%\Runner\config.json)
+/// Persistent configuration store (%APPDATA%\Focal\config.json)
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RunnerConfig {
     pub theme: ThemeMode,
@@ -117,6 +117,8 @@ pub struct RunnerConfig {
     #[serde(default)]
     pub pinned_items: Vec<PinnedItem>,
 }
+
+pub type FocalConfig = RunnerConfig;
 
 impl Default for RunnerConfig {
     fn default() -> Self {

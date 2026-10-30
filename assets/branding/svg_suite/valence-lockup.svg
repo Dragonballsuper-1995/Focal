@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" fill="none">
+  
+    <defs>
+      <linearGradient id="val-grad" x1="12" y1="15" x2="85" y2="85" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#A855F7"/>
+        <stop offset="25%" stop-color="#7C3AED"/>
+        <stop offset="60%" stop-color="#2563EB"/>
+        <stop offset="100%" stop-color="#38BDF8"/>
+      </linearGradient>
+    </defs>
+    
+  <!-- Mark Container -->
+  <g transform="translate(10, 0)">
+    
+    <g id="valence-mark">
+      <!-- Main Continuous Sweeping Ribbon 'V' -->
+      <path d="M 18 20 
+               C 12 25, 10 33, 14 40 
+               L 36 78 
+               C 42 88, 54 88, 60 78 
+               L 82 32 
+               C 85 25, 83 18, 77 15 
+               C 71 12, 65 16, 62 23 
+               L 48 57 
+               C 46 62, 42 62, 40 57 
+               L 26 23 
+               C 24 18, 20 18, 18 20 
+               Z" fill="url(#val-grad)"/>
+
+      
+        <!-- Fold Underside Shadow for 3D depth at top right -->
+        <path d="M 75 18 C 78 22, 80 28, 80 34 C 77 31, 74 27, 70 24 Z" fill="#0F172A" opacity="0.6"/>
+        
+
+      <!-- Top-left 3D Fold Highlight -->
+      <path d="M 18 20 C 13 25, 12 32, 16 38 C 17 33, 20 28, 25 24 Z" fill="#FFFFFF" opacity="0.35"/>
+    </g>
+    
+  </g>
+  <!-- Wordmark Text -->
+  <text x="125" y="65" font-family="Inter, -apple-system, sans-serif" font-size="46" font-weight="700" fill="#FFFFFF" letter-spacing="-0.03em">Valence</text>
+</svg>

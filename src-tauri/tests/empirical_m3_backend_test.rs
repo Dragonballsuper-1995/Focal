@@ -1,9 +1,9 @@
-use runner_lib::app_scanner::{
+use focal_lib::app_scanner::{
     is_uninstaller_or_helper, scan_windows_settings, SETTINGS_CATALOG, SYSTEM32_WHITELIST,
 };
-use runner_lib::db::Database;
-use runner_lib::fuzzy::{apply_frecency, fuzzy_match, get_root_commands, search_all};
-use runner_lib::models::AppCacheItem;
+use focal_lib::db::Database;
+use focal_lib::fuzzy::{apply_frecency, fuzzy_match, get_root_commands, search_all};
+use focal_lib::models::AppCacheItem;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 

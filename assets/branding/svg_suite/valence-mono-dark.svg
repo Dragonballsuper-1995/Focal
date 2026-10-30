@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  
+  <!-- Squircle Base Tile -->
+  <rect width="100" height="100" rx="22" fill="#0E1117"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="21.25" stroke="#1F2636" stroke-width="1.5"/>
+
+  <!-- Centered Scaled Logo Mark -->
+  <g transform="translate(10, 10) scale(0.8)">
+    
+    <g id="valence-mark">
+      <!-- Main Continuous Sweeping Ribbon 'V' -->
+      <path d="M 18 20 
+               C 12 25, 10 33, 14 40 
+               L 36 78 
+               C 42 88, 54 88, 60 78 
+               L 82 32 
+               C 85 25, 83 18, 77 15 
+               C 71 12, 65 16, 62 23 
+               L 48 57 
+               C 46 62, 42 62, 40 57 
+               L 26 23 
+               C 24 18, 20 18, 18 20 
+               Z" fill="#FFFFFF"/>
+
+      
+
+      <!-- Top-left 3D Fold Highlight -->
+      <path d="M 18 20 C 13 25, 12 32, 16 38 C 17 33, 20 28, 25 24 Z" fill="#FFFFFF" opacity="0.35"/>
+    </g>
+    
+  </g>
+</svg>

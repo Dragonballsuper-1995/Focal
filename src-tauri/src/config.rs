@@ -6,7 +6,7 @@ use std::thread::sleep;
 use std::time::Duration;
 use thiserror::Error;
 
-use crate::models::RunnerConfig;
+use crate::models::{FocalConfig, RunnerConfig};
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
@@ -18,18 +18,18 @@ pub enum ConfigError {
     Validation(String),
 }
 
-/// Resolves the production path for the JSON config: %APPDATA%\Runner\config.json
+/// Resolves the production path for the JSON config: %APPDATA%\Focal\config.json
 pub fn resolve_config_path() -> PathBuf {
     if let Ok(app_data) = std::env::var("APPDATA") {
-        PathBuf::from(app_data).join("Runner").join("config.json")
-    } else if let Some(proj_dirs) = directories::ProjectDirs::from("com", "runner", "Runner") {
+        PathBuf::from(app_data).join("Focal").join("config.json")
+    } else if let Some(proj_dirs) = directories::ProjectDirs::from("com", "focal", "Focal") {
         proj_dirs.config_dir().join("config.json")
     } else {
         PathBuf::from("./config.json")
     }
 }
 
-pub fn validate_config(config: &RunnerConfig) -> Result<(), ConfigError> {
+pub fn validate_config(config: &FocalConfig) -> Result<(), ConfigError> {
     if config.global_hotkey.trim().is_empty() {
         return Err(ConfigError::Validation("global_hotkey cannot be empty".to_string()));
     }
@@ -108,7 +108,7 @@ impl ConfigManager {
                     Ok(parsed) => parsed,
                     Err(err) => {
                         eprintln!(
-                            "[RunnerConfig] Warning: Corrupted config, attempting backup recovery: {}",
+                            "[FocalConfig] Warning: Corrupted config, attempting backup recovery: {}",
                             err
                         );
                         let backup_path = path.with_extension("bak");

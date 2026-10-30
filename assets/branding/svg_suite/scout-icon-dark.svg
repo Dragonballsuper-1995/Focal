@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  
+    <defs>
+      <!-- Ring Gradient: Emerald to Cyan -->
+      <linearGradient id="scout-ring-grad" x1="50" y1="10" x2="50" y2="90" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#00FFA3"/>
+        <stop offset="50%" stop-color="#00D2FF"/>
+        <stop offset="100%" stop-color="#0084FF"/>
+      </linearGradient>
+
+      <!-- Arrow Light Facet -->
+      <linearGradient id="scout-arrow-light" x1="30" y1="30" x2="71" y2="56" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#00F0FF"/>
+        <stop offset="100%" stop-color="#00A3FF"/>
+      </linearGradient>
+
+      <!-- Arrow Dark Facet -->
+      <linearGradient id="scout-arrow-dark" x1="44" y1="40" x2="65" y2="70" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#0284C7"/>
+        <stop offset="100%" stop-color="#1E3A8A"/>
+      </linearGradient>
+    </defs>
+    
+  <!-- Squircle Base Tile -->
+  <rect width="100" height="100" rx="22" fill="#0E1117"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="21.25" stroke="#1F2636" stroke-width="1.5"/>
+
+  <!-- Centered Scaled Logo Mark -->
+  <g transform="translate(10, 10) scale(0.8)">
+    
+    <g id="scout-mark">
+      <!-- Outer Reticle Ring with 4 Cardinal Crosshair Gaps -->
+      <!-- Quadrant 1: Top-Right (North to East) -->
+      <path d="M 54 12 A 38 38 0 0 1 88 46" fill="none" stroke="url(#scout-ring-grad)" stroke-width="8" stroke-linecap="round"/>
+      <!-- Quadrant 2: Bottom-Right (East to South) -->
+      <path d="M 88 54 A 38 38 0 0 1 54 88" fill="none" stroke="url(#scout-ring-grad)" stroke-width="8" stroke-linecap="round"/>
+      <!-- Quadrant 3: Bottom-Left (South to West) -->
+      <path d="M 46 88 A 38 38 0 0 1 12 54" fill="none" stroke="url(#scout-ring-grad)" stroke-width="8" stroke-linecap="round"/>
+      <!-- Quadrant 4: Top-Left (West to North) -->
+      <path d="M 12 46 A 38 38 0 0 1 46 12" fill="none" stroke="url(#scout-ring-grad)" stroke-width="8" stroke-linecap="round"/>
+
+      <!-- 4 Cardinal Hairline Ticks extending slightly outward -->
+      <line x1="50" y1="7" x2="50" y2="12" stroke="url(#scout-ring-grad)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="50" y1="88" x2="50" y2="93" stroke="url(#scout-ring-grad)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="7" y1="50" x2="12" y2="50" stroke="url(#scout-ring-grad)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="88" y1="50" x2="93" y2="50" stroke="url(#scout-ring-grad)" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- Inner 3D Beveled Compass Needle pointing North-East (~52 deg) -->
+      <polygon points="71,29 30,48 44,56" fill="url(#scout-arrow-light)"/>
+      <polygon points="71,29 44,56 52,70" fill="url(#scout-arrow-dark)"/>
+    </g>
+    
+  </g>
+</svg>

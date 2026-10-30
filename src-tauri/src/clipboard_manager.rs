@@ -13,7 +13,7 @@ pub fn start_clipboard_listener(db: Database, max_items: usize) {
     }
 
     thread::Builder::new()
-        .name("runner-clipboard-monitor".to_string())
+        .name("focal-clipboard-monitor".to_string())
         .spawn(move || {
             let mut last_text = String::new();
 

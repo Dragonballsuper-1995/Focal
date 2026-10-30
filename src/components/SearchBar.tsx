@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sun, Moon, Settings } from 'lucide-react';
+import { X, Settings } from 'lucide-react';
 import type { ViewMode, LayoutMode } from '@/types';
 
 export interface SearchBarProps {
@@ -21,14 +21,14 @@ export interface SearchBarProps {
 export const SearchBar: React.FC<SearchBarProps> = ({
   query,
   onChange,
-  onClear,
+  onClear: _onClear,
   onResetView,
   inputRef,
   placeholder,
   viewMode,
   isLoading = false,
-  theme = 'dark',
-  onToggleTheme,
+  theme: _theme = 'dark',
+  onToggleTheme: _onToggleTheme,
   onOpenSettings,
 }) => {
   const getPlaceholder = () => {
@@ -92,12 +92,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Breadcrumb Pill for Subsystems */}
       {viewMode !== 'root' && (
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
           <span>{getViewModeLabel(viewMode)}</span>
           <button
             type="button"
             onClick={onResetView}
-            className="hover:opacity-75 rounded p-0.5 transition-opacity"
+            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
             title="Return to Command Palette (Esc)"
           >
             <X className="w-3 h-3" />
@@ -119,52 +119,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Right controls */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {viewMode === 'root' && (
-          <>
-            {/* Theme Toggle Button */}
-            {onToggleTheme && (
-              <button
-                type="button"
-                onClick={onToggleTheme}
-                className="p-1 rounded text-neutral-400 hover:text-[var(--text-main)] hover:bg-[var(--hud-bg-card)] transition-colors"
-                title={`Switch Theme (Current: ${theme})`}
-              >
-                {theme === 'light' ? (
-                  <Sun className="w-3.5 h-3.5 text-amber-500" />
-                ) : (
-                  <Moon className="w-3.5 h-3.5 text-sky-400" />
-                )}
-              </button>
-            )}
-
-            {/* Settings Button */}
-            {onOpenSettings && (
-              <button
-                type="button"
-                onClick={onOpenSettings}
-                className="p-1 rounded text-neutral-400 hover:text-[var(--text-main)] hover:bg-[var(--hud-bg-card)] transition-colors"
-                title="Preferences"
-              >
-                <Settings className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </>
-        )}
-
-        {/* ESC Badge / Clear Button */}
-        {query ? (
+        {viewMode === 'root' && onOpenSettings && (
           <button
             type="button"
-            onClick={onClear}
-            title="Clear search query"
-            className="text-[9.5px] px-1.5 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-300 hover:text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors font-mono cursor-pointer"
+            onClick={onOpenSettings}
+            className="p-1 rounded-none text-neutral-400 hover:text-[var(--text-main)] hover:bg-[var(--hud-bg-card)] transition-colors"
+            title="Preferences"
           >
-            ESC
+            <Settings className="w-3.5 h-3.5" />
           </button>
-        ) : (
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
-            ESC
-          </span>
         )}
 
         {/* Subview Back Button */}
@@ -172,7 +135,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <button
             type="button"
             onClick={onResetView}
-            className="px-2 py-0.5 text-[9.5px] font-mono font-medium text-[var(--text-main)] bg-[var(--keycap-bg)] hover:opacity-80 rounded border border-[var(--keycap-border)] transition-opacity"
+            className="px-2 py-0.5 text-[9.5px] font-mono font-medium text-[var(--text-main)] bg-[var(--keycap-bg)] hover:opacity-80 rounded-none border border-[var(--keycap-border)] transition-opacity"
           >
             BACK (ESC)
           </button>

@@ -1,9 +1,9 @@
-use runner_lib::app_scanner::{
+use focal_lib::app_scanner::{
     is_uninstaller_or_helper, scan_windows_settings, SETTINGS_CATALOG, SYSTEM32_WHITELIST,
 };
-use runner_lib::fuzzy::{fuzzy_match, get_root_commands, search_all};
-use runner_lib::models::{AppCacheItem, SearchResult};
-use runner_lib::window_manager::should_ignore_blur;
+use focal_lib::fuzzy::{fuzzy_match, get_root_commands, search_all};
+use focal_lib::models::{AppCacheItem, SearchResult};
+use focal_lib::window_manager::should_ignore_blur;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 

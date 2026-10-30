@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Valence Refined MK-I: The Harmonic Armillary (3D Woven Gyroscope) -->
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="v1-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F121C"/>
+      <stop offset="100%" stop-color="#080A10"/>
+    </linearGradient>
+
+    <!-- Ring 1 Gradient (Electric Violet to Cyan) -->
+    <linearGradient id="ring1-grad" x1="16" y1="20" x2="84" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="45%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+
+    <!-- Ring 2 Gradient (Deep Indigo to Vibrant Violet) -->
+    <linearGradient id="ring2-grad" x1="84" y1="20" x2="16" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="55%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+
+    <!-- Diamond Core Facet Gradients -->
+    <linearGradient id="core-top" x1="50" y1="40" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <linearGradient id="core-left" x1="40" y1="50" x2="50" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <linearGradient id="core-right" x1="50" y1="50" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="core-glow" x="30" y="30" width="40" height="40" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Container Squircle with Precision Border -->
+  <rect width="100" height="100" rx="24" fill="url(#v1-bg)"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="23.25" stroke="#252C42" stroke-width="1.5"/>
+
+  <!-- Outer Telemetry Coordinate Ring (Dashed Orbit) -->
+  <circle cx="50" cy="50" r="38" stroke="#1D2436" stroke-width="1" stroke-dasharray="2 4"/>
+  
+  <!-- Cardinal Micro Ticks -->
+  <line x1="50" y1="8" x2="50" y2="13" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="50" y1="87" x2="50" y2="92" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="8" y1="50" x2="13" y2="50" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="87" y1="50" x2="92" y2="50" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- 3D WEAVING ORBITAL SYSTEM -->
+  
+  <!-- Under-layer: Lower Arc of Ring 2 (Tilted 45deg) -->
+  <g transform="rotate(45 50 50)">
+    <ellipse cx="50" cy="50" rx="36" ry="14" stroke="#1E2338" stroke-width="4.5"/>
+    <ellipse cx="50" cy="50" rx="36" ry="14" stroke="url(#ring2-grad)" stroke-width="2.5"/>
+  </g>
+
+  <!-- Mid-layer: Full Ring 1 (Tilted -30deg) with Luminous Core Track -->
+  <g transform="rotate(-30 50 50)">
+    <!-- Outer structural casing -->
+    <ellipse cx="50" cy="50" rx="36" ry="14" stroke="#131726" stroke-width="5"/>
+    <!-- Chromatic gradient beam -->
+    <ellipse cx="50" cy="50" rx="36" ry="14" stroke="url(#ring1-grad)" stroke-width="2.75"/>
+    <!-- Inner luminous fiber track -->
+    <ellipse cx="50" cy="50" rx="36" ry="14" stroke="#FFFFFF" stroke-width="0.75" stroke-opacity="0.6"/>
+  </g>
+
+  <!-- Over-layer: Overlap Segment of Ring 2 to create true 3D interweaving -->
+  <path d="M 68 32 C 76 40, 78 52, 70 60" stroke="url(#ring2-grad)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Central Quantum Diamond Nucleus (3D Refractive Facets) -->
+  <g filter="url(#core-glow)">
+    <!-- Top Apex Facet -->
+    <polygon points="50,38 59,50 50,47 41,50" fill="url(#core-top)"/>
+    <!-- Left Bottom Facet -->
+    <polygon points="41,50 50,47 50,62" fill="url(#core-left)"/>
+    <!-- Right Bottom Facet -->
+    <polygon points="59,50 50,47 50,62" fill="url(#core-right)"/>
+    <!-- Micro Singular Core -->
+    <circle cx="50" cy="48" r="2" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Orbital Satellite Node with Kinetic Momentum Arc -->
+  <!-- Arc tail -->
+  <path d="M 72 32 C 76 34, 79 37, 81 41" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="1 3" stroke-linecap="round"/>
+  <!-- Primary Photon Bead -->
+  <circle cx="77" cy="35" r="3.5" fill="#38BDF8" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- Satellite core glow -->
+  <circle cx="77" cy="35" r="1.5" fill="#FFFFFF"/>
+
+  <!-- Telemetry Sub-node -->
+  <circle cx="23" cy="65" r="2" fill="#8B5CF6"/>
+</svg>

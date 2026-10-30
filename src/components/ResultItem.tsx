@@ -9,6 +9,8 @@ export interface ResultItemProps {
   onSelect: () => void;
   onExecute: (item: SearchResult) => void;
   onContextMenu?: (item: SearchResult) => void;
+  isCtrlHeld?: boolean;
+  quickNumber?: number;
 }
 
 export const ResultItem: React.FC<ResultItemProps> = ({
@@ -18,6 +20,8 @@ export const ResultItem: React.FC<ResultItemProps> = ({
   onSelect,
   onExecute,
   onContextMenu,
+  isCtrlHeld = false,
+  quickNumber,
 }) => {
   const itemRef = useRef<HTMLDivElement>(null);
   const idNum = String(index + 1).padStart(2, '0');
@@ -46,6 +50,8 @@ export const ResultItem: React.FC<ResultItemProps> = ({
       aria-selected={isSelected}
       onClick={() => {
         onSelect();
+      }}
+      onDoubleClick={() => {
         onExecute(item);
       }}
       onContextMenu={(e) => {
@@ -54,7 +60,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({
         onSelect();
         onContextMenu?.(item);
       }}
-      className={`flex items-center justify-between px-3 py-2 cursor-pointer text-xs font-mono transition-all rounded-md select-none ${
+      className={`flex items-center justify-between px-3 py-2 cursor-pointer text-xs font-mono transition-all rounded-none select-none ${
         isSelected
           ? 'bg-[var(--sys-accent)] text-black font-bold shadow-sm'
           : 'text-[var(--text-main)] hover:bg-[var(--hud-bg-card)]'
@@ -86,7 +92,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({
         )}
         {item.alias && (
           <span
-            className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${
+            className={`px-1.5 py-0.2 rounded-none text-[9px] font-mono font-bold ${
               isSelected
                 ? 'bg-black text-[var(--sys-accent)]'
                 : 'bg-[var(--keycap-bg)] text-[var(--text-muted)] border border-[var(--keycap-border)]'
@@ -97,7 +103,7 @@ export const ResultItem: React.FC<ResultItemProps> = ({
         )}
       </div>
 
-      {/* Right: Category Tag + Exec Keycap */}
+      {/* Right: Category Tag + Quick Number Keycap / Exec Keycap */}
       <div className="flex items-center gap-2 shrink-0">
         <span
           className={`text-[10px] font-medium capitalize tracking-wide ${
@@ -106,7 +112,19 @@ export const ResultItem: React.FC<ResultItemProps> = ({
         >
           {categoryLabel}
         </span>
-        {isSelected && (
+        {isCtrlHeld && quickNumber !== undefined && (
+          <span
+            data-testid={`quick-number-${quickNumber}`}
+            className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-none text-[10px] font-mono font-bold shadow-sm transition-all ${
+              isSelected
+                ? 'bg-black text-[var(--sys-accent)] border border-black'
+                : 'bg-[var(--sys-accent)] text-black border border-[var(--sys-accent)]'
+            }`}
+          >
+            {quickNumber}
+          </span>
+        )}
+        {isSelected && !isCtrlHeld && (
           <span className="hud-key bg-black text-[var(--sys-accent)] border-black">
             [ENTER]
           </span>

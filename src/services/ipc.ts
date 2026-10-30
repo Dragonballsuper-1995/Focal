@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import type { SearchResult, RunnerConfig, ClipboardItem, SnippetItem, FileResult } from '@/types';
+import type { SearchResult, FocalConfig, RunnerConfig, ClipboardItem, SnippetItem, FileResult } from '@/types';
 
 export const isTauri = (): boolean => {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -105,7 +105,7 @@ export async function searchFiles(
       modified_at: Math.floor(Date.now() / 1000) - 86400,
     },
     {
-      path: 'C:\\Users\\User\\Projects\\Runner\\README.md',
+      path: 'C:\\Users\\User\\Projects\\Focal\\README.md',
       file_name: 'README.md',
       extension: 'md',
       size_bytes: 4096,
@@ -203,7 +203,7 @@ export async function getSnippets(): Promise<SnippetItem[]> {
       id: 3,
       title: 'Email Signature',
       keyword: '!sig',
-      text: 'Best regards,\nRunner Team\nSent on {datetime}',
+      text: 'Best regards,\nFocal Team\nSent on {datetime}',
       copy_count: 4,
       pinned: false,
     },
@@ -230,7 +230,7 @@ export async function expandSnippet(id: number): Promise<string> {
   return 'Expanded snippet content';
 }
 
-export async function updateSettings(settings: RunnerConfig): Promise<void> {
+export async function updateSettings(settings: FocalConfig): Promise<void> {
   if (isTauri()) {
     return await invoke<void>('update_settings', { settings });
   }
@@ -256,3 +256,4 @@ export async function subscribeLauncherEvents(
     return () => {};
   }
 }
+

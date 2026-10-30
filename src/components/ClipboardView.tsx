@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ClipboardItem } from '@/types';
 import { getClipboardHistory, copyToClipboard, clearClipboardHistory } from '@/services/ipc';
 import { Clipboard, Pin, Trash2, Check, Clock, X } from 'lucide-react';
@@ -12,6 +12,7 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const activeItemRef = useRef<HTMLDivElement>(null);
 
   const loadItems = useCallback(async (q?: string) => {
     try {
@@ -84,6 +85,10 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filteredItems.length, selectedItem, handleCopy, onBack]);
 
+  useEffect(() => {
+    activeItemRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
+
   return (
     <div className="flex-1 flex flex-col h-full bg-[var(--hud-bg-base)] text-[var(--text-main)] font-mono overflow-hidden select-none">
       {/* Top Search Bar */}
@@ -95,13 +100,13 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
         <span className="text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none">&gt;</span>
         
         {/* Breadcrumb pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
           <Clipboard className="w-3 h-3" />
           <span>Clipboard History</span>
           <button
             type="button"
             onClick={onBack}
-            className="hover:opacity-75 rounded p-0.5 transition-opacity"
+            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
             title="Return (Esc)"
           >
             <X className="w-3 h-3" />
@@ -121,20 +126,20 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
           <button
             onClick={handleClear}
             title="Clear History"
-            className="p-1 rounded text-neutral-400 hover:text-red-400 hover:bg-[var(--hud-bg-card)] transition-colors"
+            className="p-1 rounded-none text-neutral-400 hover:text-red-400 hover:bg-[var(--hud-bg-card)] transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
+          <span className="text-[9.5px] px-1.5 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
             ESC
           </span>
         </div>
       </div>
 
       {/* Main split view: items list on left, preview on right */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left: List */}
-        <div className="w-1/2 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
+        <div className="w-1/2 min-h-0 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
           {filteredItems.length === 0 ? (
             <div className="p-8 text-center text-[var(--text-muted)] text-xs">
               No clipboard items found
@@ -145,9 +150,10 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
               return (
                 <div
                   key={item.id}
+                  ref={isSel ? activeItemRef : undefined}
                   onClick={() => setSelectedIndex(idx)}
                   onDoubleClick={() => handleCopy(item, true)}
-                  className={`p-2.5 rounded-md cursor-pointer transition-all border ${
+                  className={`p-2.5 rounded-none cursor-pointer transition-all border ${
                     isSel
                       ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-semibold shadow-sm'
                       : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
@@ -176,16 +182,16 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
         </div>
 
         {/* Right: Live Preview */}
-        <div className="w-1/2 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
+        <div className="w-1/2 min-h-0 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
           {selectedItem ? (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full min-h-0">
               <div className="flex items-center justify-between pb-2 border-b border-[var(--hud-border-grid)] mb-3 text-[10px]">
                 <span className="text-[var(--text-muted)]">
                   LENGTH: {selectedItem.content.length} CHARS
                 </span>
                 <button
                   onClick={() => handleCopy(selectedItem, false)}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors text-[10px]"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors text-[10px]"
                 >
                   {copiedId === selectedItem.id ? (
                     <>

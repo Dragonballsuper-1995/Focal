@@ -10,6 +10,7 @@ export interface PinnedSectionProps {
   onExecute: (item: PinnedItem) => void;
   onUnpin: (id: string) => void;
   onContextMenu?: (item: PinnedItem, index: number) => void;
+  isCtrlHeld?: boolean;
 }
 
 interface PinnedTileProps {
@@ -19,6 +20,8 @@ interface PinnedTileProps {
   onExecute: () => void;
   onUnpin: () => void;
   onContextMenu?: () => void;
+  isCtrlHeld?: boolean;
+  quickNumber?: number;
 }
 
 const PinnedTile: React.FC<PinnedTileProps> = ({
@@ -28,6 +31,8 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
   onExecute,
   onUnpin,
   onContextMenu,
+  isCtrlHeld = false,
+  quickNumber,
 }) => {
   const tileRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +53,8 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
       data-selected={isSelected}
       onClick={() => {
         onSelect();
+      }}
+      onDoubleClick={() => {
         onExecute();
       }}
       onContextMenu={(e) => {
@@ -56,7 +63,7 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
         onSelect();
         onContextMenu?.();
       }}
-      className={`group relative flex items-center gap-2 p-1.5 h-[42px] rounded-md border cursor-pointer transition-all select-none font-mono ${
+      className={`group relative flex items-center gap-2 p-1.5 h-[42px] rounded-none border cursor-pointer transition-all select-none font-mono ${
         isSelected
           ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold shadow-md'
           : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)] hover:border-[var(--sys-accent)]'
@@ -83,18 +90,34 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
         </div>
       </div>
 
-      {/* Quick Unpin button on hover */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onUnpin();
-        }}
-        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 text-neutral-400 hover:text-white rounded bg-black/60 hover:bg-red-500/80 transition-all shadow-sm"
-        title="Unpin item"
-      >
-        <X className="w-2.5 h-2.5" />
-      </button>
+      {/* Quick Number badge when Ctrl is held */}
+      {isCtrlHeld && quickNumber !== undefined && (
+        <span
+          data-testid={`pinned-quick-number-${quickNumber}`}
+          className={`absolute top-1 right-1 min-w-[16px] h-[16px] px-0.5 flex items-center justify-center rounded-none text-[9px] font-mono font-bold shadow-sm z-10 transition-all ${
+            isSelected
+              ? 'bg-black text-[var(--sys-accent)] border border-black'
+              : 'bg-[var(--sys-accent)] text-black border border-[var(--sys-accent)]'
+          }`}
+        >
+          {quickNumber}
+        </span>
+      )}
+
+      {/* Quick Unpin button on hover (hidden if Ctrl is held) */}
+      {!isCtrlHeld && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onUnpin();
+          }}
+          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 text-neutral-400 hover:text-white rounded-none bg-black/60 hover:bg-red-500/80 transition-all shadow-sm"
+          title="Unpin item"
+        >
+          <X className="w-2.5 h-2.5" />
+        </button>
+      )}
     </div>
   );
 };
@@ -106,6 +129,7 @@ export const PinnedSection: React.FC<PinnedSectionProps> = ({
   onExecute,
   onUnpin,
   onContextMenu,
+  isCtrlHeld = false,
 }) => {
   if (pinnedItems.length === 0) {
     return null;
@@ -132,6 +156,8 @@ export const PinnedSection: React.FC<PinnedSectionProps> = ({
             onExecute={() => onExecute(item)}
             onUnpin={() => onUnpin(item.id)}
             onContextMenu={() => onContextMenu?.(item, index)}
+            isCtrlHeld={isCtrlHeld}
+            quickNumber={index < 9 ? index + 1 : undefined}
           />
         ))}
       </div>

@@ -36,17 +36,17 @@ describe('Frontend Scaffolding & DTO Contract Verification', () => {
       id: 101,
       title: 'Email Signature',
       keyword: '!sig',
-      text: 'Best regards,\nRunner Team',
+      text: 'Best regards,\nFocal Team',
       copy_count: 12,
       pinned: false,
     };
     expect(snippet.keyword).toBe('!sig');
-    expect(snippet.text).toContain('Runner Team');
+    expect(snippet.text).toContain('Focal Team');
   });
 
   it('instantiates FileResult conforming to Section 6.3.B', () => {
     const file: FileResult = {
-      path: 'C:\\Projects\\Runner\\README.md',
+      path: 'C:\\Projects\\Focal\\README.md',
       file_name: 'README.md',
       extension: 'md',
       size_bytes: 2048,
@@ -72,3 +72,4 @@ describe('Frontend Scaffolding & DTO Contract Verification', () => {
     expect(config.max_clipboard_items).toBe(500);
   });
 });
+

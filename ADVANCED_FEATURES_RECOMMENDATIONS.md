@@ -1,4 +1,4 @@
-# Runner — Advanced Features & Enhancement Roadmap
+# Focal — Advanced Features & Enhancement Roadmap
 **Clean-Room Reimplementation of Raycast for Windows**
 
 > **Document Version:** 2.0.0  
@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-Runner has successfully collapsed the legacy 3-process architecture of Raycast Windows (.NET 10 WPF host + Node.js backend + Chromium WebView2 incurring ~500 MB idle RAM) into a unified, lightweight native Rust core. The active app currently features:
+Focal has successfully collapsed the legacy 3-process architecture of Raycast Windows (.NET 10 WPF host + Node.js backend + Chromium WebView2 incurring ~500 MB idle RAM) into a unified, lightweight native Rust core. The active app currently features:
 - **Global Hotkey & Window Management:** Instant toggle (`Shift+Alt+Space` or `Alt+Space`) with smooth focus retention and rounded DWM borders.
 - **In-Memory Fuzzy Matcher:** Word-boundary & frecency-boosted indexing delivering sub-19ms searches across 20,000+ items.
 - **Clipboard History:** Win32 format monitoring, SQLite WAL ring buffer, deduplication, and auto-paste keystroke synthesis (`SendInput`).
@@ -20,7 +20,7 @@ Runner has successfully collapsed the legacy 3-process architecture of Raycast W
 - **Bespoke Icon Engine:** Native vector SVG brand logos (Chrome, VS Code, Spotify, Discord, Edge, YouTube, etc.), contextual Windows settings icons, and dynamic monogram badges.
 - **Basic Windows Power Controls:** Clean, native Win32 controls for **Lock**, **Sleep**, **Restart**, and **Shutdown**.
 
-This document outlines the **recommended advanced features** to be added sequentially without compromising Runner's zero-bloat, sub-50ms performance profile.
+This document outlines the **recommended advanced features** to be added sequentially without compromising Focal's zero-bloat, sub-50ms performance profile.
 
 ---
 
@@ -59,7 +59,7 @@ This document outlines the **recommended advanced features** to be added sequent
 ### 1.4 Custom Quicklinks
 * **Description:** User-defined URL shortcuts with dynamic query placeholders, enabling instant web navigation without manually opening a browser first.
 * **Architecture:**
-  - **Configuration:** Stored in `%APPDATA%\Runner\quicklinks.json` or SQLite `quicklinks` table.
+  - **Configuration:** Stored in `%APPDATA%\Focal\quicklinks.json` or SQLite `quicklinks` table.
   - **Token Interpolation:** Templates supporting `{query}`, `{selection}`, or `{clipboard}` tokens.
 * **Examples:**
   - Keyword `gh <query>` $\to$ `https://github.com/search?q={query}`
@@ -73,6 +73,34 @@ This document outlines the **recommended advanced features** to be added sequent
   - **Storage:** SQLite `notes` table with `id`, `title`, `content_markdown`, `pinned`, `updated_at`.
   - **Editor:** Minimalist zero-delay markdown editor with live preview and syntax styling.
   - **Persistence:** Auto-saved on every keystroke with a 300ms debounce loop.
+
+### 1.6 Rich Image Clipboard History (Raycast Parity)
+* **Description:** Comprehensive capture, indexing, preview, and re-pasting of copied bitmap, PNG, and screenshot imagery alongside text entries in Clipboard History (`view:clipboard`).
+* **Win32 Clipboard Capture Architecture:**
+  - **Format Detection:** In `src-tauri/src/clipboard_manager.rs`, query `IsClipboardFormatAvailable` for `CF_DIBV5`, `CF_DIB`, and `CF_BITMAP` when `WM_CLIPBOARDUPDATE` fires.
+  - **DIB / DIBV5 Reconstruction:** Retrieve bitmap headers (`BITMAPV5HEADER` / `BITMAPINFOHEADER`) and color bitmasks from global memory handle (`GetClipboardData(CF_DIBV5)`), decoding row strides and 32-bit BGRA pixel arrays.
+  - **Fast Disk Cache:** Encode captured bitmaps into compressed PNG files on a background worker thread (`miniz_oxide` / `image` crate), saving to `%APPDATA%\Focal\clipboard_images\{sha256_hash}.png` to keep RAM usage minimal (~30 MB baseline preserved).
+  - **Hash Deduplication:** Compute SHA-256 hash across raw image buffers to detect duplicates; on match, update `updated_at` and increment `copy_count` rather than saving duplicate images to disk.
+* **SQLite Metadata Schema:**
+  - Enhance `clipboard_history` table (or migrate schema via `ALTER TABLE`):
+    ```sql
+    ALTER TABLE clipboard_history ADD COLUMN content_type TEXT DEFAULT 'text/plain';
+    ALTER TABLE clipboard_history ADD COLUMN image_path TEXT;
+    ALTER TABLE clipboard_history ADD COLUMN image_width INTEGER;
+    ALTER TABLE clipboard_history ADD COLUMN image_height INTEGER;
+    ALTER TABLE clipboard_history ADD COLUMN file_size_bytes INTEGER;
+    ```
+* **UI Presentation (React Split View):**
+  - **Thumbnail Cards (Left List):** Display high-DPI thumbnail preview card (with 1:1 aspect-ratio thumbnail, resolution tag `[1920×1080]`, format badge `[PNG]`, file size `[1.2 MB]`, and copying app source like `[Snipping Tool]`).
+  - **Live Preview Canvas (Right Pane):** Centered, high-contrast dark checkerboard pattern canvas rendering the full image with zoom controls, pixel dimensions, color depth, and copy date.
+* **Actions & Keystrokes:**
+  - `↵` / `Double Click` **Paste Image:** Synthesizes `OpenClipboard`, `EmptyClipboard`, `SetClipboardData(CF_DIB, hDIB)`, and dispatches `Ctrl+V` to the foreground target application.
+  - `Ctrl+C` **Copy Image File:** Places image file onto clipboard using `CF_HDROP` for instant pasting into Windows File Explorer, email clients, or Discord/Slack.
+  - `Ctrl+S` **Save Image As...:** Native file dialog (`rfd` / Tauri dialog) to export the image to disk.
+  - `Delete` / `Backspace` **Delete Entry:** Removes SQLite record and safely unlinks the cached PNG file from disk.
+* **Storage Ring Buffer & Quota Management:**
+  - Configurable max image storage quota (default: 500 MB) and max image retention count (default: 250 images).
+  - Background LRU cleanup worker prunes unpinned image files from disk when disk usage exceeds the configured quota threshold.
 
 ---
 
@@ -148,9 +176,9 @@ This document outlines the **recommended advanced features** to be added sequent
 
 ### 5.2 System Tray & Autostart on Boot
 * **Description:** Background icon in the Windows taskbar notification area with quick actions:
-  - Menu: `Open Runner`, `Preferences`, `Clear Clipboard History`, `Exit`.
+  - Menu: `Open Focal`, `Preferences`, `Clear Clipboard History`, `Exit`.
   - Windows Startup Registry Hook:
-    `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run\Runner`
+    `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run\Focal`
 
 ### 5.3 Dynamic Category Filter Strip (Addon Feature)
 * **Description:** Configurable scope switcher pill bar (`All`, `Favorites`, `Applications`, `Games`, `Commands`, `Files`) placed beneath the omnibar for power users who want rapid manual domain narrowing.

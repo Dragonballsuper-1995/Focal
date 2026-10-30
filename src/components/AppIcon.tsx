@@ -43,7 +43,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
       item.icon.startsWith('asset:') ||
       item.icon.startsWith('/'))
   ) {
-    return <img src={item.icon} alt={item.title} className="w-full h-full object-contain p-0.5 rounded" />;
+    return <img src={item.icon} alt={item.title} className="w-full h-full object-contain p-0.5 rounded-none" />;
   }
 
   const titleLower = item.title.toLowerCase();
@@ -202,7 +202,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // Windows Terminal / Terminal / wt
   if (titleLower.includes('terminal') || titleLower === 'wt') {
     return (
-      <div className="w-full h-full rounded bg-neutral-900 border border-neutral-700 flex items-center justify-center">
+      <div className="w-full h-full rounded-none bg-neutral-900 border border-neutral-700 flex items-center justify-center">
         <Terminal className="w-3.5 h-3.5 text-neutral-200" />
       </div>
     );
@@ -211,7 +211,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // PowerShell
   if (titleLower.includes('powershell') || titleLower.includes('pwsh')) {
     return (
-      <div className="w-full h-full rounded bg-blue-900 border border-blue-700 flex items-center justify-center font-mono font-bold text-[10px] text-white">
+      <div className="w-full h-full rounded-none bg-blue-900 border border-blue-700 flex items-center justify-center font-mono font-bold text-[10px] text-white">
         &gt;_
       </div>
     );
@@ -220,7 +220,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // Command Prompt (CMD)
   if (titleLower === 'cmd' || titleLower.includes('command prompt')) {
     return (
-      <div className="w-full h-full rounded bg-black border border-neutral-700 flex items-center justify-center font-mono font-bold text-[9px] text-neutral-200">
+      <div className="w-full h-full rounded-none bg-black border border-neutral-700 flex items-center justify-center font-mono font-bold text-[9px] text-neutral-200">
         C:\
       </div>
     );
@@ -350,7 +350,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // Notion
   if (titleLower.includes('notion')) {
     return (
-      <div className="w-full h-full rounded bg-neutral-900 border border-neutral-700 flex items-center justify-center font-serif font-black text-xs text-white">
+      <div className="w-full h-full rounded-none bg-neutral-900 border border-neutral-700 flex items-center justify-center font-serif font-black text-xs text-white">
         N
       </div>
     );
@@ -399,21 +399,21 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // Microsoft Word / Excel / PowerPoint / Teams / Outlook
   if (titleLower.includes('word')) {
     return (
-      <div className="w-full h-full rounded bg-blue-600 flex items-center justify-center font-bold text-[11px] text-white">
+      <div className="w-full h-full rounded-none bg-blue-600 flex items-center justify-center font-bold text-[11px] text-white">
         W
       </div>
     );
   }
   if (titleLower.includes('excel')) {
     return (
-      <div className="w-full h-full rounded bg-emerald-600 flex items-center justify-center font-bold text-[11px] text-white">
+      <div className="w-full h-full rounded-none bg-emerald-600 flex items-center justify-center font-bold text-[11px] text-white">
         X
       </div>
     );
   }
   if (titleLower.includes('powerpoint')) {
     return (
-      <div className="w-full h-full rounded bg-rose-600 flex items-center justify-center font-bold text-[11px] text-white">
+      <div className="w-full h-full rounded-none bg-rose-600 flex items-center justify-center font-bold text-[11px] text-white">
         P
       </div>
     );
@@ -421,10 +421,10 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   if (titleLower.includes('teams')) {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="none">
-        <rect width="24" height="24" rx="4" fill="#5059C9" />
+        <rect width="24" height="24" rx="0" fill="#5059C9" />
         <circle cx="15.5" cy="8.5" r="2.5" fill="white" />
         <path d="M13 13h5a3 3 0 0 1 3 3v2h-8v-5z" fill="white" />
-        <rect x="3" y="7" width="9" height="11" rx="2" fill="#7B83EB" />
+        <rect x="3" y="7" width="9" height="11" rx="0" fill="#7B83EB" />
         <text x="5.5" y="15.5" fill="white" fontWeight="bold" fontSize="9" fontFamily="sans-serif">T</text>
       </svg>
     );
@@ -433,7 +433,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // Obsidian
   if (titleLower.includes('obsidian')) {
     return (
-      <div className="w-full h-full rounded bg-purple-950 border border-purple-600 flex items-center justify-center font-bold text-[11px] text-purple-300">
+      <div className="w-full h-full rounded-none bg-purple-950 border border-purple-600 flex items-center justify-center font-bold text-[11px] text-purple-300">
         ◆
       </div>
     );
@@ -442,7 +442,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
   // VLC media player
   if (titleLower.includes('vlc')) {
     return (
-      <div className="w-full h-full rounded bg-amber-600 flex items-center justify-center font-bold text-xs text-white">
+      <div className="w-full h-full rounded-none bg-amber-600 flex items-center justify-center font-bold text-xs text-white">
         ▲
       </div>
     );
@@ -505,7 +505,7 @@ export const AppIcon: React.FC<AppIconProps> = ({ item, className = 'w-4 h-4' })
 
   return (
     <div
-      className={`w-full h-full rounded-md bg-gradient-to-br ${gradient} flex items-center justify-center font-bold text-white text-[11px] shadow-sm tracking-tight`}
+      className={`w-full h-full rounded-none bg-gradient-to-br ${gradient} flex items-center justify-center font-bold text-white text-[11px] shadow-sm tracking-tight`}
     >
       {initial}
     </div>

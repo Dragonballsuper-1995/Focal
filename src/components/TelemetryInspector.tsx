@@ -73,11 +73,11 @@ export function getItemTelemetry(item?: SearchResult | PinnedItem) {
       version = version || '11.2405.8.0';
       subsystem = subsystem || 'WIN32_UWP';
     } else if (item.category === 'clipboard') {
-      publisher = publisher || 'Runner Core Subsystem';
+      publisher = publisher || 'Focal Core Subsystem';
       version = version || 'SQLite v3.45';
       subsystem = subsystem || 'SUBSYSTEM';
     } else if (item.category === 'command') {
-      publisher = publisher || 'Runner Core Subsystem';
+      publisher = publisher || 'Focal Core Subsystem';
       version = version || 'Local Index';
       subsystem = subsystem || 'SUBSYSTEM';
     } else if (item.category === 'file') {
@@ -128,7 +128,7 @@ export const TelemetryInspector: React.FC<TelemetryInspectorProps> = ({
         </div>
 
         {/* Item Identity */}
-        <div className="p-2 rounded-xs bg-[#14161C] border border-[#20232C] space-y-1">
+        <div className="p-2 rounded-none bg-[#14161C] border border-[#20232C] space-y-1">
           <div className="flex items-center justify-between gap-1.5">
             <div className="flex items-center gap-2 truncate">
               <span className="w-5 h-5 flex items-center justify-center shrink-0">
@@ -138,7 +138,7 @@ export const TelemetryInspector: React.FC<TelemetryInspectorProps> = ({
                 {item.title.toUpperCase()}
               </span>
             </div>
-            <span className="px-1 py-0.2 rounded-xs text-[9px] font-bold bg-[#1C1F28] text-[var(--sys-accent)] border border-[#282C38] shrink-0">
+            <span className="px-1 py-0.2 rounded-none text-[9px] font-bold bg-[#1C1F28] text-[var(--sys-accent)] border border-[#282C38] shrink-0">
               [{typeTag}]
             </span>
           </div>

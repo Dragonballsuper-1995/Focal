@@ -7,7 +7,7 @@ describe('App Integration & Command Palette Shell', () => {
     render(<App />);
 
     expect(screen.getByPlaceholderText("EXECUTE QUERY, ALIAS (wh, vs, yt, psh), OR TYPE '/'...")).toBeInTheDocument();
-    expect(screen.getByText('RUNNER')).toBeInTheDocument();
+    expect(screen.getByText('FOCAL')).toBeInTheDocument();
 
     await waitFor(() => {
       const items = screen.getAllByText('Clipboard History');
@@ -36,11 +36,21 @@ describe('App Integration & Command Palette Shell', () => {
       expect(items.length).toBeGreaterThanOrEqual(1);
     });
 
-    const options = screen.getAllByRole('option');
-    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    // Pinned section item 0 is selected initially
+    const pinnedButtons = screen.getAllByRole('button');
+    const firstPinned = pinnedButtons.find((btn) => btn.getAttribute('data-selected') === 'true');
+    expect(firstPinned).toBeDefined();
 
-    // Press ArrowDown on the container
+    // Press ArrowDown to move from pinned to first result option
     const searchInput = screen.getByPlaceholderText("EXECUTE QUERY, ALIAS (wh, vs, yt, psh), OR TYPE '/'...");
+    fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+
+    await waitFor(() => {
+      const options = screen.getAllByRole('option');
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    // Press ArrowDown again to move to second result option
     fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
 
     await waitFor(() => {
@@ -58,7 +68,7 @@ describe('App Integration & Command Palette Shell', () => {
     });
 
     const options = screen.getAllByRole('option');
-    fireEvent.click(options[0]);
+    fireEvent.doubleClick(options[0]);
 
     await waitFor(() => {
       expect(screen.getAllByPlaceholderText('Search clipboard history...').length).toBeGreaterThanOrEqual(1);

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Valence Refined MK-III: The Astrolabe Singularity -->
+  <defs>
+    <linearGradient id="v3-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0D101A"/>
+      <stop offset="100%" stop-color="#080A10"/>
+    </linearGradient>
+
+    <linearGradient id="astrolabe-grad" x1="16" y1="16" x2="84" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Container -->
+  <rect width="100" height="100" rx="24" fill="url(#v3-bg)"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="23.25" stroke="#252C42" stroke-width="1.5"/>
+
+  <!-- Outer Astrolabe Calibrated Rim -->
+  <circle cx="50" cy="50" r="38" stroke="#1F2638" stroke-width="1.5"/>
+  <circle cx="50" cy="50" r="34" stroke="#161B28" stroke-width="1" stroke-dasharray="2 3"/>
+
+  <!-- Precision Calibration Degree Ticks -->
+  <line x1="50" y1="12" x2="50" y2="18" stroke="#8B5CF6" stroke-width="1.5"/>
+  <line x1="50" y1="82" x2="50" y2="88" stroke="#8B5CF6" stroke-width="1.5"/>
+  <line x1="12" y1="50" x2="18" y2="50" stroke="#8B5CF6" stroke-width="1.5"/>
+  <line x1="82" y1="50" x2="88" y2="50" stroke="#8B5CF6" stroke-width="1.5"/>
+
+  <!-- 45-degree angle ticks -->
+  <line x1="23" y1="23" x2="27" y2="27" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="77" y1="23" x2="73" y2="27" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="23" y1="77" x2="27" y2="73" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="77" y1="77" x2="73" y2="73" stroke="#38BDF8" stroke-width="1"/>
+
+  <!-- Twin Woven Valence Orbitals -->
+  <!-- Orbit 1 (-35 deg) -->
+  <g transform="rotate(-35 50 50)">
+    <ellipse cx="50" cy="50" rx="30" ry="12" stroke="url(#astrolabe-grad)" stroke-width="2.75"/>
+    <ellipse cx="50" cy="50" rx="30" ry="12" stroke="#FFFFFF" stroke-width="0.75" stroke-opacity="0.4"/>
+  </g>
+
+  <!-- Orbit 2 (+45 deg) -->
+  <g transform="rotate(45 50 50)">
+    <ellipse cx="50" cy="50" rx="30" ry="12" stroke="#252E46" stroke-width="4.5"/>
+    <ellipse cx="50" cy="50" rx="30" ry="12" stroke="url(#astrolabe-grad)" stroke-width="2.25"/>
+  </g>
+
+  <!-- 3D Overpass Arc -->
+  <path d="M 64 35 C 70 42, 71 52, 65 59" stroke="#A855F7" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Core Diamond Crystal -->
+  <polygon points="50,41 57,49 50,47 43,49" fill="#FFFFFF"/>
+  <polygon points="43,49 50,47 50,59" fill="#8B5CF6"/>
+  <polygon points="57,49 50,47 50,59" fill="#C084FC"/>
+  <circle cx="50" cy="48" r="1.75" fill="#FFFFFF"/>
+
+  <!-- High-Precision Focal Crosshairs -->
+  <line x1="42" y1="50" x2="46" y2="50" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="54" y1="50" x2="58" y2="50" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="50" y1="42" x2="50" y2="44" stroke="#38BDF8" stroke-width="1"/>
+  <line x1="50" y1="54" x2="50" y2="58" stroke="#38BDF8" stroke-width="1"/>
+
+  <!-- Satellite Node -->
+  <circle cx="72" cy="38" r="3" fill="#38BDF8" stroke="#FFFFFF" stroke-width="0.75"/>
+</svg>

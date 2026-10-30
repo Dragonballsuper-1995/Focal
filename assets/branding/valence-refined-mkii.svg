@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Valence Refined MK-II: The Triple Spherical Gyroscope -->
+  <defs>
+    <linearGradient id="v2-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0E111B"/>
+      <stop offset="100%" stop-color="#07090F"/>
+    </linearGradient>
+
+    <linearGradient id="orbit-a" x1="15" y1="50" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+
+    <linearGradient id="orbit-b" x1="15" y1="50" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+
+    <linearGradient id="orbit-c" x1="15" y1="50" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Container -->
+  <rect width="100" height="100" rx="24" fill="url(#v2-bg)"/>
+  <rect x="0.75" y="0.75" width="98.5" height="98.5" rx="23.25" stroke="#232A3E" stroke-width="1.5"/>
+
+  <!-- Outer Dashed Compass Grid -->
+  <circle cx="50" cy="50" r="39" stroke="#1C2232" stroke-width="1" stroke-dasharray="1 4"/>
+
+  <!-- Ring 1: Horizontal Equatorial Gyroscope (0 deg) -->
+  <ellipse cx="50" cy="50" rx="36" ry="11" stroke="url(#orbit-a)" stroke-width="2.25"/>
+
+  <!-- Ring 2: Diagonal Left (-55 deg) -->
+  <g transform="rotate(-55 50 50)">
+    <ellipse cx="50" cy="50" rx="36" ry="11" stroke="url(#orbit-b)" stroke-width="2.25"/>
+  </g>
+
+  <!-- Ring 3: Diagonal Right (+55 deg) -->
+  <g transform="rotate(55 50 50)">
+    <ellipse cx="50" cy="50" rx="36" ry="11" stroke="url(#orbit-c)" stroke-width="2.25"/>
+  </g>
+
+  <!-- Front Intersecting Arc Overlays for 3D illusion -->
+  <path d="M 40 42 Q 50 40 60 42" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round"/>
+  
+  <!-- Central Octahedron Singularity Core -->
+  <polygon points="50,39 58,49 50,46 42,49" fill="#FFFFFF"/>
+  <polygon points="42,49 50,46 50,61" fill="#8B5CF6"/>
+  <polygon points="58,49 50,46 50,61" fill="#C084FC"/>
+  <circle cx="50" cy="49" r="2" fill="#FFFFFF"/>
+
+  <!-- Dual Counter-Rotating Satellite Nodes -->
+  <!-- Node A -->
+  <circle cx="82" cy="46" r="3" fill="#38BDF8" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- Node B -->
+  <circle cx="28" cy="28" r="2.5" fill="#C084FC" stroke="#FFFFFF" stroke-width="0.75"/>
+</svg>

@@ -119,14 +119,14 @@ pub enum DbError {
     Io(#[from] std::io::Error),
 }
 
-/// Resolves the production path for the SQLite database: %LOCALAPPDATA%\Runner\runner.db
+/// Resolves the production path for the SQLite database: %LOCALAPPDATA%\Focal\focal.db
 pub fn resolve_db_path() -> PathBuf {
     if let Ok(local_app_data) = std::env::var("LOCALAPPDATA") {
-        PathBuf::from(local_app_data).join("Runner").join("runner.db")
-    } else if let Some(proj_dirs) = directories::ProjectDirs::from("com", "runner", "Runner") {
-        proj_dirs.data_local_dir().join("runner.db")
+        PathBuf::from(local_app_data).join("Focal").join("focal.db")
+    } else if let Some(proj_dirs) = directories::ProjectDirs::from("com", "focal", "Focal") {
+        proj_dirs.data_local_dir().join("focal.db")
     } else {
-        PathBuf::from("./data/runner.db")
+        PathBuf::from("./data/focal.db")
     }
 }
 
