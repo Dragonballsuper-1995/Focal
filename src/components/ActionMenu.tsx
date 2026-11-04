@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export interface ActionOption {
   id: string;
@@ -23,78 +23,101 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
   onClose = () => {},
   title,
 }) => {
-  const displayTitle = title ? title.toUpperCase() : 'COMMAND';
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent | PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      // Ignore clicks inside the ActionMenu itself
+      if (menuRef.current && menuRef.current.contains(target)) {
+        return;
+      }
+
+      // Ignore clicks on the toggle trigger button in the footer dock
+      if (target.closest?.('#footer-tab-status, [title*="Toggle Actions Menu"]')) {
+        return;
+      }
+
+      onClose();
+    };
+
+    document.addEventListener('pointerdown', handleOutsideClick, true);
+    document.addEventListener('mousedown', handleOutsideClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideClick, true);
+      document.removeEventListener('mousedown', handleOutsideClick, true);
+    };
+  }, [onClose]);
 
   return (
     <div
+      ref={menuRef}
       role="menu"
-      className="absolute bottom-11 right-3 w-64 bg-[var(--hud-bg-sub)] backdrop-blur-xl border border-[var(--hud-border-outer)] rounded-none shadow-2xl z-50 flex flex-col font-mono text-xs overflow-hidden ring-1 ring-black/20 animate-in fade-in zoom-in-95 select-none"
+      className="absolute bottom-11 right-3 w-64 bg-[var(--surface-raised)]/95 backdrop-blur-2xl border border-white/[0.1] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.65)] z-50 flex flex-col font-sans text-xs overflow-hidden select-none animate-in fade-in duration-100"
     >
       {/* Header */}
-      <div className="px-3 py-2 bg-[var(--hud-bg-panel)] border-b border-[var(--hud-border-grid)] flex items-center justify-between text-[10px]">
+      <div className="px-3.5 py-2.5 bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-between text-xs font-sans">
         <div className="flex items-center gap-1.5 truncate">
-          <span className="w-1.5 h-1.5 bg-[var(--sys-accent)] rounded-none inline-block shrink-0" />
           <span
-            className="font-bold text-[var(--text-main)] tracking-wider truncate"
+            className="font-medium text-slate-200 text-xs truncate"
             title="Available Actions"
           >
-            ACTIONS: {displayTitle}
+            {title ? `Actions: ${title}` : 'Actions'}
           </span>
-          {/* Subtle hidden label for accessibility and test queries */}
+          {/* Accessible text for test suites */}
           <span className="sr-only">Available Actions</span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-[var(--text-muted)] hover:text-[var(--text-main)] font-mono text-[9px] cursor-pointer"
+          className="text-slate-400 hover:text-white transition-colors cursor-pointer"
         >
-          [ESC]
+          <span className="sr-only">[ESC]</span>
+          <kbd className="focal-key text-[9px] h-4">Esc</kbd>
         </button>
       </div>
 
       {/* Action Items List */}
-      <div className="p-1 space-y-0.5 max-h-56 overflow-y-auto">
+      <div className="p-1.5 space-y-0.5 max-h-56 overflow-y-auto">
         {actions.map((act, idx) => {
           const isActSel = idx === selectedIndex;
-          const keyNum = `0${idx + 1}`;
           return (
             <div
               key={act.id}
               role="menuitem"
               onMouseEnter={() => onSelectIndex(idx)}
               onClick={() => onSelect(act.id)}
-              className={`flex items-center justify-between px-2.5 py-1.5 rounded-none cursor-pointer text-[11px] font-mono transition-colors border ${
+              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer text-xs font-normal transition-colors duration-100 ${
                 isActSel
-                  ? 'bg-[var(--sys-accent)] text-black font-bold border-[var(--sys-accent)] shadow-sm'
-                  : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
+                  ? 'bg-white/[0.08] text-white font-medium'
+                  : 'text-slate-300 hover:bg-white/[0.04]'
               }`}
             >
-              <div className="flex items-center gap-1.5 truncate">
-                <span className={`${isActSel ? 'text-black' : 'text-[var(--text-dim)]'} text-[9.5px]`}>
-                  [{keyNum}]
-                </span>
-                <span className="truncate">{act.label}</span>
-              </div>
-              <span
-                className={`hud-key ${
-                  isActSel ? 'bg-black text-[var(--sys-accent)] border-black' : ''
-                }`}
-              >
+              <span className="truncate">{act.label}</span>
+              <kbd className="focal-key">
                 {act.shortcut || '↵'}
-              </span>
+              </kbd>
             </div>
           );
         })}
       </div>
 
-      {/* Footer Nav Hint */}
-      <div className="px-3 py-1.5 bg-[var(--hud-bg-panel)] border-t border-[var(--hud-border-grid)] text-[9px] text-[var(--text-muted)] flex items-center justify-between">
+      {/* Footer Navigation Hint */}
+      <div className="px-3 py-1.5 bg-white/[0.02] border-t border-white/[0.06] text-[10.5px] font-sans text-slate-400 flex items-center justify-between">
         <span className="flex items-center gap-1">
-          NAV: <kbd className="hud-key text-[8px]">[↑]</kbd>{' '}
-          <kbd className="hud-key text-[8px]">[↓]</kbd>
+          <span>Navigate</span>
+          <kbd className="focal-key text-[9px] h-4">↑</kbd>
+          <kbd className="focal-key text-[9px] h-4">↓</kbd>
         </span>
-        <span className="text-[var(--sys-accent)] font-bold">↵ EXECUTE</span>
+        <span className="flex items-center gap-1">
+          <kbd className="focal-key text-[9px] h-4">↵</kbd>
+          <span>Execute</span>
+        </span>
       </div>
     </div>
   );
 };
+
+export default ActionMenu;

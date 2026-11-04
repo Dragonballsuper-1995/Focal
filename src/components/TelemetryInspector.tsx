@@ -5,6 +5,7 @@ import { AppIcon } from './AppIcon';
 export interface TelemetryInspectorProps {
   item?: SearchResult | PinnedItem;
   onToggleActions?: () => void;
+  onExecute?: (item: SearchResult | PinnedItem) => void;
 }
 
 export function getItemTelemetry(item?: SearchResult | PinnedItem) {
@@ -106,10 +107,11 @@ export function getItemTelemetry(item?: SearchResult | PinnedItem) {
 export const TelemetryInspector: React.FC<TelemetryInspectorProps> = ({
   item,
   onToggleActions,
+  onExecute,
 }) => {
   if (!item) {
     return (
-      <div className="flex flex-col h-full items-center justify-center p-8 text-neutral-600 text-xs font-mono select-none">
+      <div className="flex flex-col h-full items-center justify-center p-8 text-[var(--text-dim)] text-xs font-mono select-none">
         &gt;&gt; SELECT RECORD
       </div>
     );
@@ -119,58 +121,65 @@ export const TelemetryInspector: React.FC<TelemetryInspectorProps> = ({
   const typeTag = (item.category || 'APP').toUpperCase();
 
   return (
-    <div className="flex flex-col h-full justify-between select-none font-mono">
-      <div className="space-y-2.5">
+    <div className="flex flex-col h-full justify-between select-none font-sans p-4 bg-black/20 space-y-4">
+      <div className="space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between pb-1 border-b border-[#1E212A] text-[9.5px] uppercase tracking-wider font-semibold">
-          <span className="text-[var(--sys-accent)]">// TELEMETRY_INSPECT</span>
-          <span className="text-emerald-400 font-semibold">[READY]</span>
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06] text-[11px] font-sans font-medium">
+          <span className="text-slate-400">
+            Properties
+          </span>
+          <span className="text-emerald-400 font-medium text-[10.5px] flex items-center gap-1.5">
+            <span className="sr-only">[VERIFIED]</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+            <span aria-hidden="true">Verified</span>
+          </span>
         </div>
 
-        {/* Item Identity */}
-        <div className="p-2 rounded-none bg-[#14161C] border border-[#20232C] space-y-1">
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-2 truncate">
-              <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                <AppIcon item={item as SearchResult} className="w-4 h-4" />
-              </span>
-              <span className="font-bold text-white text-xs tracking-wide font-hud truncate">
-                {item.title.toUpperCase()}
+        {/* Item Identity Card */}
+        <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-2 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shrink-0">
+              <AppIcon item={item as SearchResult} className="w-5 h-5 object-contain" />
+            </div>
+            <div className="overflow-hidden">
+              <h4 className="font-medium text-sm leading-tight text-slate-100 truncate">
+                {item.title}
+              </h4>
+              <span className="text-[10.5px] font-sans text-slate-400 font-medium">
+                <span className="sr-only">[{typeTag}]</span>
+                <span aria-hidden="true" className="uppercase tracking-wider font-semibold text-[10px] text-slate-400">{typeTag}</span>
               </span>
             </div>
-            <span className="px-1 py-0.2 rounded-none text-[9px] font-bold bg-[#1C1F28] text-[var(--sys-accent)] border border-[#282C38] shrink-0">
-              [{typeTag}]
-            </span>
           </div>
-          <div className="text-[10px] text-neutral-400 font-mono truncate" title={item.subtitle}>
+          <div className="text-[11px] font-mono text-slate-400 truncate" title={item.subtitle}>
             {item.subtitle || item.action}
           </div>
         </div>
 
         {/* Clean Spec Box */}
         {telemetry && (
-          <div className="space-y-1 text-xs font-mono">
-            <div className="flex items-center justify-between py-1 border-b border-[#171922]">
-              <span className="text-neutral-500 text-[9.5px]">PUBLISHER</span>
-              <span className="text-neutral-300 font-medium text-[10.5px] truncate max-w-[150px]">
+          <div className="space-y-1.5 text-xs font-sans">
+            <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05]">
+              <span className="text-slate-400 text-[11px]">Publisher</span>
+              <span className="text-slate-200 font-medium text-[11px] truncate max-w-[150px]">
                 {telemetry.publisher}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-[#171922]">
-              <span className="text-neutral-500 text-[9.5px]">VERSION</span>
-              <span className="text-neutral-300 font-medium text-[10.5px] truncate max-w-[150px]">
+            <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05]">
+              <span className="text-slate-400 text-[11px]">Version</span>
+              <span className="text-slate-200 font-mono text-[11px] truncate max-w-[150px]">
                 {telemetry.version}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-[#171922]">
-              <span className="text-neutral-500 text-[9.5px]">SUBSYSTEM</span>
-              <span className="text-[var(--sys-accent)] font-semibold text-[10.5px]">
+            <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05]">
+              <span className="text-slate-400 text-[11px]">Subsystem</span>
+              <span className="text-slate-200 font-mono text-[11px]">
                 {telemetry.subsystem}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1 border-b border-[#171922]">
-              <span className="text-neutral-500 text-[9.5px]">STATUS</span>
-              <span className="text-emerald-400 font-medium text-[10.5px]">
+            <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05]">
+              <span className="text-slate-400 text-[11px]">Status</span>
+              <span className="text-emerald-400 font-medium text-[11px]">
                 {telemetry.status}
               </span>
             </div>
@@ -178,20 +187,30 @@ export const TelemetryInspector: React.FC<TelemetryInspectorProps> = ({
         )}
       </div>
 
-      {/* Actions Prompt in Right Pane */}
-      <div className="pt-2 border-t border-[#1E212A] flex items-center justify-between text-[9.5px] font-mono">
-        <span
-          className="text-neutral-400 cursor-pointer hover:text-white flex items-center gap-1"
-          onClick={onToggleActions}
-        >
-          PRESS{' '}
-          <kbd className="hud-key bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold text-[8.5px]">
-            [TAB]
-          </kbd>{' '}
-          ACTIONS
-        </span>
-        <span className="text-neutral-500 text-[9px] truncate max-w-[90px]">{item.id}</span>
+      {/* Quick Launch CTA Button */}
+      <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+        {onExecute && (
+          <button
+            onClick={() => onExecute(item)}
+            className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-[#FF6B4A] to-[#FF5370] hover:brightness-110 text-white text-xs font-medium shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+          >
+            <span>Launch Now</span>
+            <kbd className="focal-key bg-black/20 border-white/20 text-white">↵</kbd>
+          </button>
+        )}
+
+        <div className="flex items-center justify-between text-[11px] font-sans text-slate-400">
+          <span
+            className="cursor-pointer hover:text-white flex items-center gap-1 transition-colors"
+            onClick={onToggleActions}
+          >
+            ACTIONS <kbd className="focal-key text-[8.5px] h-4">Tab</kbd>
+          </span>
+          <span className="text-slate-500 font-mono text-[10px] truncate max-w-[90px]">{item.id}</span>
+        </div>
       </div>
     </div>
   );
 };
+
+export default TelemetryInspector;

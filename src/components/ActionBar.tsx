@@ -58,67 +58,73 @@ export const ActionBar: React.FC<ActionBarProps> = ({
 }) => {
   const actions = getActionOptions(selectedItem, isPinned);
 
-  const handleStartDrag = async (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest('button, [role="button"], a, kbd, .cursor-pointer')) {
-      e.preventDefault();
-      try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window');
-        await getCurrentWindow().startDragging();
-      } catch {
-        // Fallback for test and browser environments
-      }
-    }
-  };
-
   return (
     <div
-      data-tauri-drag-region
-      onMouseDown={handleStartDrag}
-      className="relative flex items-center justify-between h-9 px-4 bg-[var(--hud-bg-base)] border-t border-[var(--hud-border-grid)] text-xs font-mono text-[var(--text-muted)] select-none shrink-0 z-10 backdrop-blur-xl cursor-default"
+      className="relative flex items-center justify-between h-9 px-4 bg-[#0E121A]/85 border-t border-white/[0.06] text-xs font-sans text-slate-400 select-none shrink-0 z-10 backdrop-blur-2xl cursor-default transition-colors"
     >
-      {/* Brand & Focal Logo */}
+      {/* Left: Focal Logo + Brand */}
       <div className="flex items-center gap-2 truncate">
-        <FocalLogo className="w-3.5 h-3.5 shrink-0" />
-        <span className="font-semibold text-[var(--text-main)] tracking-wider text-[11px]">FOCAL</span>
+        <div className="w-3.5 h-3.5 shrink-0 opacity-90">
+          <FocalLogo className="w-full h-full" />
+        </div>
+        <span className="font-semibold text-slate-200 tracking-wider text-[11px] font-sans">
+          FOCAL
+        </span>
       </div>
 
-      {/* Right: Keycap Actions */}
+      {/* Right: Minimalist Shortcut Actions */}
       <div className="flex items-center gap-3 shrink-0">
         <div
-          className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--text-main)] text-[11px] transition-colors"
+          className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200 text-xs transition-colors"
           onClick={() => onSelectAction('open')}
         >
-          <span className="text-[var(--text-muted)] hover:text-[var(--text-main)] hidden md:inline">
-            EXEC
+          <span className="text-slate-400 hover:text-slate-200 hidden md:inline text-[11px]">
+            Open
           </span>
-          <kbd className="hud-key">[ENTER]</kbd>
+          <kbd className="focal-key">
+            <span className="sr-only">[ENTER]</span>
+            <span aria-hidden="true">↵</span>
+          </kbd>
         </div>
 
         {selectedItem?.category === 'app' && (
           <div
-            className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--text-main)] text-[11px] transition-colors"
+            className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200 text-xs transition-colors"
             onClick={() => onSelectAction('admin')}
           >
-            <kbd className="hud-key">[^ENTER]</kbd>
-            <span>ADMIN</span>
+            <span className="text-slate-400 text-[11px]">
+              <span className="sr-only">ADMIN</span>
+              <span aria-hidden="true">Admin</span>
+            </span>
+            <kbd className="focal-key">
+              <span className="sr-only">[^ENTER]</span>
+              <span aria-hidden="true">Ctrl+↵</span>
+            </kbd>
           </div>
         )}
 
-        <span className="text-[var(--hud-border-outer)] select-none">|</span>
+        <span className="text-white/[0.1] select-none">|</span>
 
         <div
-          className="flex items-center gap-1.5 cursor-pointer text-[var(--sys-accent)] font-bold text-[11px] transition-colors"
+          className="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white text-xs transition-colors"
           onClick={onToggleActionMenu}
           title="Toggle Actions Menu (Tab)"
         >
-          <kbd className="hud-key bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold">
-            [TAB]
+          <span id="footer-tab-status" className="text-[11px] font-medium text-slate-300">
+            Actions
+            <span className="sr-only">ACTIONS</span>
+          </span>
+          <kbd className="focal-key">
+            <span className="sr-only">[TAB]</span>
+            <span aria-hidden="true">Tab</span>
           </kbd>
-          <span id="footer-tab-status">ACTIONS</span>
         </div>
 
         <div className="flex items-center">
-          <kbd className="hud-key">[ESC]</kbd>
+          <kbd className="focal-key">
+            <span className="sr-only">[ESC]</span>
+            <span aria-hidden="true">Esc</span>
+          </kbd>
         </div>
       </div>
 
@@ -139,3 +145,5 @@ export const ActionBar: React.FC<ActionBarProps> = ({
     </div>
   );
 };
+
+export default ActionBar;

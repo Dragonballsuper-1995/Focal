@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { FileResult } from '@/types';
 import { searchFiles, launchItem } from '@/services/ipc';
 import { FolderSearch, File, ExternalLink, X } from 'lucide-react';
+import { FocalLogo } from './FocalLogo';
 
 interface FileSearchViewProps {
   onBack: () => void;
@@ -94,23 +95,25 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[var(--hud-bg-base)] text-[var(--text-main)] font-mono overflow-hidden select-none">
+    <div className="flex-1 flex flex-col h-full bg-[var(--surface-base)] text-slate-100 font-sans overflow-hidden select-none">
       {/* Top Search Bar */}
       <div
         data-tauri-drag-region
         onMouseDown={handleStartDrag}
-        className="flex items-center h-12 px-4 border-b border-[var(--hud-border-grid)] bg-[var(--hud-bg-base)] gap-3 shrink-0 backdrop-blur-xl cursor-default"
+        className="flex items-center h-[52px] px-4 border-b border-white/[0.06] bg-[var(--surface-base)]/90 gap-3 shrink-0 backdrop-blur-2xl cursor-default transition-colors"
       >
-        <span className="text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none">&gt;</span>
+        <div className="w-4 h-4 shrink-0 opacity-90">
+          <FocalLogo className="w-full h-full" />
+        </div>
 
         {/* Breadcrumb pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
-          <FolderSearch className="w-3 h-3" />
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.07] text-slate-200 border border-white/[0.1] text-xs font-sans font-medium shrink-0 shadow-sm">
+          <FolderSearch className="w-3.5 h-3.5 text-slate-400" />
           <span>File Search</span>
           <button
             type="button"
             onClick={onBack}
-            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
+            className="hover:text-white rounded p-0.5 transition-colors text-slate-400"
             title="Return (Esc)"
           >
             <X className="w-3 h-3" />
@@ -122,28 +125,28 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search files and folders on your computer..."
-          className="flex-1 bg-transparent font-mono text-xs uppercase text-[var(--text-main)] placeholder-neutral-500 focus:outline-none tracking-wider font-medium"
+          className="flex-1 bg-transparent font-sans text-[13.5px] text-slate-100 placeholder:text-slate-400 focus:outline-none tracking-tight font-medium"
           autoFocus
         />
 
         <div className="flex items-center gap-2">
           {isSearching && (
-            <span className="text-[10px] text-[var(--sys-accent)] animate-pulse font-mono">
-              SEARCHING...
+            <span className="text-[11px] text-[#FF8566] animate-pulse font-sans font-medium">
+              Searching...
             </span>
           )}
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
-            ESC
-          </span>
+          <kbd className="focal-key">
+            Esc
+          </kbd>
         </div>
       </div>
 
       {/* Main split view */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left: Files List */}
-        <div className="w-3/5 min-h-0 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
+        <div className="w-3/5 min-h-0 border-r border-white/[0.06] overflow-y-auto overflow-x-hidden overscroll-none p-2.5 space-y-1">
           {files.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-xs">
+            <div className="p-8 text-center text-slate-500 text-xs font-sans">
               {query.trim() ? 'No files match your search' : 'Type to search local documents and files'}
             </div>
           ) : (
@@ -155,22 +158,24 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
                   ref={isSel ? activeFileRef : undefined}
                   onClick={() => setSelectedIndex(idx)}
                   onDoubleClick={() => handleOpen(file)}
-                  className={`p-2.5 rounded-none cursor-pointer transition-all flex items-center gap-2.5 border ${
+                  className={`p-2.5 rounded-lg cursor-pointer transition-colors duration-100 flex items-center gap-3 border ${
                     isSel
-                      ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-semibold shadow-sm'
-                      : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
+                      ? 'bg-white/[0.07] border-white/[0.08] text-white shadow-sm'
+                      : 'bg-white/[0.02] text-slate-300 border-white/[0.04] hover:bg-white/[0.04]'
                   }`}
                 >
-                  <File className={`w-4 h-4 shrink-0 ${isSel ? 'text-black' : 'text-[var(--text-muted)]'}`} />
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border bg-white/[0.05] border-white/[0.08] text-slate-300">
+                    <File className="w-3.5 h-3.5" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`text-xs truncate ${isSel ? 'text-black font-bold' : 'text-[var(--text-main)]'}`}>
+                    <div className="text-xs font-medium truncate text-slate-100">
                       {file.file_name}
                     </div>
-                    <div className={`text-[10px] truncate font-mono ${isSel ? 'text-neutral-900' : 'text-[var(--text-dim)]'}`}>
+                    <div className="text-[10.5px] truncate font-mono text-slate-400">
                       {file.path}
                     </div>
                   </div>
-                  <div className={`text-[9.5px] font-mono shrink-0 ${isSel ? 'text-neutral-900' : 'text-[var(--text-dim)]'}`}>
+                  <div className="text-[10px] font-mono shrink-0 text-slate-400">
                     {formatSize(file.size_bytes)}
                   </div>
                 </div>
@@ -180,52 +185,55 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
         </div>
 
         {/* Right: File details & actions */}
-        <div className="w-2/5 min-h-0 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
+        <div className="w-2/5 min-h-0 p-4 flex flex-col bg-black/20 overflow-y-auto">
           {selectedFile ? (
             <div className="flex flex-col h-full min-h-0">
-              <div className="flex items-center gap-2 pb-2 border-b border-[var(--hud-border-grid)] mb-3">
-                <File className="w-4 h-4 text-[var(--sys-accent)]" />
-                <span className="text-xs font-bold text-[var(--text-main)] truncate">
+              <div className="flex items-center gap-2.5 pb-2.5 border-b border-white/[0.06] mb-3">
+                <div className="w-7 h-7 rounded-lg bg-white/[0.08] border border-white/[0.1] flex items-center justify-center text-slate-200">
+                  <File className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-medium text-slate-100 truncate">
                   {selectedFile.file_name}
                 </span>
               </div>
               <div className="space-y-3 flex-1 min-h-0 text-xs">
                 <div>
-                  <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase block mb-1">Target Path</span>
-                  <p className="font-mono text-[11px] bg-[var(--hud-bg-card)] p-2 rounded-none border border-[var(--hud-border-outer)] text-[var(--text-main)] break-all select-text">
+                  <span className="text-[10.5px] font-medium text-slate-400 block mb-1">Target Path</span>
+                  <p className="font-mono text-[11px] bg-black/30 p-2.5 rounded-xl border border-white/[0.06] text-slate-200 break-all select-text shadow-inner">
                     {selectedFile.path}
                   </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase block mb-0.5">Size</span>
-                    <p className="font-mono text-[11px] text-[var(--text-main)]">{formatSize(selectedFile.size_bytes)}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
+                    <span className="text-[10px] font-medium text-slate-400 block mb-0.5">Size</span>
+                    <p className="font-mono text-xs text-slate-200 font-medium">{formatSize(selectedFile.size_bytes)}</p>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase block mb-0.5">Type</span>
-                    <p className="font-mono text-[11px] text-[var(--text-main)] uppercase">{selectedFile.extension || 'FILE'}</p>
+                  <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
+                    <span className="text-[10px] font-medium text-slate-400 block mb-0.5">Type</span>
+                    <p className="font-mono text-xs text-[#FF8566] uppercase font-medium">{selectedFile.extension || 'FILE'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[var(--hud-border-grid)] flex items-center gap-2">
+              <div className="pt-3 border-t border-white/[0.06] flex items-center gap-2">
                 <button
                   onClick={() => handleOpen(selectedFile)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[var(--sys-accent)] text-black rounded-none transition-opacity hover:opacity-90 font-mono"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-[#FF6B4A] hover:bg-[#FF5370] text-white rounded-lg transition-all shadow-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  OPEN (ENTER)
+                  <span>Open</span>
+                  <kbd className="focal-key text-[9px] h-4">↵</kbd>
                 </button>
                 <button
                   onClick={() => handleReveal(selectedFile)}
-                  className="px-3 py-1.5 text-xs font-mono rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors"
+                  className="px-3.5 py-2 text-xs font-sans font-medium rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] text-slate-200 transition-all"
                 >
-                  REVEAL
+                  Reveal
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-[var(--text-dim)] text-xs">
+            <div className="flex-1 flex items-center justify-center text-slate-500 text-xs font-sans">
               Select a file to inspect
             </div>
           )}
@@ -234,22 +242,24 @@ export function FileSearchView({ onBack }: FileSearchViewProps) {
 
       {/* Dock Footer */}
       <div
-        data-tauri-drag-region
-        onMouseDown={handleStartDrag}
-        className="flex items-center justify-between h-9 px-4 bg-[var(--hud-bg-base)] border-t border-[var(--hud-border-grid)] text-xs font-mono text-[var(--text-muted)] select-none shrink-0"
+        className="flex items-center justify-between h-9 px-4 bg-[var(--surface-base)] border-t border-white/[0.06] text-xs font-sans text-slate-400 select-none shrink-0"
       >
-        <span className="text-[11px]">
-          <span className="text-[var(--sys-accent)] font-bold">[FILES]</span> {files.length} MATCHES
+        <span className="text-xs flex items-center gap-1.5">
+          <span>Files</span>
+          <span className="text-slate-600">•</span>
+          <span>{files.length} matches</span>
         </span>
-        <div className="flex items-center gap-3 text-[11px]">
+        <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1">
-            <kbd className="hud-key">[ENTER]</kbd> OPEN
+            <kbd className="focal-key">↵</kbd> Open
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="hud-key">[ESC]</kbd> BACK
+            <kbd className="focal-key">Esc</kbd> Back
           </span>
         </div>
       </div>
     </div>
   );
 }
+
+export default FileSearchView;

@@ -15,7 +15,7 @@ export interface ResultItemProps {
 
 export const ResultItem: React.FC<ResultItemProps> = ({
   item,
-  index = 0,
+  index: _index = 0,
   isSelected,
   onSelect,
   onExecute,
@@ -24,7 +24,6 @@ export const ResultItem: React.FC<ResultItemProps> = ({
   quickNumber,
 }) => {
   const itemRef = useRef<HTMLDivElement>(null);
-  const idNum = String(index + 1).padStart(2, '0');
 
   useEffect(() => {
     if (isSelected) {
@@ -60,76 +59,60 @@ export const ResultItem: React.FC<ResultItemProps> = ({
         onSelect();
         onContextMenu?.(item);
       }}
-      className={`flex items-center justify-between px-3 py-2 cursor-pointer text-xs font-mono transition-all rounded-none select-none ${
+      className={`group relative flex items-center justify-between h-11 px-3.5 cursor-pointer text-xs font-sans transition-all duration-100 rounded-xl select-none border ${
         isSelected
-          ? 'bg-[var(--sys-accent)] text-black font-bold shadow-sm'
-          : 'text-[var(--text-main)] hover:bg-[var(--hud-bg-card)]'
+          ? 'bg-white/[0.08] border-white/[0.1] text-white shadow-sm ring-1 ring-[#FF6B4A]/25'
+          : 'border-transparent text-slate-300 hover:bg-white/[0.03]'
       }`}
     >
-      {/* Left: ID + Brand Icon + Title + Subtitle + Alias */}
-      <div className="flex items-center gap-2.5 truncate pr-2">
-        <span
-          className={`text-[10px] w-4 text-center shrink-0 ${
-            isSelected ? 'text-black font-bold' : 'text-[var(--text-dim)]'
-          }`}
-        >
-          {idNum}
+      {/* Left: Brand Icon + Title + Subtitle + Alias */}
+      <div className="flex items-center gap-3 truncate pr-2">
+        <span className="w-6 h-6 flex items-center justify-center shrink-0">
+          <AppIcon item={item} className="w-5 h-5 object-contain" />
         </span>
-        <span className="w-5 h-5 flex items-center justify-center shrink-0">
-          <AppIcon item={item} className="w-4 h-4 object-contain" />
-        </span>
-        <span className={`truncate ${isSelected ? 'text-black font-bold' : 'text-[var(--text-main)]'}`}>
+        <span className="font-medium tracking-tight truncate text-slate-100 text-[13.5px]">
           {item.title}
         </span>
         {item.subtitle && (
-          <span
-            className={`text-[10px] truncate max-w-[180px] hidden sm:inline ${
-              isSelected ? 'text-neutral-900 font-medium' : 'text-[var(--text-muted)]'
-            }`}
-          >
+          <span className="text-[11.5px] truncate max-w-[240px] hidden sm:inline text-slate-400 font-normal">
             {item.subtitle}
           </span>
         )}
         {item.alias && (
-          <span
-            className={`px-1.5 py-0.2 rounded-none text-[9px] font-mono font-bold ${
-              isSelected
-                ? 'bg-black text-[var(--sys-accent)]'
-                : 'bg-[var(--keycap-bg)] text-[var(--text-muted)] border border-[var(--keycap-border)]'
-            }`}
-          >
+          <span className="text-[10px] font-mono text-slate-400 font-normal px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.06]">
             {item.alias}
           </span>
         )}
       </div>
 
-      {/* Right: Category Tag + Quick Number Keycap / Exec Keycap */}
-      <div className="flex items-center gap-2 shrink-0">
-        <span
-          className={`text-[10px] font-medium capitalize tracking-wide ${
-            isSelected ? 'text-neutral-900 font-bold' : 'text-[var(--text-dim)]'
-          }`}
-        >
+      {/* Right: Subtle Category Metadata + Quick Number Keycap / Sleek Exec Keycap */}
+      <div className="flex items-center gap-2.5 shrink-0">
+        <span className="text-[11px] font-sans text-slate-400 font-normal">
           {categoryLabel}
         </span>
+
         {isCtrlHeld && quickNumber !== undefined && (
           <span
             data-testid={`quick-number-${quickNumber}`}
-            className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-none text-[10px] font-mono font-bold shadow-sm transition-all ${
+            className={`min-w-[19px] h-[19px] px-1.5 flex items-center justify-center rounded-md text-[10px] font-sans font-semibold transition-all ${
               isSelected
-                ? 'bg-black text-[var(--sys-accent)] border border-black'
-                : 'bg-[var(--sys-accent)] text-black border border-[var(--sys-accent)]'
+                ? 'bg-[#FF6B4A] text-white shadow-sm'
+                : 'bg-white/[0.1] text-slate-300 border border-white/[0.14]'
             }`}
           >
             {quickNumber}
           </span>
         )}
+
         {isSelected && !isCtrlHeld && (
-          <span className="hud-key bg-black text-[var(--sys-accent)] border-black">
-            [ENTER]
+          <span className="focal-key">
+            <span className="sr-only">[ENTER]</span>
+            <span aria-hidden="true">↵</span>
           </span>
         )}
       </div>
     </div>
   );
 };
+
+export default ResultItem;

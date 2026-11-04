@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ClipboardItem } from '@/types';
 import { getClipboardHistory, copyToClipboard, clearClipboardHistory } from '@/services/ipc';
 import { Clipboard, Pin, Trash2, Check, Clock, X } from 'lucide-react';
+import { FocalLogo } from './FocalLogo';
 
 interface ClipboardViewProps {
   onBack: () => void;
@@ -90,23 +91,25 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
   }, [selectedIndex]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[var(--hud-bg-base)] text-[var(--text-main)] font-mono overflow-hidden select-none">
+    <div className="flex-1 flex flex-col h-full bg-[var(--surface-base)] text-slate-100 font-sans overflow-hidden select-none">
       {/* Top Search Bar */}
       <div
         data-tauri-drag-region
         onMouseDown={handleStartDrag}
-        className="flex items-center h-12 px-4 border-b border-[var(--hud-border-grid)] bg-[var(--hud-bg-base)] gap-3 shrink-0 backdrop-blur-xl cursor-default"
+        className="flex items-center h-[52px] px-4 border-b border-white/[0.06] bg-[var(--surface-base)]/90 gap-3 shrink-0 backdrop-blur-2xl cursor-default transition-colors"
       >
-        <span className="text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none">&gt;</span>
+        <div className="w-4 h-4 shrink-0 opacity-90">
+          <FocalLogo className="w-full h-full" />
+        </div>
         
         {/* Breadcrumb pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
-          <Clipboard className="w-3 h-3" />
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.07] text-slate-200 border border-white/[0.1] text-xs font-sans font-medium shrink-0 shadow-sm">
+          <Clipboard className="w-3.5 h-3.5 text-slate-400" />
           <span>Clipboard History</span>
           <button
             type="button"
             onClick={onBack}
-            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
+            className="hover:text-white rounded p-0.5 transition-colors text-slate-400"
             title="Return (Esc)"
           >
             <X className="w-3 h-3" />
@@ -118,7 +121,7 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search clipboard history..."
-          className="flex-1 bg-transparent font-mono text-xs uppercase text-[var(--text-main)] placeholder-neutral-500 focus:outline-none tracking-wider font-medium"
+          className="flex-1 bg-transparent font-sans text-[13.5px] text-slate-100 placeholder:text-slate-400 focus:outline-none tracking-tight font-medium"
           autoFocus
         />
 
@@ -126,22 +129,22 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
           <button
             onClick={handleClear}
             title="Clear History"
-            className="p-1 rounded-none text-neutral-400 hover:text-red-400 hover:bg-[var(--hud-bg-card)] transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/[0.06] border border-transparent transition-all"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
-          <span className="text-[9.5px] px-1.5 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-neutral-500 font-mono select-none">
-            ESC
-          </span>
+          <kbd className="focal-key">
+            Esc
+          </kbd>
         </div>
       </div>
 
       {/* Main split view: items list on left, preview on right */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left: List */}
-        <div className="w-1/2 min-h-0 border-r border-[var(--hud-border-grid)] overflow-y-auto p-2 space-y-1">
+        <div className="w-1/2 min-h-0 border-r border-white/[0.06] overflow-y-auto overflow-x-hidden overscroll-none p-2.5 space-y-1">
           {filteredItems.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-xs">
+            <div className="p-8 text-center text-slate-500 text-xs font-sans">
               No clipboard items found
             </div>
           ) : (
@@ -153,18 +156,18 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
                   ref={isSel ? activeItemRef : undefined}
                   onClick={() => setSelectedIndex(idx)}
                   onDoubleClick={() => handleCopy(item, true)}
-                  className={`p-2.5 rounded-none cursor-pointer transition-all border ${
+                  className={`p-2.5 rounded-lg cursor-pointer transition-colors duration-100 border ${
                     isSel
-                      ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-semibold shadow-sm'
-                      : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)]'
+                      ? 'bg-white/[0.07] border-white/[0.08] text-white shadow-sm'
+                      : 'bg-white/[0.02] text-slate-300 border-white/[0.04] hover:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 mb-1 text-[10px]">
-                    {item.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400" />}
-                    <span className={isSel ? 'text-neutral-900 font-bold' : 'text-[var(--text-dim)]'}>
-                      [{item.source_app || 'TEXT'}]
+                  <div className="flex items-center gap-1.5 mb-1 text-[11px] font-sans">
+                    {item.pinned && <Pin className="w-3 h-3 text-[#FFA06A] fill-[#FFA06A]" />}
+                    <span className={`font-medium ${isSel ? 'text-slate-200' : 'text-slate-400'}`}>
+                      {item.source_app || 'Text'}
                     </span>
-                    <span className={`ml-auto flex items-center gap-1 ${isSel ? 'text-neutral-800' : 'text-[var(--text-dim)]'}`}>
+                    <span className="ml-auto flex items-center gap-1 text-[10px] text-slate-500 font-mono">
                       <Clock className="w-2.5 h-2.5" />
                       {new Date(item.created_at).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -172,7 +175,7 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
                       })}
                     </span>
                   </div>
-                  <p className={`text-xs font-mono line-clamp-2 break-all ${isSel ? 'text-black' : 'text-[var(--text-main)]'}`}>
+                  <p className={`text-xs font-mono line-clamp-2 break-all ${isSel ? 'text-slate-100 font-medium' : 'text-slate-300'}`}>
                     {item.content}
                   </p>
                 </div>
@@ -182,33 +185,36 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
         </div>
 
         {/* Right: Live Preview */}
-        <div className="w-1/2 min-h-0 p-4 flex flex-col bg-[var(--hud-bg-panel)] overflow-y-auto">
+        <div className="w-1/2 min-h-0 p-4 flex flex-col bg-black/20 overflow-y-auto">
           {selectedItem ? (
             <div className="flex flex-col h-full min-h-0">
-              <div className="flex items-center justify-between pb-2 border-b border-[var(--hud-border-grid)] mb-3 text-[10px]">
-                <span className="text-[var(--text-muted)]">
-                  LENGTH: {selectedItem.content.length} CHARS
+              <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.06] mb-3 text-xs font-sans">
+                <span className="text-slate-400">
+                  Length: <strong className="text-slate-200 font-medium">{selectedItem.content.length}</strong> chars
                 </span>
                 <button
                   onClick={() => handleCopy(selectedItem, false)}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-none bg-[var(--keycap-bg)] border border-[var(--keycap-border)] text-[var(--text-main)] hover:border-[var(--sys-accent)] transition-colors text-[10px]"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] text-slate-200 text-xs font-medium transition-all shadow-sm"
                 >
                   {copiedId === selectedItem.id ? (
                     <>
-                      <Check className="w-3 h-3 text-emerald-400" />
-                      COPIED!
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied</span>
                     </>
                   ) : (
-                    'COPY (ENTER)'
+                    <>
+                      <span>Copy</span>
+                      <kbd className="focal-key text-[9px] h-4">↵</kbd>
+                    </>
                   )}
                 </button>
               </div>
-              <pre className="flex-1 text-xs font-mono text-[var(--text-main)] whitespace-pre-wrap break-all select-text overflow-y-auto">
+              <pre className="flex-1 text-xs font-mono text-slate-200 whitespace-pre-wrap break-all select-text overflow-y-auto overflow-x-hidden overscroll-none p-3 rounded-xl bg-black/30 border border-white/[0.06] shadow-inner">
                 {selectedItem.content}
               </pre>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-[var(--text-dim)] text-xs">
+            <div className="flex-1 flex items-center justify-center text-slate-500 text-xs font-sans">
               Select an item to preview
             </div>
           )}
@@ -217,22 +223,24 @@ export function ClipboardView({ onBack }: ClipboardViewProps) {
 
       {/* Dock Footer */}
       <div
-        data-tauri-drag-region
-        onMouseDown={handleStartDrag}
-        className="flex items-center justify-between h-9 px-4 bg-[var(--hud-bg-base)] border-t border-[var(--hud-border-grid)] text-xs font-mono text-[var(--text-muted)] select-none shrink-0"
+        className="flex items-center justify-between h-9 px-4 bg-[var(--surface-base)] border-t border-white/[0.06] text-xs font-sans text-slate-400 select-none shrink-0"
       >
-        <span className="text-[11px]">
-          <span className="text-[var(--sys-accent)] font-bold">[CLIPBOARD]</span> {filteredItems.length} ENTRIES
+        <span className="text-xs flex items-center gap-1.5">
+          <span>Clipboard History</span>
+          <span className="text-slate-600">•</span>
+          <span>{filteredItems.length} entries</span>
         </span>
-        <div className="flex items-center gap-3 text-[11px]">
+        <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1">
-            <kbd className="hud-key">[ENTER]</kbd> PASTE
+            <kbd className="focal-key">↵</kbd> Paste
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="hud-key">[ESC]</kbd> BACK
+            <kbd className="focal-key">Esc</kbd> Back
           </span>
         </div>
       </div>
     </div>
   );
 }
+
+export default ClipboardView;

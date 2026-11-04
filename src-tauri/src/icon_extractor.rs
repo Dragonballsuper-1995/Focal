@@ -221,7 +221,20 @@ pub fn extract_icon_as_data_uri(file_path: &str) -> Option<String> {
             if res_small != 0 && sfi_small.hIcon != std::ptr::null_mut() {
                 sfi_small.hIcon
             } else {
-                return None;
+                // Secondary fallback: ExtractIconExW directly from binary
+                let mut h_icon_ex: windows_sys::Win32::UI::WindowsAndMessaging::HICON = std::ptr::null_mut();
+                let extracted = windows_sys::Win32::UI::Shell::ExtractIconExW(
+                    wide_path.as_ptr(),
+                    0,
+                    &mut h_icon_ex,
+                    std::ptr::null_mut(),
+                    1,
+                );
+                if extracted > 0 && !h_icon_ex.is_null() {
+                    h_icon_ex
+                } else {
+                    return None;
+                }
             }
         };
 
@@ -260,6 +273,7 @@ pub fn extract_icon_as_data_uri(file_path: &str) -> Option<String> {
         );
 
         if h_bitmap.is_null() || bits_ptr.is_null() {
+            eprintln!("[DEBUG extract_icon_as_data_uri] CreateDIBSection failed");
             DeleteDC(hdc_mem);
             ReleaseDC(std::ptr::null_mut(), hdc_screen);
             DestroyIcon(h_icon);

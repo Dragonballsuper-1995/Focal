@@ -42,7 +42,7 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
     }
   }, [isSelected]);
 
-  const alias = item.alias || (item.category ? item.category.slice(0, 3) : 'app');
+  const displaySubtitle = item.subtitle || (item.category === 'app' ? 'Application' : item.category === 'command' ? 'Command' : item.category || 'App');
 
   return (
     <div
@@ -63,30 +63,26 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
         onSelect();
         onContextMenu?.();
       }}
-      className={`group relative flex items-center gap-2 p-1.5 h-[42px] rounded-none border cursor-pointer transition-all select-none font-mono ${
+      className={`group relative flex items-center gap-2.5 px-3 h-[46px] rounded-xl border cursor-pointer transition-all duration-120 select-none font-sans ${
         isSelected
-          ? 'bg-[var(--sys-accent)] text-black border-[var(--sys-accent)] font-bold shadow-md'
-          : 'bg-[var(--hud-bg-card)] text-[var(--text-main)] border-[var(--hud-border-outer)] hover:bg-[var(--hud-bg-panel)] hover:border-[var(--sys-accent)]'
+          ? 'bg-white/[0.08] border-white/[0.15] ring-1 ring-[#FF6B4A]/40 text-white shadow-[0_0_16px_rgba(255,107,74,0.15)]'
+          : 'bg-white/[0.03] text-slate-200 border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.12]'
       }`}
-      title={`${item.title} (${item.subtitle || item.category})`}
+      title={`${item.title} (${displaySubtitle})`}
     >
-      <div className="w-5 h-5 flex items-center justify-center shrink-0">
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${
+        isSelected ? 'bg-white/[0.12] border-white/[0.18]' : 'bg-white/[0.04] border-white/[0.06]'
+      }`}>
         <AppIcon item={item as SearchResult} className="w-4 h-4 object-contain" />
       </div>
-      <div className="truncate flex-1 min-w-0 pr-3">
-        <div
-          className={`text-[11px] truncate leading-tight font-medium ${
-            isSelected ? 'text-black font-bold' : 'text-[var(--text-main)]'
-          }`}
-        >
+      <div className="truncate flex-1 min-w-0 pr-1">
+        <div className="text-[12px] truncate leading-tight font-medium text-slate-100">
           {item.title}
         </div>
-        <div
-          className={`text-[9px] leading-tight flex items-center gap-1 ${
-            isSelected ? 'text-neutral-900 font-semibold' : 'text-[var(--text-muted)]'
-          }`}
-        >
-          <span>[{alias}]</span>
+        <div className={`text-[10px] leading-tight truncate mt-0.5 ${
+          isSelected ? 'text-slate-300' : 'text-slate-400'
+        }`}>
+          {displaySubtitle}
         </div>
       </div>
 
@@ -94,10 +90,10 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
       {isCtrlHeld && quickNumber !== undefined && (
         <span
           data-testid={`pinned-quick-number-${quickNumber}`}
-          className={`absolute top-1 right-1 min-w-[16px] h-[16px] px-0.5 flex items-center justify-center rounded-none text-[9px] font-mono font-bold shadow-sm z-10 transition-all ${
+          className={`absolute top-1.5 right-1.5 min-w-[17px] h-[17px] px-1 flex items-center justify-center rounded-md text-[9px] font-sans font-semibold shadow-sm z-10 transition-all ${
             isSelected
-              ? 'bg-black text-[var(--sys-accent)] border border-black'
-              : 'bg-[var(--sys-accent)] text-black border border-[var(--sys-accent)]'
+              ? 'bg-[#FF6B4A] text-white shadow-sm'
+              : 'bg-white/[0.12] text-slate-300 border border-white/[0.15]'
           }`}
         >
           {quickNumber}
@@ -112,7 +108,7 @@ const PinnedTile: React.FC<PinnedTileProps> = ({
             e.stopPropagation();
             onUnpin();
           }}
-          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 text-neutral-400 hover:text-white rounded-none bg-black/60 hover:bg-red-500/80 transition-all shadow-sm"
+          className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-white rounded-full bg-black/60 hover:bg-rose-600 transition-all shadow-sm"
           title="Unpin item"
         >
           <X className="w-2.5 h-2.5" />
@@ -139,14 +135,16 @@ export const PinnedSection: React.FC<PinnedSectionProps> = ({
   const displayItems = pinnedItems.slice(0, 10);
 
   return (
-    <div className="px-3 pt-2 pb-1.5 mb-2 border-b border-[var(--hud-border-grid)]">
-      <div className="px-0.5 pb-1 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-bold mb-1.5">
-        <span>Favorites</span>
-        <span className="text-[var(--text-dim)]">[{displayItems.length}]</span>
+    <div className="px-3 pt-2 pb-2 mb-2 border-b border-white/[0.06]">
+      <div className="px-1 pb-1.5 flex items-center justify-between text-[11px] font-sans text-slate-400 font-medium">
+        <span className="flex items-center gap-1.5">
+          <span>Favorites</span>
+        </span>
+        <span className="text-slate-500 font-normal">{displayItems.length}</span>
       </div>
 
       {/* 2x5 Grid */}
-      <div className="grid grid-cols-5 gap-2 mb-1">
+      <div className="grid grid-cols-5 gap-2 mb-0.5">
         {displayItems.map((item, index) => (
           <PinnedTile
             key={item.id}
@@ -164,3 +162,5 @@ export const PinnedSection: React.FC<PinnedSectionProps> = ({
     </div>
   );
 };
+
+export default PinnedSection;

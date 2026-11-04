@@ -11,6 +11,7 @@ import { ClipboardView } from '@/components/ClipboardView';
 import { SnippetsView } from '@/components/SnippetsView';
 import { FileSearchView } from '@/components/FileSearchView';
 import { SettingsModal } from '@/components/SettingsModal';
+import { TelemetryInspector } from '@/components/TelemetryInspector';
 import { getSettings, updateSettings, launchItem, hideWindow } from '@/services/ipc';
 
 const defaultPinnedItems: PinnedItem[] = [
@@ -64,7 +65,7 @@ export function App() {
     snippet_expansion_enabled: true,
     pinned_items: defaultPinnedItems,
     layout_mode: 'hybrid',
-    accent_color: '#0078D4',
+    accent_color: '#FF6B4A',
   });
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('hybrid');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
@@ -88,6 +89,8 @@ export function App() {
         }
         if (cfg.accent_color) {
           document.documentElement.style.setProperty('--sys-accent', cfg.accent_color);
+        } else {
+          document.documentElement.style.setProperty('--sys-accent', '#FF6B4A');
         }
         setConfig(cfg);
       })
@@ -125,9 +128,48 @@ export function App() {
     return () => window.removeEventListener('keydown', preventBrowserInterferingShortcuts, { capture: true });
   }, []);
 
+  // 4c. Prevent HTML drag ghosting and unwanted window-level panning/scrolling
+  useEffect(() => {
+    const handleDragStart = (e: DragEvent) => e.preventDefault();
+    const handleWheel = (e: WheelEvent) => {
+      // Prevent horizontal wheel/trackpad scrolling across the entire app
+      if (Math.abs(e.deltaX) > 0) {
+        e.preventDefault();
+      }
+      const target = e.target as HTMLElement | null;
+      const scrollable = target?.closest('.overflow-y-auto, .overflow-auto, [role="listbox"]');
+      if (!scrollable) {
+        e.preventDefault();
+      }
+    };
+    const handleMouseDown = (e: MouseEvent) => {
+      // Prevent middle-click (button 1) 4-directional autoscroll panning
+      if (e.button === 1) {
+        e.preventDefault();
+      }
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest('.overflow-y-auto, .overflow-auto, [role="listbox"]')) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('dragstart', handleDragStart, { capture: true });
+    window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    window.addEventListener('mousedown', handleMouseDown, { capture: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+    return () => {
+      window.removeEventListener('dragstart', handleDragStart, { capture: true });
+      window.removeEventListener('wheel', handleWheel, { capture: true });
+      window.removeEventListener('mousedown', handleMouseDown, { capture: true });
+      window.removeEventListener('touchmove', handleTouchMove, { capture: true });
+    };
+  }, []);
+
   // 5. Action Handlers
   const handleExecuteItem = useCallback(
-    (item: SearchResult) => {
+    (item: SearchResult | PinnedItem) => {
       if (item.action.startsWith('view:')) {
         const nextView = item.action.replace('view:', '') as ViewMode;
         setViewMode(nextView);
@@ -399,9 +441,10 @@ export function App() {
   });
 
   return (
-    <div className="flex items-center justify-center w-full h-full bg-transparent p-0 select-none">
+    <div className="fixed inset-0 w-full h-full bg-transparent m-0 p-0 select-none overflow-hidden overscroll-none touch-none">
+      {/* Main Focal Window Shell */}
       <div
-        className="relative flex flex-col w-full max-w-[760px] h-full max-h-[480px] bg-[var(--hud-bg-base)] border border-[var(--hud-border-outer)] rounded-none shadow-2xl overflow-hidden font-mono backdrop-blur-xl ring-1 ring-black/10"
+        className="relative flex flex-col w-full h-full bg-[#0E121A]/90 border border-white/[0.08] rounded-2xl overflow-hidden font-sans backdrop-blur-2xl box-border"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
@@ -449,9 +492,9 @@ export function App() {
           />
         )}
 
-        {/* 2. Main Stage (Full 100% width, no preview pane) */}
+        {/* 2. Main Stage */}
         {viewMode === 'root' ? (
-          <div className="flex-1 w-full overflow-hidden flex flex-col bg-transparent relative">
+          <div className="flex-1 w-full overflow-hidden flex bg-transparent relative">
             <ResultsList
               results={displayedResults}
               selectedIndex={selectedIndex}
@@ -491,6 +534,15 @@ export function App() {
               onContextMenuPinned={handlePinnedContextMenu}
               layoutMode={layoutMode}
             />
+            {config.preview_pane_enabled && currentSelectedItem && (
+              <div className="w-72 border-l border-[var(--border-hairline)] overflow-y-auto overflow-x-hidden overscroll-none hidden md:block">
+                <TelemetryInspector
+                  item={currentSelectedItem}
+                  onToggleActions={() => setIsActionMenuOpen((prev) => !prev)}
+                  onExecute={handleExecuteItem}
+                />
+              </div>
+            )}
           </div>
         ) : viewMode === 'clipboard' ? (
           <div className="flex-1 w-full overflow-hidden flex flex-col">
@@ -528,12 +580,28 @@ export function App() {
               onBack={() => {
                 setViewMode('root');
                 clearQuery();
+                getSettings()
+                  .then((cfg) => {
+                    setConfig(cfg);
+                    if (cfg.layout_mode) setLayoutMode(cfg.layout_mode);
+                    if (cfg.accent_color) {
+                      document.documentElement.style.setProperty('--sys-accent', cfg.accent_color);
+                    }
+                  })
+                  .catch(() => {});
                 setTimeout(() => inputRef.current?.focus(), 10);
+              }}
+              onConfigChange={(updated) => {
+                setConfig(updated);
+                if (updated.layout_mode) setLayoutMode(updated.layout_mode);
+                if (updated.accent_color) {
+                  document.documentElement.style.setProperty('--sys-accent', updated.accent_color);
+                }
               }}
             />
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-neutral-400 font-mono">
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-[var(--text-muted)] font-mono">
             <div className="max-w-md text-center">
               <h2 className="text-lg font-semibold text-white capitalize mb-1">
                 {viewMode} Subsystem
@@ -545,7 +613,7 @@ export function App() {
                   clearQuery();
                   inputRef.current?.focus();
                 }}
-                className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--sys-accent)] hover:opacity-90 rounded-none transition-opacity shadow-sm"
+                className="px-4 py-2 text-xs font-medium text-white bg-gradient-to-r from-[#FFA06A] to-[#FF4565] hover:brightness-110 rounded-xl transition-all shadow-md"
               >
                 Return to Search (Esc)
               </button>
@@ -553,7 +621,7 @@ export function App() {
           </div>
         )}
 
-        {/* 3. Raycast-Inspired Bottom Dock Footer (Root only) */}
+        {/* 3. Bottom Dock Footer (Root only) */}
         {viewMode === 'root' && (
           <ActionBar
             selectedItem={currentSelectedItem}

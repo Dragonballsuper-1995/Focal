@@ -1,4 +1,6 @@
 import React from 'react';
+import { FocalLogo } from './FocalLogo';
+import { hideWindow } from '@/services/ipc';
 
 export interface TelemetryHeaderProps {
   targetsCount?: number;
@@ -9,74 +11,71 @@ export interface TelemetryHeaderProps {
 
 export const TelemetryHeader: React.FC<TelemetryHeaderProps> = ({
   targetsCount = 842,
-  accentColor = '#0078D4',
+  accentColor = '#FF6B4A',
   onMinimize,
   onClose,
 }) => {
+  const handleMinimize = onMinimize || (() => hideWindow().catch(() => {}));
+  const handleClose = onClose || (() => hideWindow().catch(() => {}));
+
   return (
     <div
       data-tauri-drag-region
-      className="h-8 px-3.5 py-1.5 bg-[#14161C] border-b border-[#1E212A] flex items-center justify-between text-xs font-mono select-none shrink-0"
+      className="h-9 px-4 bg-[var(--surface-base)]/90 border-b border-[var(--border-hairline)] flex items-center justify-between text-xs font-mono select-none shrink-0 backdrop-blur-2xl transition-colors"
     >
       {/* Left telemetry info */}
       <div className="flex items-center gap-2.5 pointer-events-none">
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 100 100" fill="none" aria-label="Focal Logo">
-          <defs>
-            <linearGradient id="hdr-focal-1" x1="22" y1="26" x2="86" y2="26" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#FFA07A"/>
-              <stop offset="100%" stop-color="#FB923C"/>
-            </linearGradient>
-            <linearGradient id="hdr-focal-2" x1="22" y1="54" x2="70" y2="54" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#FB7185"/>
-              <stop offset="100%" stop-color="#F43F5E"/>
-            </linearGradient>
-            <linearGradient id="hdr-focal-3" x1="22" y1="82" x2="42" y2="82" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#F43F5E"/>
-              <stop offset="100%" stop-color="#E11D48"/>
-            </linearGradient>
-          </defs>
-          <rect x="22" y="16" width="64" height="20" rx="10" fill="url(#hdr-focal-1)"/>
-          <rect x="22" y="44" width="48" height="20" rx="10" fill="url(#hdr-focal-2)"/>
-          <circle cx="32" cy="82" r="10" fill="url(#hdr-focal-3)"/>
-        </svg>
-        <span className="text-white font-bold tracking-wider font-hud text-xs">
-          FOCAL // SYS_COMMAND_HUD
+        <div className="w-4 h-4 shrink-0 logo-aura">
+          <FocalLogo className="w-full h-full" />
+        </div>
+        <span className="font-extrabold text-[var(--text-main)] tracking-wider font-sans text-xs">
+          FOCAL
+        </span>
+        <span className="text-[var(--text-dim)]">//</span>
+        <span className="text-[var(--text-muted)] text-[11px] font-medium">
+          SYS_COMMAND_HUD
         </span>
         <span className="text-neutral-600">•</span>
-        <span className="text-neutral-400 text-[10.5px]">
+        <span className="text-[#FF6B4A] font-semibold text-[11px]">
           {targetsCount} TARGETS
         </span>
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-3 text-[10.5px] text-neutral-400">
-        <span>
-          STATUS: <strong className="text-emerald-400 font-semibold">[READY]</strong>
+      <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
+        <span className="flex items-center gap-1.5 text-[10.5px]">
+          STATUS: <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 focal-dot-pulse" />
+          <strong className="text-emerald-400 font-semibold">[READY]</strong>
         </span>
-        <span>
-          ACCENT: <strong className="text-[var(--sys-accent)] font-semibold">{accentColor}</strong>
+        <span className="text-[10.5px] hidden sm:inline">
+          ACCENT:{' '}
+          <strong style={{ color: accentColor }} className="font-semibold">
+            {accentColor}
+          </strong>
         </span>
 
-        {/* Minimal Dismiss Buttons */}
-        <div className="pl-2 border-l border-[#262A36] flex items-center gap-1">
+        {/* Minimal Window Control Dots */}
+        <div className="pl-2 border-l border-[var(--border-hairline)] flex items-center gap-1.5">
           <button
             type="button"
-            onClick={onMinimize}
-            className="px-1 py-0.5 rounded-none text-neutral-500 hover:text-white hover:bg-[#20232D] text-[9.5px] transition-colors"
-            title="Hide to Tray (Esc)"
+            onClick={handleMinimize}
+            className="w-3 h-3 rounded-full bg-neutral-600/70 hover:bg-neutral-500 transition-colors flex items-center justify-center text-[8px] text-transparent hover:text-white"
+            title="Minimize to Tray (Esc)"
           >
-            [—]
+            —
           </button>
           <button
             type="button"
-            onClick={onClose}
-            className="px-1 py-0.5 rounded-none text-neutral-500 hover:text-red-400 hover:bg-[#20232D] text-[9.5px] transition-colors"
+            onClick={handleClose}
+            className="w-3 h-3 rounded-full bg-[#FF4565]/80 hover:bg-[#FF4565] hover:brightness-125 transition-all flex items-center justify-center text-[8px] text-transparent hover:text-white"
             title="Dismiss"
           >
-            [✕]
+            ✕
           </button>
         </div>
       </div>
     </div>
   );
 };
+
+export default TelemetryHeader;

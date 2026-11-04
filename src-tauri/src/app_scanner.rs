@@ -424,3 +424,236 @@ pub fn scan_all_apps_with_options(include_path: bool) -> Vec<AppCacheItem> {
 
     aggregated
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedShortcut {
+    pub target_exe: PathBuf,
+    pub arguments: String,
+    pub working_dir: PathBuf,
+}
+
+static RESOLVED_LNK_CACHE: std::sync::LazyLock<
+    std::sync::RwLock<std::collections::HashMap<String, ResolvedShortcut>>,
+> = std::sync::LazyLock::new(|| std::sync::RwLock::new(std::collections::HashMap::new()));
+
+/// Resolves a Windows .lnk shortcut to its target executable, arguments, and working directory.
+/// Results are cached in-memory for sub-millisecond retrieval.
+pub fn resolve_lnk(lnk_path: &str) -> Option<ResolvedShortcut> {
+    if let Ok(cache) = RESOLVED_LNK_CACHE.read() {
+        if let Some(cached) = cache.get(lnk_path) {
+            return Some(cached.clone());
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(resolved) = resolve_lnk_win32(lnk_path) {
+            if let Ok(mut cache) = RESOLVED_LNK_CACHE.write() {
+                cache.insert(lnk_path.to_string(), resolved.clone());
+            }
+            return Some(resolved);
+        }
+    }
+
+    None
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn resolve_lnk(_lnk_path: &str) -> Option<ResolvedShortcut> {
+    None
+}
+
+#[cfg(target_os = "windows")]
+fn resolve_lnk_win32(lnk_path: &str) -> Option<ResolvedShortcut> {
+    use std::ffi::c_void;
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::core::GUID;
+    use windows_sys::Win32::Foundation::{BOOL, HWND};
+    type HRESULT = i32;
+    use windows_sys::Win32::System::Com::{
+        CoCreateInstance, CoInitializeEx, CLSCTX_INPROC_SERVER,
+    };
+
+    const CLSID_SHELL_LINK: GUID = GUID {
+        data1: 0x00021401,
+        data2: 0x0000,
+        data3: 0x0000,
+        data4: [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46],
+    };
+
+    const IID_ISHELL_LINK_W: GUID = GUID {
+        data1: 0x000214F9,
+        data2: 0x0000,
+        data3: 0x0000,
+        data4: [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46],
+    };
+
+    const IID_IPERSIST_FILE: GUID = GUID {
+        data1: 0x0000010b,
+        data2: 0x0000,
+        data3: 0x0000,
+        data4: [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46],
+    };
+
+    #[allow(non_snake_case)]
+    #[repr(C)]
+    struct IPersistFileVtbl {
+        QueryInterface: unsafe extern "system" fn(*mut c_void, *const GUID, *mut *mut c_void) -> HRESULT,
+        AddRef: unsafe extern "system" fn(*mut c_void) -> u32,
+        Release: unsafe extern "system" fn(*mut c_void) -> u32,
+        GetClassID: unsafe extern "system" fn(*mut c_void, *mut GUID) -> HRESULT,
+        IsDirty: unsafe extern "system" fn(*mut c_void) -> HRESULT,
+        Load: unsafe extern "system" fn(*mut c_void, *const u16, u32) -> HRESULT,
+        Save: unsafe extern "system" fn(*mut c_void, *const u16, BOOL) -> HRESULT,
+        SaveCompleted: unsafe extern "system" fn(*mut c_void, *const u16) -> HRESULT,
+        GetCurFile: unsafe extern "system" fn(*mut c_void, *mut *mut u16) -> HRESULT,
+    }
+
+    #[allow(non_snake_case)]
+    #[repr(C)]
+    struct IShellLinkWVtbl {
+        QueryInterface: unsafe extern "system" fn(*mut c_void, *const GUID, *mut *mut c_void) -> HRESULT,
+        AddRef: unsafe extern "system" fn(*mut c_void) -> u32,
+        Release: unsafe extern "system" fn(*mut c_void) -> u32,
+        GetPath: unsafe extern "system" fn(*mut c_void, *mut u16, i32, *mut c_void, u32) -> HRESULT,
+        GetIDList: unsafe extern "system" fn(*mut c_void, *mut *mut c_void) -> HRESULT,
+        SetIDList: unsafe extern "system" fn(*mut c_void, *const c_void) -> HRESULT,
+        GetDescription: unsafe extern "system" fn(*mut c_void, *mut u16, i32) -> HRESULT,
+        SetDescription: unsafe extern "system" fn(*mut c_void, *const u16) -> HRESULT,
+        GetWorkingDirectory: unsafe extern "system" fn(*mut c_void, *mut u16, i32) -> HRESULT,
+        SetWorkingDirectory: unsafe extern "system" fn(*mut c_void, *const u16) -> HRESULT,
+        GetArguments: unsafe extern "system" fn(*mut c_void, *mut u16, i32) -> HRESULT,
+        SetArguments: unsafe extern "system" fn(*mut c_void, *const u16) -> HRESULT,
+        GetHotkey: unsafe extern "system" fn(*mut c_void, *mut u16) -> HRESULT,
+        SetHotkey: unsafe extern "system" fn(*mut c_void, u16) -> HRESULT,
+        GetShowCmd: unsafe extern "system" fn(*mut c_void, *mut i32) -> HRESULT,
+        SetShowCmd: unsafe extern "system" fn(*mut c_void, i32) -> HRESULT,
+        GetIconLocation: unsafe extern "system" fn(*mut c_void, *mut u16, i32, *mut i32) -> HRESULT,
+        SetIconLocation: unsafe extern "system" fn(*mut c_void, *const u16, i32) -> HRESULT,
+        SetRelativePath: unsafe extern "system" fn(*mut c_void, *const u16, u32) -> HRESULT,
+        Resolve: unsafe extern "system" fn(*mut c_void, HWND, u32) -> HRESULT,
+        SetPath: unsafe extern "system" fn(*mut c_void, *const u16) -> HRESULT,
+    }
+
+    #[cfg(target_os = "windows")]
+    thread_local! {
+        static COM_INITIALIZED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    }
+
+    let com_ready = COM_INITIALIZED.with(|cell| {
+        if !cell.get() {
+            unsafe {
+                let init_hr = CoInitializeEx(std::ptr::null_mut(), 0x2 /* COINIT_APARTMENTTHREADED */);
+                if init_hr == 0 || init_hr == 1 || init_hr == -2147417850 /* RPC_E_CHANGED_MODE */ {
+                    cell.set(true);
+                    return true;
+                }
+                return false;
+            }
+        }
+        true
+    });
+
+    if !com_ready {
+        return None;
+    }
+
+    let wide_path: Vec<u16> = OsStr::new(lnk_path)
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+
+    unsafe {
+        let mut shell_link_raw: *mut c_void = std::ptr::null_mut();
+        let hr = CoCreateInstance(
+            &CLSID_SHELL_LINK,
+            std::ptr::null_mut(),
+            CLSCTX_INPROC_SERVER,
+            &IID_ISHELL_LINK_W,
+            &mut shell_link_raw,
+        );
+
+        if hr < 0 || shell_link_raw.is_null() {
+            return None;
+        }
+
+        let shell_link = &*(shell_link_raw as *mut *const IShellLinkWVtbl);
+        let shell_link_vtbl = &**shell_link;
+
+        let mut persist_file_raw: *mut c_void = std::ptr::null_mut();
+        let hr_qi = (shell_link_vtbl.QueryInterface)(
+            shell_link_raw,
+            &IID_IPERSIST_FILE,
+            &mut persist_file_raw,
+        );
+
+        let mut result = None;
+
+        if hr_qi >= 0 && !persist_file_raw.is_null() {
+            let persist_file = &*(persist_file_raw as *mut *const IPersistFileVtbl);
+            let persist_file_vtbl = &**persist_file;
+
+            let hr_load = (persist_file_vtbl.Load)(
+                persist_file_raw,
+                wide_path.as_ptr(),
+                0, /* STGM_READ */
+            );
+            (persist_file_vtbl.Release)(persist_file_raw);
+
+            if hr_load >= 0 {
+                // SLR_NO_UI (1) | SLR_NOTRACK (0x20) | SLR_NOSEARCH (0x10) | SLR_NOUPDATE (0x8) = 0x0039
+                let _ = (shell_link_vtbl.Resolve)(shell_link_raw, std::ptr::null_mut(), 0x0039);
+
+                let mut path_buf = [0u16; 1024];
+                let hr_get_path = (shell_link_vtbl.GetPath)(
+                    shell_link_raw,
+                    path_buf.as_mut_ptr(),
+                    path_buf.len() as i32,
+                    std::ptr::null_mut(),
+                    0,
+                );
+
+                let mut args_buf = [0u16; 1024];
+                let _ = (shell_link_vtbl.GetArguments)(
+                    shell_link_raw,
+                    args_buf.as_mut_ptr(),
+                    args_buf.len() as i32,
+                );
+
+                let mut workdir_buf = [0u16; 1024];
+                let _ = (shell_link_vtbl.GetWorkingDirectory)(
+                    shell_link_raw,
+                    workdir_buf.as_mut_ptr(),
+                    workdir_buf.len() as i32,
+                );
+
+                if hr_get_path >= 0 {
+                    let len = path_buf.iter().position(|&c| c == 0).unwrap_or(path_buf.len());
+                    let resolved_target = String::from_utf16_lossy(&path_buf[..len]);
+
+                    if !resolved_target.is_empty() {
+                        let args_len = args_buf.iter().position(|&c| c == 0).unwrap_or(args_buf.len());
+                        let arguments = String::from_utf16_lossy(&args_buf[..args_len]);
+
+                        let wd_len = workdir_buf.iter().position(|&c| c == 0).unwrap_or(workdir_buf.len());
+                        let working_dir = String::from_utf16_lossy(&workdir_buf[..wd_len]);
+
+                        result = Some(ResolvedShortcut {
+                            target_exe: PathBuf::from(resolved_target),
+                            arguments,
+                            working_dir: if working_dir.is_empty() {
+                                PathBuf::new()
+                            } else {
+                                PathBuf::from(working_dir)
+                            },
+                        });
+                    }
+                }
+            }
+        }
+
+        (shell_link_vtbl.Release)(shell_link_raw);
+        result
+    }
+}

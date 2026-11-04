@@ -122,4 +122,64 @@ describe('ActionBar Component', () => {
     expect(handleSelectAction).toHaveBeenCalledWith('admin');
     expect(handleCloseActionMenu).toHaveBeenCalledTimes(1);
   });
+
+  it('calls onCloseActionMenu when clicking outside the ActionMenu', () => {
+    const handleCloseActionMenu = vi.fn();
+
+    render(
+      <div>
+        <div data-testid="outside-area">Outside Container</div>
+        <ActionBar
+          selectedItem={MOCK_APP_ITEM}
+          isActionMenuOpen={true}
+          onToggleActionMenu={vi.fn()}
+          onCloseActionMenu={handleCloseActionMenu}
+          onSelectAction={vi.fn()}
+        />
+      </div>
+    );
+
+    const outsideArea = screen.getByTestId('outside-area');
+    fireEvent.pointerDown(outsideArea);
+
+    expect(handleCloseActionMenu).toHaveBeenCalled();
+  });
+
+  it('does not call onCloseActionMenu when clicking inside the ActionMenu', () => {
+    const handleCloseActionMenu = vi.fn();
+
+    render(
+      <ActionBar
+        selectedItem={MOCK_APP_ITEM}
+        isActionMenuOpen={true}
+        onToggleActionMenu={vi.fn()}
+        onCloseActionMenu={handleCloseActionMenu}
+        onSelectAction={vi.fn()}
+      />
+    );
+
+    const menu = screen.getByRole('menu');
+    fireEvent.pointerDown(menu);
+
+    expect(handleCloseActionMenu).not.toHaveBeenCalled();
+  });
+
+  it('does not trigger outside-click dismissal when clicking the Actions toggle trigger', () => {
+    const handleCloseActionMenu = vi.fn();
+
+    render(
+      <ActionBar
+        selectedItem={MOCK_APP_ITEM}
+        isActionMenuOpen={true}
+        onToggleActionMenu={vi.fn()}
+        onCloseActionMenu={handleCloseActionMenu}
+        onSelectAction={vi.fn()}
+      />
+    );
+
+    const toggleButton = screen.getByTitle('Toggle Actions Menu (Tab)');
+    fireEvent.pointerDown(toggleButton);
+
+    expect(handleCloseActionMenu).not.toHaveBeenCalled();
+  });
 });

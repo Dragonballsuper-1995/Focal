@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub enum ThemeMode {
     Dark,
     Light,
+    Oled,
     System,
 }
 
@@ -19,6 +20,7 @@ impl std::fmt::Display for ThemeMode {
         match self {
             ThemeMode::Dark => write!(f, "dark"),
             ThemeMode::Light => write!(f, "light"),
+            ThemeMode::Oled => write!(f, "oled"),
             ThemeMode::System => write!(f, "system"),
         }
     }

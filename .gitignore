@@ -71,3 +71,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Prototypes & UI showcases
+prototypes/
+design directions/
+*.html
+!index.html
+focal_release_verified.png
+

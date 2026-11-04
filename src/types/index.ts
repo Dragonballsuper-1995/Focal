@@ -66,7 +66,7 @@ export interface PinnedItem {
 export type LayoutMode = 'hybrid' | 'list' | 'grid';
 
 export interface RunnerConfig {
-  theme: 'dark' | 'light' | 'system';
+  theme: 'dark' | 'light' | 'oled' | 'system';
   global_hotkey: string;
   fallback_hotkey: string;
   max_clipboard_items: number;

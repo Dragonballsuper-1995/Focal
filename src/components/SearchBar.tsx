@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Settings } from 'lucide-react';
 import type { ViewMode, LayoutMode } from '@/types';
+import { FocalLogo } from './FocalLogo';
 
 export interface SearchBarProps {
   query: string;
@@ -13,7 +14,7 @@ export interface SearchBarProps {
   isLoading?: boolean;
   layoutMode?: LayoutMode;
   onLayoutChange?: (mode: LayoutMode) => void;
-  theme?: 'dark' | 'light' | 'system';
+  theme?: 'dark' | 'light' | 'oled' | 'system';
   onToggleTheme?: () => void;
   onOpenSettings?: () => void;
 }
@@ -39,7 +40,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       case 'snippets':
         return 'Search snippets by name or keyword...';
       case 'files':
-        return 'Search files and folders...';
+        return 'Search files and folders on your computer...';
       case 'settings':
         return 'Search settings...';
       default:
@@ -78,26 +79,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     <div
       data-tauri-drag-region
       onMouseDown={handleStartDrag}
-      className="flex items-center h-12 px-4 border-b border-[var(--hud-border-grid)] bg-[var(--hud-bg-base)] gap-3 shrink-0 select-none backdrop-blur-xl cursor-default"
+      className="flex items-center h-[52px] px-4 border-b border-white/[0.06] bg-[#0E121A]/80 gap-3 shrink-0 select-none backdrop-blur-2xl cursor-default transition-colors"
     >
-      {/* Branded HUD prompt symbol */}
-      <span
-        data-tauri-drag-region
-        className={`text-[var(--sys-accent)] font-bold text-base select-none pointer-events-none ${
-          isLoading ? 'animate-pulse' : ''
-        }`}
-      >
-        &gt;
-      </span>
+      {/* Branded Focal Omnibox Prefix Mark */}
+      <div className={`relative flex items-center justify-center shrink-0 ${isLoading ? 'animate-pulse' : ''}`}>
+        <FocalLogo className="w-4 h-4 opacity-90" />
+      </div>
 
-      {/* Breadcrumb Pill for Subsystems */}
+      {/* Subsystem Breadcrumb Pill */}
       {viewMode !== 'root' && (
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-none bg-[var(--sys-accent-muted)] text-[var(--sys-accent)] border border-[var(--sys-accent-border)] text-[10px] font-mono font-bold shrink-0">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.07] text-slate-200 border border-white/[0.1] text-xs font-sans font-medium shrink-0 shadow-sm animate-in fade-in duration-150">
           <span>{getViewModeLabel(viewMode)}</span>
           <button
             type="button"
             onClick={onResetView}
-            className="hover:opacity-75 rounded-none p-0.5 transition-opacity"
+            className="hover:text-white rounded p-0.5 transition-colors text-slate-400"
             title="Return to Command Palette (Esc)"
           >
             <X className="w-3 h-3" />
@@ -105,28 +101,37 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </div>
       )}
 
-      {/* Main input */}
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder={getPlaceholder()}
-        value={query}
-        onChange={(e) => onChange(e.target.value)}
-        spellCheck={false}
-        autoComplete="off"
-        className="flex-1 bg-transparent font-mono text-xs uppercase text-[var(--text-main)] placeholder-neutral-500 focus:outline-none tracking-wider font-medium"
-      />
+      {/* Main Omnibox Search Input with Crystal Clear Visual Placeholder */}
+      <div className="relative flex-1 flex items-center">
+        {!query && (
+          <span className="absolute left-0 pointer-events-none text-[13.5px] text-slate-400 font-normal tracking-tight select-none">
+            {viewMode === 'root'
+              ? 'Search apps, commands, or files...'
+              : getPlaceholder()}
+          </span>
+        )}
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder={getPlaceholder()}
+          value={query}
+          onChange={(e) => onChange(e.target.value)}
+          spellCheck={false}
+          autoComplete="off"
+          className="w-full bg-transparent font-sans text-[13.5px] text-[var(--text-main)] placeholder:text-transparent focus:outline-none tracking-tight font-medium"
+        />
+      </div>
 
-      {/* Right controls */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      {/* Right Controls */}
+      <div className="flex items-center gap-2 shrink-0">
         {viewMode === 'root' && onOpenSettings && (
           <button
             type="button"
             onClick={onOpenSettings}
-            className="p-1 rounded-none text-neutral-400 hover:text-[var(--text-main)] hover:bg-[var(--hud-bg-card)] transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent transition-all"
             title="Preferences"
           >
-            <Settings className="w-3.5 h-3.5" />
+            <Settings className="w-4 h-4" />
           </button>
         )}
 
@@ -135,12 +140,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <button
             type="button"
             onClick={onResetView}
-            className="px-2 py-0.5 text-[9.5px] font-mono font-medium text-[var(--text-main)] bg-[var(--keycap-bg)] hover:opacity-80 rounded-none border border-[var(--keycap-border)] transition-opacity"
+            className="focal-key hover:text-white hover:bg-white/[0.1] transition-colors"
           >
-            BACK (ESC)
+            <span className="sr-only">BACK (ESC)</span>
+            <span aria-hidden="true">Esc</span>
           </button>
         )}
       </div>
     </div>
   );
 };
+
+export default SearchBar;

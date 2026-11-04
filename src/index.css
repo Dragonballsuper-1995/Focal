@@ -4,80 +4,201 @@
 
 :root {
   color-scheme: dark;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Geist Mono', Consolas, monospace;
-  --font-hud: 'Space Grotesk', sans-serif;
 
-  /* Dynamic Windows Accent Color */
-  --sys-accent: #0078D4; /* Windows Cobalt Default */
-  --sys-accent-hover: #1A90F0;
-  --sys-accent-muted: rgba(0, 120, 212, 0.18);
-  --sys-accent-subtle: rgba(0, 120, 212, 0.08);
-  --sys-accent-border: rgba(0, 120, 212, 0.45);
-  --sys-accent-glow: rgba(0, 120, 212, 0.35);
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', Consolas, monospace;
+  --font-hud: 'Plus Jakarta Sans', 'Space Grotesk', sans-serif;
 
-  /* Nordic Glass Surfaces (Dark) - Deep luxury frosted surface */
-  --hud-bg-base: rgba(15, 17, 23, 0.96);
-  --hud-bg-sub: rgba(20, 23, 30, 0.96);
-  --hud-bg-panel: rgba(18, 20, 27, 0.98);
-  --hud-bg-card: rgba(255, 255, 255, 0.05);
-  --hud-border-outer: rgba(255, 255, 255, 0.12);
-  --hud-border-grid: rgba(255, 255, 255, 0.07);
-  --hud-border-hairline: rgba(255, 255, 255, 0.04);
+  /* Radiant Sunset Brand Colors (Derived from Official Focal Mark) */
+  --focal-amber-peach: #FFA06A;
+  --focal-coral-start: #FFA07A;
+  --focal-tangerine: #FB923C;
+  --focal-coral: #FF6B4A;
+  --focal-coral-rose: #FF5370;
+  --focal-rose-mid: #FB7185;
+  --focal-rose: #FF4565;
+  --focal-ruby: #E11D48;
+  --focal-wine: #881337;
 
-  --text-main: #EAEAEF;
-  --text-muted: #868A98;
-  --text-dim: #505462;
+  /* Primary Radiant Gradients */
+  --focal-gradient-sunset: linear-gradient(135deg, #FFA06A 0%, #FF6B4A 35%, #FF5370 70%, #FF4565 100%);
+  --focal-gradient-capsule: linear-gradient(90deg, #FFA07A 0%, #FB923C 30%, #FF5370 65%, #F43F5E 100%);
+  --focal-gradient-border: linear-gradient(135deg, rgba(255, 107, 74, 0.6) 0%, rgba(255, 83, 112, 0.35) 50%, rgba(255, 69, 101, 0.25) 75%, rgba(255, 255, 255, 0.06) 100%);
+  --focal-gradient-glow: linear-gradient(135deg, rgba(255, 107, 74, 0.4) 0%, rgba(255, 83, 112, 0.3) 50%, rgba(255, 69, 101, 0.2) 100%);
 
-  --keycap-bg: #1A1D24;
-  --keycap-text: #C8CBD6;
-  --keycap-border: #2F3442;
-  --keycap-bottom: #0B0D10;
+  /* Dynamic Glow Multiplier */
+  --focal-glow-multiplier: 1.0;
+
+  /* Dynamic Accent Color (Default: Focal Coral #FF6B4A) */
+  --sys-accent: #FF6B4A;
+  --sys-accent-hover: #FF5370;
+  --sys-accent-muted: rgba(255, 107, 74, 0.18);
+  --sys-accent-subtle: rgba(255, 107, 74, 0.08);
+  --sys-accent-border: rgba(255, 107, 74, 0.45);
+  --sys-accent-glow: rgba(255, 107, 74, 0.35);
+
+  /* Obsidian Deep Surfaces (Dark Mode: Obsidian Slate) */
+  --canvas-bg: #0B0D13;
+  --surface-base: #0E121A;
+  --surface-raised: #141824;
+  --surface-overlay: #1A2030;
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --border-hairline: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-highlight: rgba(255, 107, 74, 0.4);
+
+  --hud-bg-base: #0E121A;
+  --hud-bg-sub: #141824;
+  --hud-bg-panel: #171D2C;
+  --hud-bg-card: rgba(255, 255, 255, 0.03);
+  --hud-border-outer: rgba(255, 255, 255, 0.08);
+  --hud-border-grid: rgba(255, 255, 255, 0.06);
+  --hud-border-hairline: rgba(255, 255, 255, 0.05);
+
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --text-inverse: #0B0D13;
+
+  --selection-bg: rgba(255, 255, 255, 0.06);
+  --selection-border: rgba(255, 107, 74, 0.35);
+
+  --keycap-bg: rgba(255, 255, 255, 0.07);
+  --keycap-border: rgba(255, 255, 255, 0.12);
+  --keycap-bevel: transparent;
+  --keycap-text: #CBD5E1;
+
+  --shadow-window: 0 28px 70px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 16px 40px -10px rgba(255, 107, 74, calc(0.2 * var(--focal-glow-multiplier)));
 }
 
 [data-theme='light'] {
   color-scheme: light;
 
-  /* Nordic Frosted Glass Surfaces (Light) */
-  --hud-bg-base: rgba(255, 255, 255, 0.96);
-  --hud-bg-sub: rgba(246, 247, 249, 0.96);
-  --hud-bg-panel: rgba(255, 255, 255, 0.98);
+  --canvas-bg: #F8FAFC;
+  --surface-base: #FFFFFF;
+  --surface-raised: #F1F5F9;
+  --surface-overlay: #FFFFFF;
+  --surface-hover: #FFF5F2;
+  --border-hairline: #E2E8F0;
+  --border-subtle: #CBD5E1;
+  --border-highlight: rgba(255, 107, 74, 0.65);
+
+  --hud-bg-base: #FFFFFF;
+  --hud-bg-sub: #F8FAFC;
+  --hud-bg-panel: #F1F5F9;
   --hud-bg-card: rgba(0, 0, 0, 0.03);
-  --hud-border-outer: rgba(0, 0, 0, 0.10);
-  --hud-border-grid: rgba(0, 0, 0, 0.06);
-  --hud-border-hairline: rgba(0, 0, 0, 0.04);
+  --hud-border-outer: #E2E8F0;
+  --hud-border-grid: #CBD5E1;
+  --hud-border-hairline: #E2E8F0;
 
-  --text-main: #18181B;
-  --text-muted: #64748B;
+  --text-main: #0F172A;
+  --text-muted: #475569;
   --text-dim: #94A3B8;
+  --text-inverse: #FFFFFF;
 
-  --keycap-bg: #F1F3F5;
-  --keycap-text: #334155;
+  --selection-bg: linear-gradient(90deg, rgba(255, 107, 74, 0.14) 0%, rgba(255, 69, 101, 0.05) 100%);
+  --selection-border: rgba(255, 107, 74, 0.5);
+
+  --keycap-bg: #F1F5F9;
   --keycap-border: #CBD5E1;
-  --keycap-bottom: #94A3B8;
+  --keycap-bevel: #94A3B8;
+  --keycap-text: #1E293B;
+
+  --shadow-window: 0 20px 50px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px #E2E8F0;
+  --shadow-glow: 0 16px 40px -10px rgba(255, 107, 74, calc(0.25 * var(--focal-glow-multiplier)));
+}
+
+[data-theme='oled'] {
+  color-scheme: dark;
+
+  --canvas-bg: #000000;
+  --surface-base: #070709;
+  --surface-raised: #101015;
+  --surface-overlay: #15151D;
+  --surface-hover: #1C1C27;
+  --border-hairline: #1C1D27;
+  --border-subtle: #292B3A;
+  --border-highlight: rgba(255, 107, 74, 0.55);
+
+  --hud-bg-base: #070709;
+  --hud-bg-sub: #101015;
+  --hud-bg-panel: #15151D;
+  --hud-bg-card: rgba(255, 255, 255, 0.03);
+  --hud-border-outer: #1C1D27;
+  --hud-border-grid: #292B3A;
+  --hud-border-hairline: #1C1D27;
+
+  --text-main: #FFFFFF;
+  --text-muted: #A1A1AA;
+  --text-dim: #71717A;
+  --text-inverse: #000000;
+
+  --selection-bg: linear-gradient(90deg, rgba(255, 107, 74, 0.25) 0%, rgba(255, 69, 101, 0.12) 100%);
+  --selection-border: rgba(255, 107, 74, 0.6);
+
+  --keycap-bg: #14141C;
+  --keycap-border: #2B2C3C;
+  --keycap-bevel: #000000;
+  --keycap-text: #FFFFFF;
+
+  --shadow-window: 0 24px 64px -12px rgba(0, 0, 0, 0.98), 0 0 0 1px #222330;
+  --shadow-glow: 0 16px 48px -10px rgba(255, 107, 74, calc(0.45 * var(--focal-glow-multiplier)));
 }
 
 html,
 body,
 #root {
-  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+  touch-action: none;
   background-color: transparent;
+  color: var(--text-main);
   user-select: none;
   -webkit-user-select: none;
-  font-family: var(--font-mono);
+  -webkit-user-drag: none;
+  font-family: var(--font-sans);
+  box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+  -webkit-user-drag: none;
+  box-sizing: border-box;
+}
+
+/* Enforce strict single-axis scrolling and eliminate 4-way rubberbanding */
+.overflow-y-auto,
+.overflow-auto,
+[role="listbox"] {
+  overflow-x: hidden !important;
+  overscroll-behavior: none !important;
+  overscroll-behavior-x: none !important;
+  overscroll-behavior-y: none !important;
+  touch-action: pan-y !important;
+}
+
+.font-sans { font-family: var(--font-sans); }
 .font-hud { font-family: var(--font-hud); }
 .font-mono { font-family: var(--font-mono); }
 
 /* Custom Glass Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -85,86 +206,130 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(140, 145, 160, 0.25);
-  border-radius: 0px;
+  background: var(--border-subtle);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--sys-accent);
+  background: var(--focal-coral);
 }
 
-/* Direction C Tactile Mechanical Keycaps */
-.hud-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 18px;
-  padding: 0 5px;
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  background: var(--keycap-bg);
-  color: var(--keycap-text);
-  border: 1px solid var(--keycap-border);
-  border-bottom: 2px solid var(--keycap-bottom);
-  border-radius: 0px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  user-select: none;
-  transition: transform 0.05s ease, border-bottom-width 0.05s ease;
-}
-
-.hud-key:active {
-  transform: translateY(1px);
-  border-bottom-width: 1px;
-}
-
-/* Industrial Control Button */
-.hud-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  background: var(--hud-bg-sub);
-  color: var(--text-muted);
-  border: 1px solid var(--hud-border-outer);
-  border-radius: 0px;
-  transition: all 0.12s ease;
-  cursor: pointer;
-}
-
-.hud-btn:hover {
-  color: var(--text-main);
-  border-color: var(--sys-accent);
-}
-
-.hud-btn.active {
-  background: var(--sys-accent);
-  color: #000000;
-  border-color: var(--sys-accent);
-  font-weight: 700;
-}
-
-/* Backward compatibility badge */
+/* Minimalist Modern Keyboard Shortcut Badges */
+.focal-key,
+.hud-key,
 .kbd-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 18px;
+  height: 19px;
+  min-width: 19px;
   padding: 0 5px;
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  border-radius: 0px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
   background: var(--keycap-bg);
   color: var(--keycap-text);
   border: 1px solid var(--keycap-border);
-  border-bottom: 2px solid var(--keycap-bottom);
+  border-radius: 5px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.focal-key:active,
+.hud-key:active {
+  transform: translateY(1px);
+}
+
+.focal-key-primary {
+  background: rgba(255, 107, 74, 0.14) !important;
+  color: #FF8566 !important;
+  border: 1px solid rgba(255, 107, 74, 0.3) !important;
+  text-shadow: none !important;
+}
+
+/* Radiant Sunset Glow & Glass Effects */
+.focal-glow-box {
+  box-shadow: var(--shadow-glow);
+}
+
+.focal-glass {
+  background: var(--surface-base);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-hairline);
+}
+
+.focal-glass-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.focal-glass-card:hover {
+  border-color: var(--border-highlight);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Active Selection Row Flood */
+.focal-active-row {
+  background: var(--selection-bg);
+  border: 1px solid var(--selection-border);
+  box-shadow: 0 0 16px -4px rgba(255, 107, 74, 0.25);
+}
+
+/* Radiant Focus Ring */
+.focal-focus-ring:focus-within,
+.focal-focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 1.5px rgba(255, 107, 74, 0.6), 0 0 20px rgba(255, 107, 74, 0.25);
+}
+
+/* Logo Aura Animation */
+@keyframes pulseAura {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(255, 107, 74, calc(0.35 * var(--focal-glow-multiplier, 1)))); }
+  50% { filter: drop-shadow(0 0 28px rgba(255, 69, 101, calc(0.65 * var(--focal-glow-multiplier, 1)))); }
+}
+
+.logo-aura {
+  animation: pulseAura 4s ease-in-out infinite;
+}
+
+/* Pulsing Focal Dot */
+@keyframes focalDotBreath {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.18); opacity: 1; filter: drop-shadow(0 0 8px #FF6B4A); }
+}
+
+.focal-dot-pulse {
+  animation: focalDotBreath 2.4s ease-in-out infinite;
+}
+
+/* Pill Selection Bar */
+.focal-pill-indicator {
+  width: 4px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--focal-gradient-sunset);
+}
+
+/* Accessibility: Honor reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .logo-aura,
+  .focal-dot-pulse {
+    animation: none !important;
+  }
 }

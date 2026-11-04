@@ -120,3 +120,32 @@ fn test_live_scan_finds_uwp_apps() {
     }
 }
 
+#[test]
+fn test_resolve_lnk_nonexistent() {
+    let result = crate::app_scanner::resolve_lnk(r"C:\Windows\definitely_not_a_shortcut.lnk");
+    assert!(result.is_none());
+}
+
+#[test]
+fn test_resolve_lnk_start_menu_shortcuts() {
+    let apps = crate::app_scanner::scan_start_menu_shortcuts();
+    let lnk_apps: Vec<_> = apps.iter().filter(|a| a.path.ends_with(".lnk")).collect();
+    println!("Found {} .lnk shortcuts in Start Menu", lnk_apps.len());
+
+    let mut resolved_count = 0;
+    for app in lnk_apps.iter().take(10) {
+        if let Some(resolved) = crate::app_scanner::resolve_lnk(&app.path) {
+            println!(
+                "Successfully resolved .lnk: '{}' -> exe: '{:?}', args: '{}', workdir: '{:?}'",
+                app.name, resolved.target_exe, resolved.arguments, resolved.working_dir
+            );
+            resolved_count += 1;
+
+            // Test caching: resolving a second time should immediately hit cache and match
+            let cached = crate::app_scanner::resolve_lnk(&app.path);
+            assert_eq!(cached, Some(resolved));
+        }
+    }
+    println!("Resolved {}/{} sampled .lnk shortcuts via COM IShellLinkW", resolved_count, lnk_apps.len().min(10));
+}
+

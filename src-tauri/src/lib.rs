@@ -87,30 +87,72 @@ pub fn fast_launch_windows(target: &str, run_as_admin: bool) {
     use std::os::windows::process::CommandExt;
 
     // 1. Direct UWP / MSIX shell virtual paths (shell:AppsFolder\...)
-    // ShellExecuteW fails on virtual namespace folders; explorer.exe launches them with zero delay
     if target.starts_with("shell:AppsFolder\\") {
+        // Raycast Pillar A: If not run_as_admin, check if already running and activate in <5ms
+        if !run_as_admin && window_manager::activate_app_window(target) {
+            return;
+        }
+
         let mut cmd = std::process::Command::new("explorer.exe");
         cmd.arg(target).creation_flags(0x08000000);
         let _ = cmd.spawn();
         return;
     }
 
-    // 2. Direct executable (.exe) launch without ShellExecute overhead
-    if target.ends_with(".exe") && !run_as_admin && std::path::Path::new(target).is_file() {
-        let mut cmd = std::process::Command::new(target);
-        if let Some(parent) = std::path::Path::new(target).parent() {
+    // 2. Raycast Pillar B: Resolve .lnk shortcuts to direct target executable
+    let mut exe_path = target.to_string();
+    let mut args: Option<String> = None;
+    let mut working_dir: Option<std::path::PathBuf> = None;
+
+    if target.ends_with(".lnk") && std::path::Path::new(target).is_file() {
+        if let Some(resolved) = app_scanner::resolve_lnk(target) {
+            exe_path = resolved.target_exe.to_string_lossy().to_string();
+            if !resolved.arguments.is_empty() {
+                args = Some(resolved.arguments);
+            }
+            if !resolved.working_dir.as_os_str().is_empty() {
+                working_dir = Some(resolved.working_dir);
+            }
+        }
+    }
+
+    // 3. Raycast Pillar A: If application is already running, activate its window in <5ms
+    if !run_as_admin {
+        if window_manager::activate_app_window(&exe_path) {
+            return;
+        }
+        if exe_path != target && window_manager::activate_app_window(target) {
+            return;
+        }
+    }
+
+    // 4. Raycast Cold Start: Direct executable (.exe) launch without ShellExecute overhead
+    if exe_path.ends_with(".exe") && !run_as_admin && std::path::Path::new(&exe_path).is_file() {
+        let mut cmd = std::process::Command::new(&exe_path);
+        if let Some(dir) = working_dir {
+            cmd.current_dir(dir);
+        } else if let Some(parent) = std::path::Path::new(&exe_path).parent() {
             cmd.current_dir(parent);
+        }
+        if let Some(arg_str) = args {
+            cmd.raw_arg(&arg_str);
         }
         if let Ok(_) = cmd.spawn() {
             return;
         }
     }
 
-    // 3. Native ShellExecuteW for .lnk shortcuts, protocols (ms-settings:), and admin execution
-    if let Err(e) = native_launch_target(target, run_as_admin) {
+    // 5. Native ShellExecuteW for .lnk shortcuts, protocols (ms-settings:), and admin execution
+    let launch_target = if run_as_admin && exe_path.ends_with(".exe") && std::path::Path::new(&exe_path).is_file() {
+        &exe_path
+    } else {
+        target
+    };
+
+    if let Err(e) = native_launch_target(launch_target, run_as_admin) {
         eprintln!(
             "[Focal Warning] Native ShellExecute failed for '{}' ({}), falling back to explorer",
-            target, e
+            launch_target, e
         );
         let mut cmd = std::process::Command::new("explorer.exe");
         cmd.arg(target).creation_flags(0x08000000);

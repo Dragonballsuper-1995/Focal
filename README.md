@@ -41,7 +41,7 @@
 | **Frontend UI** | React 19 + TypeScript | Component tree, keyboard navigation engine, reactive state |
 | **Styling** | Tailwind CSS v3 | Design system tokens, hardware frosted glass, mechanical keycaps |
 | **Branding** | Focal Identity Suite | Coral/rose radiant mark, rounded geometry, dark & light SVG/PNG assets |
-| **Testing** | Vitest + Cargo Test | 67 Vitest frontend tests + 63 Cargo Rust backend tests (130 automated tests) |
+| **Testing** | Vitest + Cargo Test | 80 Vitest frontend tests + 73 Cargo Rust backend tests (153 automated tests) |
 
 ---
 
@@ -71,12 +71,12 @@ npm run dev
 ```
 
 ### 3. Run Test Suite
-Executes all 9 Vitest frontend test suites (67 tests):
+Executes all 10 Vitest frontend test suites (80 tests):
 ```bash
 npm test
 ```
 
-Executes all Rust backend unit and empirical challenge tests (63 tests):
+Executes all Rust backend unit and empirical challenge tests (73 tests):
 ```bash
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
@@ -93,8 +93,8 @@ npx tauri build
 
 The compiled release outputs:
 - **Standalone Binary:** `src-tauri/target/release/focal.exe` (~4.8 MB)
-- **NSIS Setup Installer:** `src-tauri/target/release/bundle/nsis/Focal_0.1.0_x64-setup.exe` (~1.85 MB)
-- **WiX MSI Installer:** `src-tauri/target/release/bundle/msi/Focal_0.1.0_x64_en-US.msi` (~2.6 MB)
+- **NSIS Setup Installer:** `src-tauri/target/release/bundle/nsis/Focal_0.2.0_x64-setup.exe` (~1.85 MB)
+- **WiX MSI Installer:** `src-tauri/target/release/bundle/msi/Focal_0.2.0_x64_en-US.msi` (~2.6 MB)
 
 ---
 

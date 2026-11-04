@@ -3,3 +3,4 @@ mod test_config;
 mod test_db;
 mod test_fuzzy;
 mod test_tray;
+mod test_window_manager;
